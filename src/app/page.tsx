@@ -67,7 +67,7 @@ function MagneticCTA({ className = "", size = "default" }: { className?: string;
         transition: offset.x === 0 ? "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s, background-color 0.3s" : "color 0.3s, background-color 0.3s",
       }}
     >
-      <span>Plan een Strategy Call</span>
+      <span>Plan een Strategiegesprek</span>
       <svg className="w-5 h-5 transition-transform duration-500 group-hover:translate-x-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
       </svg>
@@ -183,7 +183,7 @@ export default function Home() {
             <NavLink href="#framework">Framework</NavLink>
             <NavLink href="#proces">Hoe het werkt</NavLink>
             <a href={CTA_URL} className="inline-flex items-center gap-2 bg-accent/10 hover:bg-accent text-accent hover:text-background border border-accent/20 hover:border-accent font-semibold text-sm px-5 py-2 rounded-lg transition-all duration-300">
-              Gratis Strategy Call
+              Gratis Gesprek
             </a>
           </div>
         </div>
@@ -350,7 +350,7 @@ export default function Home() {
             <p className="text-muted text-sm mt-1">Volledige analyse van je markt, concurrenten en contentkansen. Geen maandcontract, geen risico.</p>
           </div>
           <a href={CTA_URL} className="shrink-0 inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-background font-bold text-sm px-6 py-3 rounded-lg transition-colors">
-            Plan een Audit Call
+            Plan een Audit Gesprek
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
           </a>
         </div>
@@ -416,9 +416,9 @@ export default function Home() {
         <div className="max-w-3xl mb-8">
           <SectionLabel>Het framework</SectionLabel>
           <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-extrabold leading-[0.95] tracking-tight">
-            <RevealText>{"The Content Engine"}</RevealText>
+            <RevealText>{"Het Content Engine"}</RevealText>
             <br />
-            <span className="text-accent"><RevealText delay={0.2}>{"Framework"}</RevealText></span>
+            <span className="text-accent"><RevealText delay={0.2}>{"Raamwerk"}</RevealText></span>
           </h2>
           <p className="mt-6 text-muted text-base max-w-xl">
             90% van founders faalt met content omdat ze random posten. Wij gebruiken
@@ -426,20 +426,20 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="relative grid md:grid-cols-3 gap-px bg-card-border/20 rounded-2xl overflow-hidden">
+        <div className="relative grid md:grid-cols-3 gap-4">
           {[
-            { level: "TOP", title: "Bereik", desc: "Virale hooks, discovery content, pattern interrupts. Zorgt dat nieuwe mensen je vinden.", metrics: "Impressies \u00B7 Bereik \u00B7 Volgers", opacity: 100 },
-            { level: "MID", title: "Autoriteit", desc: "Educatie, diepgang, thought leadership. Bouwt vertrouwen en expertpositie op.", metrics: "Engagement \u00B7 Saves \u00B7 DMs", opacity: 65 },
-            { level: "BOTTOM", title: "Conversie", desc: "Social proof, case studies, DM funnels. Zet volgers om in betalende klanten.", metrics: "Leads \u00B7 Calls \u00B7 Omzet", opacity: 35 },
+            { level: "TOP", title: "Bereik", desc: "Virale hooks, discovery content, pattern interrupts. Zorgt dat nieuwe mensen je vinden.", metrics: "Impressies \u00B7 Bereik \u00B7 Volgers" },
+            { level: "MID", title: "Autoriteit", desc: "Educatie, diepgang, thought leadership. Bouwt vertrouwen en expertpositie op.", metrics: "Engagement \u00B7 Saves \u00B7 DMs" },
+            { level: "BOTTOM", title: "Conversie", desc: "Social proof, case studies, DM funnels. Zet volgers om in betalende klanten.", metrics: "Leads \u00B7 Calls \u00B7 Omzet" },
           ].map((funnel, i) => (
-            <StaggerItem key={funnel.level} index={i} className="relative p-7 md:p-8 bg-card group hover:bg-card/80 transition-colors duration-500">
-              <div className="absolute top-0 left-0 w-full h-1 bg-accent transition-opacity duration-500 group-hover:opacity-100" style={{ opacity: funnel.opacity / 100 }} />
-              <span className="font-mono text-xs tracking-[0.2em] text-accent/60">{funnel.level} FUNNEL</span>
+            <StaggerItem key={funnel.level} index={i} className="relative p-7 rounded-2xl border border-card-border bg-card group hover:border-accent/30 transition-colors duration-500">
+              <div className="absolute top-0 left-0 w-full h-1 bg-accent rounded-t-2xl" />
+              <span className="font-mono text-xs tracking-[0.2em] text-accent">{funnel.level} FUNNEL</span>
               <h3 className="font-display text-2xl font-extrabold mt-2">{funnel.title}</h3>
-              <p className="text-muted text-sm mt-3 leading-relaxed">{funnel.desc}</p>
-              <div className="mt-5 pt-3 border-t border-card-border/40">
-                <span className="font-mono text-xs tracking-wider text-muted uppercase">KPIs: </span>
-                <span className="text-sm text-foreground/80">{funnel.metrics}</span>
+              <p className="text-foreground/80 text-sm mt-3 leading-relaxed">{funnel.desc}</p>
+              <div className="mt-5 pt-3 border-t border-card-border">
+                <span className="font-mono text-xs tracking-wider text-muted uppercase">KPI&apos;s: </span>
+                <span className="text-sm text-foreground/90">{funnel.metrics}</span>
               </div>
             </StaggerItem>
           ))}
@@ -465,7 +465,7 @@ export default function Home() {
 
         <div className="grid md:grid-cols-3 gap-5">
           {[
-            { step: "01", title: "Strategy Call", desc: "We analyseren je markt, doelgroep en concurrenten. Contentstrategie op maat die past bij jouw business goals.", detail: "45 min \u2014 geen pitch, puur strategie", link: CTA_URL },
+            { step: "01", title: "Kennismakingsgesprek", desc: "We analyseren je markt, doelgroep en concurrenten. Contentstrategie op maat die past bij jouw doelen.", detail: "45 min \u2014 geen pitch, puur strategie", link: CTA_URL },
             { step: "02", title: "Wij bouwen het systeem", desc: "Content planning, scripts, formats, funnels \u2014 alles wordt opgezet. Jij keurt goed. Wij produceren.", detail: "Oplevering binnen 2 weken", link: undefined },
             { step: "03", title: "Jij neemt op, wij doen de rest", desc: "1-2x per maand content opnemen. Wij editen, publiceren, optimaliseren en rapporteren.", detail: "Volledig hands-off na opname", link: undefined },
           ].map((item, i) => (
@@ -545,10 +545,10 @@ export default function Home() {
 
           <div className="md:col-span-7 md:pl-8 space-y-5">
             {[
-              { title: "Founder-to-founder", desc: "Geen junior account manager. Je werkt direct met iemand die snapt wat je nodig hebt." },
-              { title: "Systeem, geen service", desc: "Schaalbaar en herhaalbaar. Geen ad-hoc werk dat stopt als wij stoppen." },
-              { title: "Revenue-first", desc: "Succes meten we in leads en omzet, niet in likes en volgers." },
-              { title: "Max 6\u20138 klanten", desc: "Premium aandacht voor iedereen. Geen lopende band." },
+              { title: "Snellere beslissingen, betere strategie", desc: "Geen junior account manager. Je werkt direct met een founder die dezelfde taal spreekt als jij." },
+              { title: "Schaalbaar zonder jouw tijd", desc: "We bouwen een systeem dat draait \u00F3\u00F3k als wij stoppen. Geen afhankelijkheid, wel resultaat." },
+              { title: "Omzet als maatstaf", desc: "We meten succes in leads en klanten, niet in likes en volgers. Elke euro moet terugkomen." },
+              { title: "Exclusief: max 6\u20138 klanten", desc: "Zodat jouw bedrijf de aandacht krijgt die het verdient. Geen lopende band." },
             ].map((item, i) => (
               <StaggerItem key={item.title} index={i} className="flex gap-4 items-start group">
                 <div className="relative mt-2 shrink-0">
@@ -587,7 +587,7 @@ export default function Home() {
           </div>
 
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-6">
-            {["Gratis strategy call", "Geen verplichtingen", "Start vanaf \u20AC500 audit"].map((item) => (
+            {["Gratis kennismakingsgesprek", "Geen verplichtingen", "Start vanaf \u20AC500 audit"].map((item) => (
               <span key={item} className="flex items-center gap-2 font-mono text-xs tracking-wide text-muted">
                 <svg className="w-3.5 h-3.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
