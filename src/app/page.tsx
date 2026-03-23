@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import Lenis from "lenis";
 
-const CTA_URL = "#book"; // Vervang met Calendly / Cal.com link
+const CTA_URL = "/book";
 
 /* ══════════════════════════════════════
    HOOKS
@@ -123,7 +123,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 function Section({ children, className = "", id }: { children: React.ReactNode; className?: string; id?: string }) {
   const { ref, inView } = useInView(0.08);
   return (
-    <section ref={ref} id={id} className={`px-6 md:px-12 lg:px-20 py-12 md:py-16 ${className}`}>
+    <section ref={ref} id={id} className={`px-6 md:px-12 lg:px-20 py-10 md:py-12 ${className}`}>
       <div className={`max-w-6xl mx-auto ${inView ? "section-revealed" : ""}`}>{children}</div>
     </section>
   );
@@ -192,7 +192,7 @@ export default function Home() {
       {/* ══════════════════════════════════════
          1. HERO — centered, max-w-7xl, capped font size
          ══════════════════════════════════════ */}
-      <section className="relative min-h-[90vh] flex items-center px-6 md:px-12 lg:px-20 pt-20 z-10">
+      <section className="relative min-h-[85vh] flex items-center px-6 md:px-12 lg:px-20 pt-20 pb-12 z-10">
         <div className="max-w-7xl mx-auto w-full grid md:grid-cols-12 gap-8 items-center">
           <div className="md:col-span-8">
             {/* Case study badge — linkt naar #resultaten */}
@@ -206,11 +206,15 @@ export default function Home() {
               </span>
             </a>
 
-            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[0.95] tracking-[-0.03em]">
-              <RevealText delay={0.2}>{"Je concurrent\ngroeit sneller."}</RevealText>
+            <h1 className="animate-fade-in-up animation-delay-200 font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[0.95] tracking-[-0.03em]">
+              Je concurrent
               <br />
-              <span className="text-accent relative inline-block">
-                <RevealText delay={0.5}>{"Met een slechter\nproduct."}</RevealText>
+              groeit sneller.
+              <br />
+              <span className="text-accent">
+                Met een slechter
+                <br />
+                product.
               </span>
             </h1>
 
@@ -403,33 +407,6 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ══════════════════════════════════════
-         SOCIAL PROOF — TODO: vul in met echte testimonials
-         ══════════════════════════════════════ */}
-      <div className="max-w-6xl mx-auto px-6 md:px-12 lg:px-20 py-8">
-        <div className="grid md:grid-cols-3 gap-5">
-          {[
-            { quote: "Voeg hier een echte testimonial toe van een klant met naam, bedrijf en resultaat.", name: "[Klantnaam]", role: "[Bedrijf / Rol]" },
-            { quote: "Voeg hier een tweede testimonial toe. Specifieke resultaten converteren het best.", name: "[Klantnaam]", role: "[Bedrijf / Rol]" },
-            { quote: "Voeg hier een derde testimonial toe. Video-testimonials zijn nog sterker — overweeg een embed.", name: "[Klantnaam]", role: "[Bedrijf / Rol]" },
-          ].map((t, i) => (
-            <div key={i} className="p-6 rounded-2xl border border-dashed border-accent/20 bg-card/30">
-              <p className="text-muted text-sm leading-relaxed italic">&ldquo;{t.quote}&rdquo;</p>
-              <div className="mt-4 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-card-border flex items-center justify-center text-muted text-xs font-bold">?</div>
-                <div>
-                  <p className="font-display text-sm font-bold">{t.name}</p>
-                  <p className="text-muted text-xs">{t.role}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-        <p className="text-center mt-4 font-mono text-xs text-accent">
-          &#9888; TODO: Vervang bovenstaande placeholders met echte klant-testimonials voordat je live gaat.
-        </p>
-      </div>
-
       <div className="hr-gradient max-w-xl mx-auto" />
 
       {/* ══════════════════════════════════════
@@ -590,7 +567,7 @@ export default function Home() {
       {/* ══════════════════════════════════════
          9. FINAL CTA
          ══════════════════════════════════════ */}
-      <section id="book" className="relative px-6 md:px-12 lg:px-20 py-24 md:py-32 z-10">
+      <section id="cta-final" className="relative px-6 md:px-12 lg:px-20 py-16 md:py-20 z-10">
         <div className="absolute inset-0 bg-gradient-to-t from-accent/[0.04] via-transparent to-transparent pointer-events-none" />
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-accent/[0.06] rounded-full blur-[180px] pointer-events-none" />
 
