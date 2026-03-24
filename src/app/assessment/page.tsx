@@ -334,7 +334,7 @@ function IGStats({ stats }: { stats: IGAnalysis["stats"] }) {
     { label: "Volgers", value: stats.followers >= 1000 ? `${(stats.followers / 1000).toFixed(1)}K` : String(stats.followers) },
     { label: "Reels", value: `${stats.reelsPercentage}%` },
     { label: "Engagement", value: `${stats.engagementRate}%` },
-    { label: "Activiteit", value: stats.lastPostDaysAgo <= 1 ? "Vandaag" : `${stats.lastPostDaysAgo}d` },
+    { label: "Laatste post", value: stats.lastPostDaysAgo <= 1 ? "Vandaag" : `${stats.lastPostDaysAgo} dgn geleden` },
   ];
   return (
     <div className="grid grid-cols-4 gap-px bg-white/[0.04] rounded-xl overflow-hidden border border-white/[0.05] mb-7">
