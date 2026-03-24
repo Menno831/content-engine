@@ -35,9 +35,16 @@ interface IGData {
   followers: number;
   following: number;
   totalPosts: number;
+  feedPostCount: number;
+  avgFeedLikes: number;
+  avgFeedComments: number;
   reelsCount: number;
   reelsPercentage: number;
   avgReelsViews: number;
+  avgReelLikes: number;
+  avgReelComments: number;
+  bestReelViews: number;
+  worstReelViews: number;
   avgLikes: number;
   avgComments: number;
   lastPostDaysAgo: number;
@@ -47,6 +54,8 @@ interface IGData {
   hasAuthorityBio: boolean;
   engagementRate: number;
   viewToFollowerRatio: number;
+  reelsOutperformFeed: boolean;
+  reelsLikesMultiplier: number | null;
 }
 
 interface Insight {
@@ -174,23 +183,38 @@ function analyzeInstagram(data: IGData | null): IGAnalysis {
   const flags: Insight[] = [];
 
   // Reels ratio
-  if (data.reelsPercentage >= 60) score += 3;
-  else if (data.reelsPercentage >= 35) { score += 2; flags.push({ title: `${data.reelsPercentage}% van je content zijn Reels`, text: "Als founder is je gezicht je merk. Reels met jou in beeld bouwen sneller vertrouwen dan afbeeldingen. Richt je op 60%+ Reels voor maximaal bereik.", priority: "medium" }); }
-  else if (data.reelsPercentage >= 15) { score += 1; flags.push({ title: `Slechts ${data.reelsPercentage}% van je content zijn Reels`, text: "Het Instagram-algoritme duwt Reels 2-3x harder dan andere formats. Als founder mis je het krachtigste kanaal om je expertise te laten zien.", priority: "high" }); }
-  else flags.push({ title: data.reelsPercentage === 0 ? "Je maakt geen Reels" : `Maar ${data.reelsPercentage}% Reels`, text: "Zonder Reels ben je onzichtbaar voor nieuwe mensen. Founders die talking head Reels maken krijgen structureel meer bereik, DM's en leads.", priority: "high" });
+  if (data.reelsCount >= 10) score += 3;
+  else if (data.reelsCount >= 5) { score += 2; flags.push({ title: `${data.reelsCount} Reels gevonden`, text: `Je maakt Reels, maar niet genoeg voor consistent bereik. De top founders posten 3-5 Reels per week. Jouw Reels krijgen gemiddeld ${data.avgReelsViews.toLocaleString()} views — dat is ${data.viewToFollowerRatio}% van je volgers.`, priority: "medium" }); }
+  else if (data.reelsCount >= 1) { score += 1; flags.push({ title: `Slechts ${data.reelsCount} Reel${data.reelsCount > 1 ? "s" : ""} op je profiel`, text: `Instagram geeft Reels 2-3x meer bereik dan foto's of carousels.${data.reelsLikesMultiplier ? ` Jouw Reels krijgen ${data.reelsLikesMultiplier}x meer likes dan je feed posts — bewijs dat video werkt voor jou.` : " Begin met 1 Reel per week en bouw op."}`, priority: "high" }); }
+  else flags.push({ title: "Geen Reels op je profiel", text: "Dit is je grootste gemiste kans. Zonder Reels ben je onzichtbaar voor nieuwe mensen. Founders die talking head Reels maken krijgen structureel meer bereik, DM's en leads. Je hoeft niet te dansen — praat gewoon over je expertise.", priority: "high" });
+
+  // Reels performance (if they have reels)
+  if (data.reelsCount > 0 && data.avgReelsViews > 0) {
+    const spread = data.bestReelViews > 0 && data.worstReelViews > 0
+      ? Math.round(data.bestReelViews / data.worstReelViews)
+      : 0;
+    if (spread > 5) {
+      flags.push({ title: `Beste Reel: ${data.bestReelViews.toLocaleString()} views vs slechtste: ${data.worstReelViews.toLocaleString()}`, text: `Je bereik varieert sterk (${spread}x verschil). Dit wijst op inconsistente hooks. Analyseer je best presterende Reel — welke hook gebruikte je? Welk onderwerp? Maak daar meer van.`, priority: "medium" });
+    }
+  }
+
+  // Reels vs Feed comparison
+  if (data.reelsOutperformFeed && data.reelsLikesMultiplier && data.reelsLikesMultiplier > 1.5) {
+    flags.push({ title: `Reels scoren ${data.reelsLikesMultiplier}x beter dan je feed`, text: `Je Reels krijgen gemiddeld ${data.avgReelLikes} likes vs ${data.avgFeedLikes} op feed posts. Het algoritme beloont je video content — maak hier je prioriteit van.`, priority: "medium" });
+  }
 
   // Posting frequency
   if (data.lastPostDaysAgo <= 2) score += 3;
   else if (data.lastPostDaysAgo <= 5) score += 2;
-  else if (data.lastPostDaysAgo <= 10) { score += 1; flags.push({ title: `Je laatste post is ${data.lastPostDaysAgo} dagen geleden`, text: "Voor een personal brand is consistentie alles. 3-5x per week is de sweet spot voor founders.", priority: "high" }); }
-  else flags.push({ title: data.lastPostDaysAgo > 30 ? "Meer dan een maand niet gepost" : `${data.lastPostDaysAgo} dagen stilte`, text: "Je account verliest dagelijks relevantie. Elke dag dat je niet post, bouwt je concurrent wél autoriteit op.", priority: "high" });
+  else if (data.lastPostDaysAgo <= 10) { score += 1; flags.push({ title: `Laatste post: ${data.lastPostDaysAgo} dagen geleden`, text: "Voor een personal brand is consistentie alles. 3-5x per week is de sweet spot voor founders.", priority: "high" }); }
+  else flags.push({ title: data.lastPostDaysAgo > 30 ? `Al ${data.lastPostDaysAgo} dagen niet gepost` : `${data.lastPostDaysAgo} dagen stilte`, text: "Je account verliest dagelijks relevantie. Het algoritme vergeet je na 7-10 dagen inactiviteit. Begin met 1 post deze week — consistentie wint altijd van perfectie.", priority: "high" });
 
   // Engagement
   const eng = data.engagementRate;
   if (eng >= 5) score += 3;
   else if (eng >= 3) score += 2;
-  else if (eng >= 1.5) { score += 1; flags.push({ title: `Engagement rate: ${eng}%`, text: "Voor een personal brand is dit laag. Focus op content met een duidelijke mening of concreet advies, dat triggert reacties.", priority: "medium" }); }
-  else flags.push({ title: `Engagement rate: ${eng}%.te laag`, text: "Je volgers scrollen langs je content. Talking head Reels met een controversiële take scoren veel beter.", priority: "high" });
+  else if (eng >= 1.5) { score += 1; flags.push({ title: `Engagement rate: ${eng}%`, text: "Voor een personal brand is dit onder gemiddeld. Posts met een duidelijke mening of concreet framework scoren 2-3x beter. Probeer: 'De 3 fouten die ik zie bij [jouw niche]' als format.", priority: "medium" }); }
+  else flags.push({ title: `Engagement rate: ${eng}% — te laag`, text: "Je volgers scrollen langs je content. Nicheer je boodschap, stel vragen, en deel controversiele takes. Talking head Reels scoren veel beter op engagement.", priority: "high" });
 
   // Bio
   let bioScore = 0;
@@ -206,16 +230,16 @@ function analyzeInstagram(data: IGData | null): IGAnalysis {
     flags.push({ title: `Bio mist: ${missing.join(", ")}`, text: "Je bio is je elevator pitch. Bezoekers beslissen in 3 seconden. Zeg glashelder: wie je bent, wie je helpt, en wat de volgende stap is.", priority: bioScore === 0 ? "high" : "medium" });
   }
 
-  // Reels views
+  // Reels views reach
   const vr = data.viewToFollowerRatio;
   if (vr >= 100) score += 3;
   else if (vr >= 40) score += 2;
-  else if (vr >= 15) { score += 1; flags.push({ title: `Reels bereiken ${vr}% van je volgers`, text: "Het algoritme pusht je content niet ver. Werk aan sterkere hooks in de eerste 1-2 seconden.", priority: "medium" }); }
-  else if (data.reelsCount > 0) flags.push({ title: vr > 0 ? `Reels bereiken maar ${vr}% van je volgers` : "Reels krijgen weinig views", text: "Zwakke hooks of te brede content. Nicheer je boodschap en begin elke Reel met een herkenbaar probleem.", priority: "high" });
+  else if (vr >= 15) { score += 1; flags.push({ title: `Reels bereiken ${vr}% van je volgers`, text: "Het algoritme pusht je content niet ver genoeg. Werk aan sterkere hooks in de eerste 1,5 seconde — dat bepaalt 80% van je bereik.", priority: "medium" }); }
+  else if (data.reelsCount > 0) flags.push({ title: vr > 0 ? `Reels bereiken maar ${vr}% van je volgers` : "Reels krijgen weinig views", text: "Zwakke hooks of te brede content. Nicheer je boodschap en begin elke Reel met een herkenbaar probleem van je ideale klant.", priority: "high" });
 
   return {
     score,
-    flags: flags.slice(0, 5),
+    flags: flags.slice(0, 6),
     stats: { followers: data.followers, reelsPercentage: data.reelsPercentage, engagementRate: eng, lastPostDaysAgo: data.lastPostDaysAgo },
   };
 }
