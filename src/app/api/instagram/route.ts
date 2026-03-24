@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || "";
-const RAPIDAPI_HOST = process.env.RAPIDAPI_HOST || "instagram-scraper-20251.p.rapidapi.com";
+const RAPIDAPI_HOST = "instagram120.p.rapidapi.com";
 
 // Simple rate limiting
 const rateMap = new Map<string, { count: number; resetAt: number }>();
@@ -23,42 +23,61 @@ function checkRate(ip: string): boolean {
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 async function fetchProfile(username: string) {
-  const res = await fetch(
-    `https://${RAPIDAPI_HOST}/userinfo/?username_or_id=${username}`,
-    { headers: { "x-rapidapi-key": RAPIDAPI_KEY, "x-rapidapi-host": RAPIDAPI_HOST } }
-  );
+  const res = await fetch(`https://${RAPIDAPI_HOST}/api/instagram/profile`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-rapidapi-key": RAPIDAPI_KEY,
+      "x-rapidapi-host": RAPIDAPI_HOST,
+    },
+    body: JSON.stringify({ username }),
+  });
   if (!res.ok) throw new Error(`Profile: ${res.status}`);
-  return res.json();
+  const data = await res.json();
+  if (data.success === false || data.response === 4) {
+    throw new Error("Account not found");
+  }
+  return data;
 }
 
 async function fetchPosts(username: string) {
-  const res = await fetch(
-    `https://${RAPIDAPI_HOST}/userposts/?username_or_id=${username}`,
-    { headers: { "x-rapidapi-key": RAPIDAPI_KEY, "x-rapidapi-host": RAPIDAPI_HOST } }
-  );
+  const res = await fetch(`https://${RAPIDAPI_HOST}/api/instagram/posts`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-rapidapi-key": RAPIDAPI_KEY,
+      "x-rapidapi-host": RAPIDAPI_HOST,
+    },
+    body: JSON.stringify({ username, next: "" }),
+  });
   if (!res.ok) throw new Error(`Posts: ${res.status}`);
-  return res.json();
+  const data = await res.json();
+  if (data.success === false || data.response === 4) {
+    return { result: { edges: [] } };
+  }
+  return data;
 }
 
 function normalize(profile: any, postsData: any) {
-  const user = profile?.data || profile;
-  const posts = postsData?.data?.items || postsData?.data || postsData?.items || [];
-  const recent: any[] = Array.isArray(posts) ? posts.slice(0, 30) : [];
+  // instagram120 returns { result: { ... } }
+  const user = profile?.result || profile?.data || profile;
+  const rawEdges = postsData?.result?.edges || postsData?.data?.edges || [];
+  const recent: any[] = Array.isArray(rawEdges) ? rawEdges.slice(0, 30).map((e: any) => e.node || e) : [];
 
   const reels = recent.filter(
-    (p: any) => p.media_type === 2 || p.product_type === "clips" || p.is_video || p.video_url
+    (p: any) => p.media_type === 2 || p.product_type === "clips" || p.is_video || p.video_url || p.__typename === "GraphVideo"
   );
 
-  const totalLikes = recent.reduce((s: number, p: any) => s + (p.like_count || 0), 0);
-  const totalComments = recent.reduce((s: number, p: any) => s + (p.comment_count || 0), 0);
+  const totalLikes = recent.reduce((s: number, p: any) => s + (p.like_count || p.edge_media_preview_like?.count || 0), 0);
+  const totalComments = recent.reduce((s: number, p: any) => s + (p.comment_count || p.edge_media_to_comment?.count || 0), 0);
   const avgLikes = recent.length > 0 ? Math.round(totalLikes / recent.length) : 0;
   const avgComments = recent.length > 0 ? Math.round(totalComments / recent.length) : 0;
 
-  const reelsViews = reels.filter((r: any) => r.view_count || r.video_view_count || r.play_count);
-  const totalReelsViews = reelsViews.reduce((s: number, r: any) => s + (r.play_count || r.view_count || r.video_view_count || 0), 0);
+  const reelsViews = reels.filter((r: any) => r.view_count || r.video_view_count || r.play_count || r.video_views);
+  const totalReelsViews = reelsViews.reduce((s: number, r: any) => s + (r.play_count || r.video_view_count || r.view_count || r.video_views || 0), 0);
   const avgReelsViews = reelsViews.length > 0 ? Math.round(totalReelsViews / reelsViews.length) : 0;
 
-  const timestamps = recent.map((p: any) => p.taken_at || 0).filter((t: number) => t > 0).sort((a: number, b: number) => b - a);
+  const timestamps = recent.map((p: any) => p.taken_at || p.taken_at_timestamp || 0).filter((t: number) => t > 0).sort((a: number, b: number) => b - a);
   const lastPostDaysAgo = timestamps[0] ? Math.floor((Date.now() / 1000 - timestamps[0]) / 86400) : 99;
 
   let postsPerWeek = 0;
@@ -67,19 +86,21 @@ function normalize(profile: any, postsData: any) {
     postsPerWeek = span > 0 ? Math.round((timestamps.length / span) * 10) / 10 : timestamps.length;
   }
 
-  const bio = (user.biography || user.bio || "").toLowerCase();
+  const bio = (user.biography || "").toLowerCase();
   const externalUrl = user.external_url || "";
 
   const ctaKw = ["link", "boek", "plan", "dm", "stuur", "klik", "download", "gratis", "aanmelden", "book", "free", "click", "sign up", "apply", "join"];
   const authKw = ["founder", "ceo", "oprichter", "expert", "coach", "consultant", "helping", "ik help", "specialist", "ondernemer", "entrepreneur"];
 
-  const followers = user.follower_count || 0;
+  const followers = user.edge_followed_by?.count || user.follower_count || 0;
+  const following = user.edge_follow?.count || user.following_count || 0;
+  const totalPosts = user.edge_owner_to_timeline_media?.count || user.media_count || 0;
 
   return {
     username: user.username || "",
     followers,
-    following: user.following_count || 0,
-    totalPosts: user.media_count || 0,
+    following,
+    totalPosts,
     reelsCount: reels.length,
     reelsPercentage: recent.length > 0 ? Math.round((reels.length / recent.length) * 100) : 0,
     avgReelsViews,
