@@ -226,12 +226,19 @@ export default function Home() {
 
             <div className="animate-fade-in-up animation-delay-1000 mt-8 flex flex-col sm:flex-row items-start gap-5">
               <MagneticCTA />
-              <div className="flex items-center gap-2 text-sm text-muted self-center">
-                <span className="w-1 h-1 bg-muted/60 rounded-full" />
-                <span>Max 6&ndash;8 klanten</span>
-                <span className="w-1 h-1 bg-muted/60 rounded-full" />
-                <span>Geen verplichtingen</span>
-              </div>
+              <a
+                href="/assessment"
+                className="group inline-flex items-center gap-2.5 border border-white/[0.08] hover:border-accent/30 bg-transparent hover:bg-accent/[0.06] text-muted hover:text-accent font-semibold text-base px-7 py-4 rounded-xl transition-all duration-300 self-center"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" ry="2" /></svg>
+                Gratis Reels-scan
+              </a>
+            </div>
+            <div className="animate-fade-in-up animation-delay-1200 mt-5 flex items-center gap-2 text-sm text-muted">
+              <span className="w-1 h-1 bg-muted/60 rounded-full" />
+              <span>Max 6&ndash;8 klanten</span>
+              <span className="w-1 h-1 bg-muted/60 rounded-full" />
+              <span>Geen verplichtingen</span>
             </div>
           </div>
 
@@ -275,10 +282,10 @@ export default function Home() {
 
           <div className="md:col-span-7 space-y-3">
             {[
-              { n: "01", title: "Inconsistent of helemaal niet posten", desc: "Je weet dat het moet, maar het gebeurt niet. Geen systeem, geen output." },
-              { n: "02", title: "Freelancers ingehuurd \u2014 teleurgesteld", desc: "Ze snappen je merk niet. Leveren matige content. Jij blijft alles controleren." },
+              { n: "01", title: "Je weet dat je moet posten, maar het gebeurt niet", desc: "Elke week hetzelfde verhaal. Geen plan, geen systeem, geen output. Ondertussen loopt je concurrent weg." },
+              { n: "02", title: "Freelancers inhuren die je merk niet snappen", desc: "Je betaalt een editor, maar het resultaat voelt niet als jij. Dus ga je toch weer zelf zitten editen." },
               { n: "03", title: "Concurrent domineert jouw niche", desc: "Ze hebben een slechter product maar betere content. En het werkt." },
-              { n: "04", title: "Je tijd gaat naar content in plaats van business", desc: "Uren per week aan scripts en edits. Terwijl je een bedrijf runt." },
+              { n: "04", title: "6+ uur per week aan content terwijl je een bedrijf runt", desc: "Brainstormen, opnemen, editen, posten. Dat is geen CEO-werk. Dat is een fulltimebaan die je ervan afhoudt te doen waar je goed in bent." },
             ].map((item, i) => (
               <StaggerItem key={item.n} index={i} className="card-hover group flex gap-5 p-5 rounded-xl border border-card-border/60 bg-card/40 hover:bg-card hover:border-accent/20 cursor-default">
                 <span className="font-mono text-sm text-accent/70 group-hover:text-accent transition-colors duration-500 mt-0.5 shrink-0">{item.n}</span>
@@ -321,7 +328,7 @@ export default function Home() {
           </h2>
           <p className="mt-6 text-muted text-base leading-relaxed max-w-xl">
             Wij bouwen een volledig contentsysteem dat inbound leads genereert
-            zonder ads. Strategie, planning, scripting, editing, publishing &mdash; alles.
+            zonder ads. Strategie, planning, scripting, editing, publishing. Alles uit handen.
           </p>
         </div>
 
@@ -355,6 +362,47 @@ export default function Home() {
           </a>
         </div>
       </div>
+
+      {/* ══════════════════════════════════════
+         PRICING INDICATIE
+         ══════════════════════════════════════ */}
+      <Section>
+        <div className="max-w-3xl mb-8">
+          <SectionLabel>Investering</SectionLabel>
+          <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-extrabold leading-[0.95] tracking-tight">
+            <RevealText>{"Transparant."}</RevealText>
+            <br />
+            <span className="text-accent"><RevealText delay={0.15}>{"Geen verrassingen."}</RevealText></span>
+          </h2>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-5 max-w-4xl">
+          <StaggerItem index={0} className="gradient-border p-7 rounded-2xl bg-card/60">
+            <span className="font-mono text-xs text-accent/70 uppercase tracking-wider">Instap</span>
+            <h3 className="font-display text-2xl font-bold mt-2">&euro;500 <span className="text-muted text-base font-normal">eenmalig</span></h3>
+            <p className="text-muted text-sm mt-3 leading-relaxed">Volledige audit van je markt, concurrenten en contentkansen. Je krijgt een concreet plan. Geen verplichtingen daarna.</p>
+            <ul className="mt-4 space-y-2 text-sm text-foreground/70">
+              <li className="flex items-center gap-2"><span className="text-accent">&#10003;</span> Markt- en concurrentieanalyse</li>
+              <li className="flex items-center gap-2"><span className="text-accent">&#10003;</span> Contentstrategie op maat</li>
+              <li className="flex items-center gap-2"><span className="text-accent">&#10003;</span> Concrete aanbevelingen</li>
+            </ul>
+          </StaggerItem>
+
+          <StaggerItem index={1} className="gradient-border p-7 rounded-2xl bg-card/60 border-accent/30">
+            <span className="font-mono text-xs text-accent uppercase tracking-wider">Retainer</span>
+            <h3 className="font-display text-2xl font-bold mt-2">Vanaf &euro;1.500 <span className="text-muted text-base font-normal">/maand</span></h3>
+            <p className="text-muted text-sm mt-3 leading-relaxed">Volledig contentsysteem. Wij produceren, publiceren en optimaliseren. Jij neemt 1-2x per maand op.</p>
+            <ul className="mt-4 space-y-2 text-sm text-foreground/70">
+              <li className="flex items-center gap-2"><span className="text-accent">&#10003;</span> 10-15+ Reels per maand</li>
+              <li className="flex items-center gap-2"><span className="text-accent">&#10003;</span> Instagram, TikTok, LinkedIn</li>
+              <li className="flex items-center gap-2"><span className="text-accent">&#10003;</span> Scripting, editing, publishing</li>
+              <li className="flex items-center gap-2"><span className="text-accent">&#10003;</span> Maandelijkse rapportage</li>
+            </ul>
+          </StaggerItem>
+        </div>
+      </Section>
+
+      <div className="hr-gradient max-w-xl mx-auto" />
 
       {/* ══════════════════════════════════════
          4. PROOF / CASE STUDY
@@ -465,8 +513,8 @@ export default function Home() {
 
         <div className="grid md:grid-cols-3 gap-5">
           {[
-            { step: "01", title: "Kennismakingsgesprek", desc: "We analyseren je markt, doelgroep en concurrenten. Contentstrategie op maat die past bij jouw doelen.", detail: "45 min \u2014 geen pitch, puur strategie", link: CTA_URL },
-            { step: "02", title: "Wij bouwen het systeem", desc: "Content planning, scripts, formats, funnels \u2014 alles wordt opgezet. Jij keurt goed. Wij produceren.", detail: "Oplevering binnen 2 weken", link: undefined },
+            { step: "01", title: "Kennismakingsgesprek", desc: "We analyseren je markt, doelgroep en concurrenten. Contentstrategie op maat die past bij jouw doelen.", detail: "45 min, geen pitch, puur strategie", link: CTA_URL },
+            { step: "02", title: "Wij bouwen het systeem", desc: "Content planning, scripts, formats, funnels. Alles wordt opgezet. Jij keurt goed. Wij produceren.", detail: "Oplevering binnen 2 weken", link: undefined },
             { step: "03", title: "Jij neemt op, wij doen de rest", desc: "1-2x per maand content opnemen. Wij editen, publiceren, optimaliseren en rapporteren.", detail: "Volledig hands-off na opname", link: undefined },
           ].map((item, i) => (
             <StaggerItem key={item.step} index={i} className={`gradient-border card-hover group relative p-7 rounded-2xl bg-card/60 ${item.link ? "cursor-pointer" : ""}`}>
@@ -502,7 +550,7 @@ export default function Home() {
         <div className="grid md:grid-cols-2 gap-5 max-w-4xl">
           {[
             { q: "\u201CTe duur.\u201D", a: "Je verliest elke maand leads en marktpositie aan concurrenten die w\u00E9l investeren in content. Als content je 5 extra klanten per maand oplevert, is de ROI 10x+. Reken het uit." },
-            { q: "\u201CIk heb al een editor geprobeerd.\u201D", a: "Een editor is geen systeem. Wij leveren geen edits \u2014 wij leveren een complete contentoperatie. Strategie, scripting, productie, publishing, optimalisatie. Het verschil tussen een freelancer en een machine." },
+            { q: "\u201CIk heb al een editor geprobeerd.\u201D", a: "Een editor is geen systeem. Wij leveren geen edits, wij leveren een complete contentoperatie. Strategie, scripting, productie, publishing, optimalisatie. Het verschil tussen een freelancer en een machine." },
             { q: "\u201CIk kan het zelf.\u201D", a: "Kun je. Maar doe je het? Consistent? Op hoog niveau? Je tijd is \u20AC200\u2013500+/uur waard. Besteed het aan je core business, niet aan Reels editen." },
             { q: "\u201CWat als het niet werkt?\u201D", a: "Start met onze \u20AC500 audit implementatie. Geen maandcontract, geen risico. Je ziet precies wat we gaan doen v\u00F3\u00F3rdat je committed aan een retainer." },
           ].map((item, i) => (
@@ -534,11 +582,15 @@ export default function Home() {
 
             {/* Founder identity */}
             <div className="mt-8 flex items-center gap-4">
-              {/* TODO: vervang met echte foto */}
               <div className="w-14 h-14 rounded-full bg-accent/20 border-2 border-accent/40 flex items-center justify-center text-accent font-display font-bold text-lg">MK</div>
               <div>
                 <p className="font-display font-bold">Menno Kater</p>
                 <p className="text-muted text-sm">Founder, Content Engine</p>
+                <div className="flex items-center gap-3 mt-1.5">
+                  <a href="https://instagram.com/menno.ktr" target="_blank" rel="noopener noreferrer" className="text-xs text-accent/70 hover:text-accent transition-colors">Instagram</a>
+                  <a href="https://linkedin.com/in/mennokater" target="_blank" rel="noopener noreferrer" className="text-xs text-accent/70 hover:text-accent transition-colors">LinkedIn</a>
+                  <a href="https://youtube.com/@mennokater" target="_blank" rel="noopener noreferrer" className="text-xs text-accent/70 hover:text-accent transition-colors">YouTube</a>
+                </div>
               </div>
             </div>
           </div>
