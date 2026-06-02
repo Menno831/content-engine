@@ -1,0 +1,130 @@
+// ════════════════════════════════════════════════════════════════
+// MOCK DATA — clickable prototype van het KTR Studio platform.
+// Niets hiervan is echt; puur om de look & flow te demonstreren.
+// Bij de echte build komt dit uit de database (Supabase) + integraties.
+// ════════════════════════════════════════════════════════════════
+
+export const BRAND = {
+  name: "KTR Studio",
+  // White-label: per klant overschrijfbaar met eigen naam + accentkleur.
+  accent: "#F97316",
+};
+
+export type ClientStatus = "actief" | "onboarding" | "gepauzeerd";
+
+export interface Client {
+  id: string;
+  name: string;
+  handle: string;
+  status: ClientStatus;
+  initials: string;
+  monthlyValue: number; // retainer per maand
+  revenueAttributed: number; // omzet toegeschreven aan content deze maand
+  postsLive: number;
+  leadsThisMonth: number;
+}
+
+export const clients: Client[] = [
+  { id: "c1", name: "Lars Vermeer", handle: "@larsbuilds", status: "actief", initials: "LV", monthlyValue: 2500, revenueAttributed: 18400, postsLive: 12, leadsThisMonth: 47 },
+  { id: "c2", name: "Sophie de Wit", handle: "@sophie.scales", status: "actief", initials: "SW", monthlyValue: 1800, revenueAttributed: 9200, postsLive: 9, leadsThisMonth: 31 },
+  { id: "c3", name: "Daan Koster", handle: "@daankoster", status: "actief", initials: "DK", monthlyValue: 3200, revenueAttributed: 27600, postsLive: 16, leadsThisMonth: 68 },
+  { id: "c4", name: "Imza Health", handle: "@imza.health", status: "onboarding", initials: "IH", monthlyValue: 2200, revenueAttributed: 0, postsLive: 0, leadsThisMonth: 4 },
+  { id: "c5", name: "Noor Bakker", handle: "@noorbakker", status: "gepauzeerd", initials: "NB", monthlyValue: 1500, revenueAttributed: 3100, postsLive: 3, leadsThisMonth: 8 },
+];
+
+// ── Content pipeline (kanban) ──────────────────────────────────────
+export type PipelineStage = "idee" | "script" | "review" | "goedgekeurd" | "live";
+
+export const stageMeta: Record<PipelineStage, { label: string; hint: string }> = {
+  idee: { label: "Ideeën", hint: "Hooks & concepten" },
+  script: { label: "Script", hint: "In productie" },
+  review: { label: "Review", hint: "Wacht op klant" },
+  goedgekeurd: { label: "Goedgekeurd", hint: "Klaar om te plannen" },
+  live: { label: "Live", hint: "Gepubliceerd" },
+};
+
+export interface ContentCard {
+  id: string;
+  title: string;
+  client: string;
+  stage: PipelineStage;
+  format: "Reel" | "Carrousel" | "Story" | "Short";
+  hook: string;
+  assignee: string;
+  due: string;
+  views?: number;
+  leads?: number;
+}
+
+export const contentCards: ContentCard[] = [
+  { id: "p1", title: "Waarom niemand je content ziet", client: "Lars Vermeer", stage: "idee", format: "Reel", hook: "3 redenen waarom je reels floppen (en niemand zegt het je)", assignee: "AI", due: "5 jun" },
+  { id: "p2", title: "Mijn grootste fout als founder", client: "Daan Koster", stage: "idee", format: "Reel", hook: "Ik verloor €40k door deze ene aanname", assignee: "Menno", due: "6 jun" },
+  { id: "p3", title: "Het 5-min content systeem", client: "Sophie de Wit", stage: "script", format: "Carrousel", hook: "Zo maak ik 30 posts in 1 uur", assignee: "Eva", due: "4 jun" },
+  { id: "p4", title: "Cold DM teardown", client: "Lars Vermeer", stage: "script", format: "Reel", hook: "Deze DM leverde een klant van €12k op", assignee: "AI", due: "7 jun" },
+  { id: "p5", title: "Klant-resultaat reveal", client: "Daan Koster", stage: "review", format: "Reel", hook: "0 → 300 leden in 90 dagen, hier is hoe", assignee: "Eva", due: "3 jun" },
+  { id: "p6", title: "Founder ochtendroutine", client: "Sophie de Wit", stage: "goedgekeurd", format: "Short", hook: "De routine die mijn omzet verdubbelde", assignee: "Menno", due: "2 jun" },
+  { id: "p7", title: "Hoe ik 1 klant closede via Reels", client: "Daan Koster", stage: "live", format: "Reel", hook: "1 reel = 1 klant van €3.200", assignee: "Eva", due: "28 mei", views: 84200, leads: 22 },
+  { id: "p8", title: "3 hooks die altijd werken", client: "Lars Vermeer", stage: "live", format: "Carrousel", hook: "Steel deze 3 hooks", assignee: "AI", due: "26 mei", views: 51800, leads: 14 },
+];
+
+// ── Leads / sales pipeline (ManyChat → call → close) ───────────────
+export type LeadStage = "nieuw" | "gekwalificeerd" | "call_gepland" | "closed" | "verloren";
+
+export const leadStageMeta: Record<LeadStage, { label: string; color: string }> = {
+  nieuw: { label: "Nieuwe lead", color: "#60A5FA" },
+  gekwalificeerd: { label: "Gekwalificeerd", color: "#A78BFA" },
+  call_gepland: { label: "Call gepland", color: "#FBBF24" },
+  closed: { label: "Closed", color: "#34D399" },
+  verloren: { label: "Verloren", color: "#6B7280" },
+};
+
+export interface Lead {
+  id: string;
+  name: string;
+  source: string; // welke content / DM trigger
+  client: string;
+  stage: LeadStage;
+  value: number;
+  setter: string;
+  date: string;
+}
+
+export const leads: Lead[] = [
+  { id: "l1", name: "@thomas_grows", source: "Reel: 1 reel = 1 klant", client: "Daan Koster", stage: "closed", value: 3200, setter: "Set: Eva", date: "1 jun" },
+  { id: "l2", name: "@marije.k", source: "ManyChat: 'GIDS'", client: "Lars Vermeer", stage: "call_gepland", value: 2500, setter: "Set: Menno", date: "2 jun" },
+  { id: "l3", name: "@buildwithsam", source: "Carrousel: 3 hooks", client: "Lars Vermeer", stage: "gekwalificeerd", value: 2500, setter: "Set: Eva", date: "2 jun" },
+  { id: "l4", name: "@founderfleur", source: "ManyChat: 'START'", client: "Sophie de Wit", stage: "nieuw", value: 1800, setter: "—", date: "3 jun" },
+  { id: "l5", name: "@rickdoes", source: "Reel: klant-resultaat", client: "Daan Koster", stage: "closed", value: 3200, setter: "Set: Eva", date: "30 mei" },
+  { id: "l6", name: "@joycevdberg", source: "ManyChat: 'GIDS'", client: "Sophie de Wit", stage: "verloren", value: 1800, setter: "Set: Menno", date: "29 mei" },
+];
+
+// ── Analytics: maandelijkse omzet uit content (12 mnd) ─────────────
+export const revenueByMonth = [
+  { m: "jul", v: 8200 }, { m: "aug", v: 11400 }, { m: "sep", v: 9800 },
+  { m: "okt", v: 14600 }, { m: "nov", v: 21200 }, { m: "dec", v: 18900 },
+  { m: "jan", v: 24800 }, { m: "feb", v: 31200 }, { m: "mrt", v: 28400 },
+  { m: "apr", v: 39600 }, { m: "mei", v: 47800 }, { m: "jun", v: 55300 },
+];
+
+// Top presterende content
+export const topContent = [
+  { title: "1 reel = 1 klant van €3.200", client: "Daan Koster", views: 84200, leads: 22, revenue: 9600 },
+  { title: "0 → 300 leden in 90 dagen", client: "Daan Koster", views: 67100, leads: 18, revenue: 7400 },
+  { title: "Steel deze 3 hooks", client: "Lars Vermeer", views: 51800, leads: 14, revenue: 5000 },
+  { title: "De routine die mijn omzet verdubbelde", client: "Sophie de Wit", views: 42300, leads: 11, revenue: 3600 },
+  { title: "Ik verloor €40k door deze fout", client: "Daan Koster", views: 38900, leads: 9, revenue: 2800 },
+];
+
+// ── Studio: AI-gegenereerde hooks (mock output) ────────────────────
+export const generatedHooks = [
+  { hook: "Iedereen post elke dag — en niemand groeit. Dit is waarom.", angle: "Contrarian", score: 92 },
+  { hook: "Ik analyseerde 1.000 virale reels. 3 dingen kwamen elke keer terug.", angle: "Authority", score: 88 },
+  { hook: "Je hook is niet het probleem. Je eerste frame wel.", angle: "Pattern interrupt", score: 85 },
+  { hook: "Stop met 'waarde geven'. Doe dit in plaats daarvan.", angle: "Controversieel", score: 81 },
+];
+
+export const fmtEur = (n: number) =>
+  "€" + n.toLocaleString("nl-NL", { maximumFractionDigits: 0 });
+
+export const fmtNum = (n: number) =>
+  n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1) + "K" : String(n);
