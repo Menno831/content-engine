@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { BRAND } from "./_data";
 import { icons, Avatar } from "./_components";
+import { DemoBanner } from "./_states";
+import { DEMO_MODE } from "@/lib/config";
 
 const nav = [
   { href: "/platform", label: "Dashboard", icon: icons.dashboard, exact: true },
@@ -105,6 +107,7 @@ export default function PlatformLayout({ children }: { children: ReactNode }) {
 
         {/* Page body */}
         <main className="flex-1 px-5 md:px-8 py-7 md:py-9 max-w-[1400px] w-full mx-auto">
+          {DEMO_MODE && <DemoBanner />}
           {children}
         </main>
       </div>
