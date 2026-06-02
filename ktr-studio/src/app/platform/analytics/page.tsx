@@ -1,10 +1,11 @@
-"use client";
-
-import { revenueByMonth, topContent, clients, fmtEur, fmtNum } from "../_data";
+import { fmtEur, fmtNum } from "../_data";
 import { PageHeader, Card, Stat, Eyebrow, Badge, icons } from "../_components";
+import { getWorkspaceData } from "@/lib/data";
 
-export default function Analytics() {
-  const maxRev = Math.max(...revenueByMonth.map((d) => d.v));
+export default async function Analytics() {
+  const { revenueByMonth, topContent, clients } = await getWorkspaceData();
+
+  const maxRev = Math.max(1, ...revenueByMonth.map((d) => d.v));
   // SVG line chart punten
   const W = 100, H = 100;
   const pts = revenueByMonth.map((d, i) => {
@@ -17,7 +18,7 @@ export default function Analytics() {
 
   const totalViews = topContent.reduce((s, c) => s + c.views, 0);
   const totalLeads = topContent.reduce((s, c) => s + c.leads, 0);
-  const maxViews = Math.max(...topContent.map((c) => c.views));
+  const maxViews = Math.max(1, ...topContent.map((c) => c.views));
 
   return (
     <>

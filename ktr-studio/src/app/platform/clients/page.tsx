@@ -1,7 +1,7 @@
-"use client";
-
-import { clients, fmtEur, fmtNum, type ClientStatus } from "../_data";
+import { fmtEur, fmtNum, type ClientStatus } from "../_data";
 import { PageHeader, Card, Avatar, Badge, Eyebrow, icons } from "../_components";
+import { getWorkspaceData } from "@/lib/data";
+import { NotConnected } from "../_states";
 
 const statusColor: Record<ClientStatus, string> = {
   actief: "#34D399",
@@ -9,7 +9,8 @@ const statusColor: Record<ClientStatus, string> = {
   gepauzeerd: "#6B7280",
 };
 
-export default function Clients() {
+export default async function Clients() {
+  const { clients, demo } = await getWorkspaceData();
   const mrr = clients.filter((c) => c.status !== "gepauzeerd").reduce((s, c) => s + c.monthlyValue, 0);
 
   return (
@@ -49,6 +50,13 @@ export default function Clients() {
       </Card>
 
       <Eyebrow>Alle klanten</Eyebrow>
+      {!demo && clients.length === 0 ? (
+        <div className="mt-2">
+          <NotConnected provider="Klanten">
+            Nog geen klanten. Voeg je eerste klant toe om een portaal en koppelingen te starten.
+          </NotConnected>
+        </div>
+      ) : null}
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4 mt-2">
         {clients.map((c) => (
           <Card key={c.id} hover className="p-5">

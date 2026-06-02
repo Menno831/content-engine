@@ -1,7 +1,6 @@
-"use client";
-
-import { contentCards, stageMeta, fmtNum, type PipelineStage } from "../_data";
+import { stageMeta, fmtNum, type PipelineStage } from "../_data";
 import { PageHeader, Card, Badge, icons } from "../_components";
+import { getWorkspaceData } from "@/lib/data";
 
 const stageOrder: PipelineStage[] = ["idee", "script", "review", "goedgekeurd", "live"];
 
@@ -12,7 +11,8 @@ const formatColor: Record<string, string> = {
   Short: "#34D399",
 };
 
-export default function Pipeline() {
+export default async function Pipeline() {
+  const { content: contentCards } = await getWorkspaceData();
   return (
     <>
       <PageHeader

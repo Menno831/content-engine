@@ -1,10 +1,26 @@
-"use client";
-
-import { clients, topContent, fmtEur, fmtNum } from "../_data";
+import { fmtEur, fmtNum } from "../_data";
 import { PageHeader, Card, Stat, Eyebrow, Badge, Avatar, icons } from "../_components";
+import { getWorkspaceData } from "@/lib/data";
+import { NotConnected } from "../_states";
 
-export default function Reports() {
-  const client = clients[2]; // Daan Koster als voorbeeld
+export default async function Reports() {
+  const { clients, topContent } = await getWorkspaceData();
+  const client = clients[2] ?? clients[0];
+
+  if (!client) {
+    return (
+      <>
+        <PageHeader
+          eyebrow="Rapporten"
+          title="Automatische rapportage"
+          subtitle="Koppel een klant en sync content om hier een rapport te genereren."
+        />
+        <NotConnected provider="Rapporten">
+          Nog geen klanten of content — voeg een klant toe en draai een Instagram-sync.
+        </NotConnected>
+      </>
+    );
+  }
 
   return (
     <>

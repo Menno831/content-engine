@@ -1,11 +1,12 @@
-"use client";
-
-import { leads, leadStageMeta, fmtEur, type LeadStage } from "../_data";
+import { leadStageMeta, fmtEur, type LeadStage } from "../_data";
 import { PageHeader, Card, Stat, Avatar, icons } from "../_components";
+import { getWorkspaceData } from "@/lib/data";
 
 const stageOrder: LeadStage[] = ["nieuw", "gekwalificeerd", "call_gepland", "closed", "verloren"];
 
-export default function Leads() {
+export default async function Leads() {
+  const { leads } = await getWorkspaceData();
+
   const closed = leads.filter((l) => l.stage === "closed");
   const closedValue = closed.reduce((s, l) => s + l.value, 0);
   const pipelineValue = leads

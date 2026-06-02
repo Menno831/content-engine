@@ -1,32 +1,24 @@
-"use client";
-
 import Link from "next/link";
-import {
-  clients,
-  contentCards,
-  leads,
-  revenueByMonth,
-  stageMeta,
-  fmtEur,
-  fmtNum,
-  type PipelineStage,
-} from "./_data";
+import { stageMeta, fmtEur, fmtNum, type PipelineStage } from "./_data";
 import { Card, Stat, PageHeader, Avatar, Badge, icons, Eyebrow } from "./_components";
+import { getWorkspaceData } from "@/lib/data";
 
-export default function Dashboard() {
+export default async function Dashboard() {
+  const { clients, content: contentCards, leads, revenueByMonth } = await getWorkspaceData();
+
   const activeClients = clients.filter((c) => c.status === "actief").length;
   const totalRevenue = clients.reduce((s, c) => s + c.revenueAttributed, 0);
   const totalLeads = clients.reduce((s, c) => s + c.leadsThisMonth, 0);
   const closed = leads.filter((l) => l.stage === "closed");
   const closedValue = closed.reduce((s, l) => s + l.value, 0);
 
-  const maxRev = Math.max(...revenueByMonth.map((d) => d.v));
+  const maxRev = Math.max(1, ...revenueByMonth.map((d) => d.v));
 
   const stageCounts = (Object.keys(stageMeta) as PipelineStage[]).map((st) => ({
     st,
     count: contentCards.filter((c) => c.stage === st).length,
   }));
-  const totalCards = contentCards.length;
+  const totalCards = Math.max(1, contentCards.length);
 
   return (
     <>
