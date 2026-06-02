@@ -7,6 +7,7 @@ import { BRAND } from "./_data";
 import { icons, Avatar } from "./_components";
 import { DemoBanner } from "./_states";
 import { DEMO_MODE } from "@/lib/config";
+import { signOut } from "../login/actions";
 
 const nav = [
   { href: "/platform", label: "Dashboard", icon: icons.dashboard, exact: true },
@@ -63,10 +64,21 @@ export default function PlatformLayout({ children }: { children: ReactNode }) {
         <div className="p-3 border-t border-white/[0.06]">
           <div className="flex items-center gap-3 rounded-xl px-3 py-2.5 bg-white/[0.02]">
             <Avatar initials="MK" size={32} />
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="text-sm font-medium truncate">Menno Kater</div>
               <div className="text-[11px] text-muted truncate">Agency owner</div>
             </div>
+            <form action={signOut}>
+              <button
+                type="submit"
+                title="Uitloggen"
+                className="grid place-items-center w-8 h-8 rounded-lg text-muted hover:text-foreground hover:bg-white/[0.05] transition-colors"
+              >
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+                </svg>
+              </button>
+            </form>
           </div>
         </div>
       </aside>
