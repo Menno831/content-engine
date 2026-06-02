@@ -2,6 +2,8 @@ import { fmtEur, fmtNum, type ClientStatus } from "../_data";
 import { PageHeader, Card, Avatar, Badge, Eyebrow, icons } from "../_components";
 import { getWorkspaceData } from "@/lib/data";
 import { NotConnected } from "../_states";
+import { AddClientDialog } from "./AddClientDialog";
+import { SyncButton } from "./SyncButton";
 
 const statusColor: Record<ClientStatus, string> = {
   actief: "#34D399",
@@ -19,11 +21,7 @@ export default async function Clients() {
         eyebrow="Klanten"
         title="Portalen & white-label"
         subtitle="Elke klant heeft een eigen omgeving in jouw huisstijl — eigen logo, eigen kleur, eigen domein. Zij zien alleen hun content, leads en rapporten."
-        action={
-          <button className="flex items-center gap-2 rounded-xl bg-accent hover:bg-accent-hover text-background font-bold text-sm px-4 py-2.5 transition-colors">
-            {icons.plus} Klant toevoegen
-          </button>
-        }
+        action={<AddClientDialog />}
       />
 
       {/* MRR strip */}
@@ -91,9 +89,12 @@ export default async function Clients() {
 
             <div className="flex items-center justify-between mt-4">
               <span className="text-[12px] text-muted">{fmtEur(c.monthlyValue)}/mnd</span>
-              <button className="flex items-center gap-1.5 text-[13px] text-accent hover:text-accent-hover transition-colors">
-                Open portaal {icons.arrowRight}
-              </button>
+              <div className="flex items-center gap-2">
+                <SyncButton clientId={c.id} />
+                <button className="flex items-center gap-1.5 text-[13px] text-accent hover:text-accent-hover transition-colors">
+                  Open portaal {icons.arrowRight}
+                </button>
+              </div>
             </div>
           </Card>
         ))}

@@ -181,3 +181,31 @@ create policy "members read own profile" on profiles
 
 create policy "owner reads agency" on agencies
   for select using (id = current_agency_id());
+
+-- ── Schrijfrechten: alleen owner/team (geen client-logins) ──────
+create policy "team insert clients" on clients
+  for insert with check (agency_id = current_agency_id() and current_client_id() is null);
+create policy "team update clients" on clients
+  for update using (agency_id = current_agency_id() and current_client_id() is null);
+
+create policy "team insert content" on content
+  for insert with check (
+    current_client_id() is null
+    and client_id in (select id from clients where agency_id = current_agency_id())
+  );
+create policy "team update content" on content
+  for update using (
+    current_client_id() is null
+    and client_id in (select id from clients where agency_id = current_agency_id())
+  );
+
+create policy "team insert leads" on leads
+  for insert with check (
+    current_client_id() is null
+    and client_id in (select id from clients where agency_id = current_agency_id())
+  );
+create policy "team update leads" on leads
+  for update using (
+    current_client_id() is null
+    and client_id in (select id from clients where agency_id = current_agency_id())
+  );
