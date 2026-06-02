@@ -19,6 +19,7 @@ export interface InstagramMedia {
   likes: number;
   comments: number;
   views: number | null; // alleen reels/video
+  reach: number | null; // alleen via officiële Graph API
   permalink: string | null;
   timestamp: number | null;
 }
@@ -69,6 +70,7 @@ function mapMedia(raw: any, isReel: boolean): InstagramMedia {
     likes: m.like_count || m.edge_media_preview_like?.count || 0,
     comments: m.comment_count || m.edge_media_to_comment?.count || 0,
     views: isReel ? m.play_count || m.view_count || null : null,
+    reach: null, // scrape-bron levert geen reach
     permalink: m.code ? `https://www.instagram.com/p/${m.code}/` : null,
     timestamp: m.taken_at || m.taken_at_timestamp || null,
   };
