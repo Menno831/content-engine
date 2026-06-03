@@ -10,7 +10,7 @@ Dit is geen merkvideo van Flaneur. Het is een **founder-vlog van Regi**. Flaneur
 
 ## Positionering
 
-| | Founder-vlog (wat we maken) | Merk-vlog (wat we vermijden) |
+| Aspect | Founder-vlog (wat we maken) | Merk-vlog (wat we vermijden) |
 |---|---|---|
 | Perspectief | POV van Regi, eerste persoon | Het bedrijf van buitenaf |
 | Held | Regi | Het product / Flaneur |

@@ -41,3 +41,6 @@ yarn-error.log*
 next-env.d.ts
 
 .vercel
+
+# PDF build artifacts
+flaneur-vlog/*.pdf
