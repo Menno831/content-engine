@@ -14,6 +14,7 @@ Dit is het complete productiepakket. Alles is opgesplitst zodat Regi zelf niets 
 | [`04-draaischema.md`](./04-draaischema.md) | Draaidagen, logistiek, gear, planning | Productie |
 | [`05-beslissingen.md`](./05-beslissingen.md) | Vastgelegde regie-beslissingen + interview-vragen voor op de set | Regi + crew |
 | [`06-publicatie.md`](./06-publicatie.md) | Titel, thumbnail, beschrijving, uitrol | Editing / publicatie |
+| [`07-illustratie-prompts.md`](./07-illustratie-prompts.md) | Kant-en-klare prompts per shot voor stick-figure storyboard-tekeningen | Pre-productie / visualisatie |
 
 ## In één zin
 
@@ -28,6 +29,7 @@ Dit is het complete productiepakket. Alles is opgesplitst zodat Regi zelf niets 
 - [x] Regie-beslissingen vastgelegd (open punten ingevuld — geen voice note nodig)
 - [x] Interview-vragen voor op de set (vervangt de voice note)
 - [x] Publicatieplan
+- [x] Storyboard-illustratie prompts (stick-figure, per shot)
 - [ ] Crew/videograaf bevestigd per draaidag
 - [ ] Definitieve draaidatums geprikt (richtlijn: eerste helft november)
 
