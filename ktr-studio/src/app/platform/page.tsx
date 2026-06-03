@@ -4,7 +4,7 @@ import { Card, Stat, PageHeader, Avatar, Badge, icons, Eyebrow } from "./_compon
 import { getWorkspaceData } from "@/lib/data";
 
 export default async function Dashboard() {
-  const { clients, content: contentCards, leads, revenueByMonth } = await getWorkspaceData();
+  const { clients, content: contentCards, leads, revenueByMonth, demo } = await getWorkspaceData();
 
   const activeClients = clients.filter((c) => c.status === "actief").length;
   const totalRevenue = clients.reduce((s, c) => s + c.revenueAttributed, 0);
@@ -20,19 +20,40 @@ export default async function Dashboard() {
   }));
   const totalCards = Math.max(1, contentCards.length);
 
+  // Eerste keer (echte data, nog geen klanten): toon een onboarding i.p.v. nullen.
+  if (!demo && clients.length === 0) {
+    return (
+      <>
+        <PageHeader
+          eyebrow="Aan de slag"
+          title="Welkom bij KTR Studio"
+          subtitle="Je workspace staat klaar. Drie stappen en je dashboard vult zich met echte data."
+        />
+        <div className="grid md:grid-cols-3 gap-4">
+          <OnboardingStep n={1} title="Voeg je eerste klant toe" body="Maak een klant aan met z'n Instagram-handle." cta="Naar Klanten" />
+          <OnboardingStep n={2} title="Koppel een bron" body="Verbind Instagram zodat we content en cijfers kunnen ophalen." cta="Bron koppelen" />
+          <OnboardingStep n={3} title="Sync de data" body="Klik 'Sync' op de klant — content en metrics stromen binnen." cta="Open Klanten" />
+        </div>
+        <p className="mt-6 text-sm text-muted">
+          Zodra er data is, zie je hier automatisch je omzet, leads en pipeline-status.
+        </p>
+      </>
+    );
+  }
+
   return (
     <>
       <PageHeader
-        eyebrow="Overzicht · juni 2026"
-        title="Goedemorgen, Menno"
-        subtitle="Hier is wat er speelt over al je klanten — content, leads en omzet op één plek."
+        eyebrow="Overzicht"
+        title="Dashboard"
+        subtitle="Wat er speelt over al je klanten — content, leads en omzet op één plek."
       />
 
       {/* KPI's */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <Stat label="Omzet uit content" value={fmtEur(totalRevenue)} delta="+34% vs. vorige maand" icon={icons.money} />
-        <Stat label="Actieve klanten" value={String(activeClients)} delta="+1 deze maand" icon={icons.clients} />
-        <Stat label="Leads deze maand" value={String(totalLeads)} delta="+22% vs. vorige maand" icon={icons.leads} />
+        <Stat label="Omzet uit content" value={fmtEur(totalRevenue)} delta={demo ? "+34% vs. vorige maand" : undefined} icon={icons.money} />
+        <Stat label="Actieve klanten" value={String(activeClients)} delta={demo ? "+1 deze maand" : undefined} icon={icons.clients} />
+        <Stat label="Leads deze maand" value={String(totalLeads)} delta={demo ? "+22% vs. vorige maand" : undefined} icon={icons.leads} />
         <Stat label="Closed via content" value={fmtEur(closedValue)} delta={`${closed.length} deals`} icon={icons.check} />
       </div>
 
@@ -141,5 +162,33 @@ export default async function Dashboard() {
         </Card>
       </div>
     </>
+  );
+}
+
+function OnboardingStep({
+  n,
+  title,
+  body,
+  cta,
+}: {
+  n: number;
+  title: string;
+  body: string;
+  cta: string;
+}) {
+  return (
+    <Card className="p-6">
+      <span className="inline-grid place-items-center w-9 h-9 rounded-xl bg-accent/15 text-accent font-display font-extrabold mb-4">
+        {n}
+      </span>
+      <h3 className="font-display font-bold text-base mb-1">{title}</h3>
+      <p className="text-muted text-sm leading-relaxed mb-4">{body}</p>
+      <Link
+        href="/platform/clients"
+        className="inline-flex items-center gap-1.5 text-[13px] text-accent hover:text-accent-hover transition-colors"
+      >
+        {cta} {icons.arrowRight}
+      </Link>
+    </Card>
   );
 }
