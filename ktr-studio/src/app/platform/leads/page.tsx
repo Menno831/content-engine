@@ -1,31 +1,38 @@
 import { leadStageMeta, fmtEur, type LeadStage } from "../_data";
 import { PageHeader, Card, Stat, Avatar, icons } from "../_components";
 import { getWorkspaceData } from "@/lib/data";
+import { AddLeadDialog } from "./AddLeadDialog";
+import { LeadStageControl } from "./LeadStageControl";
 
 const stageOrder: LeadStage[] = ["nieuw", "gekwalificeerd", "call_gepland", "closed", "verloren"];
 
 export default async function Leads() {
-  const { leads } = await getWorkspaceData();
+  const { leads, clients, content, demo } = await getWorkspaceData();
 
   const closed = leads.filter((l) => l.stage === "closed");
   const closedValue = closed.reduce((s, l) => s + l.value, 0);
   const pipelineValue = leads
     .filter((l) => l.stage !== "closed" && l.stage !== "verloren")
     .reduce((s, l) => s + l.value, 0);
-  const closeRate = Math.round((closed.length / leads.filter((l) => l.stage !== "nieuw").length) * 100);
+  const qualified = leads.filter((l) => l.stage !== "nieuw").length;
+  const closeRate = qualified ? Math.round((closed.length / qualified) * 100) : 0;
+
+  const clientOptions = clients.map((c) => ({ id: c.id, label: c.name }));
+  const contentOptions = content.map((c) => ({ id: c.id, label: c.title }));
 
   return (
     <>
       <PageHeader
         eyebrow="Leads & Omzet"
         title="Sales pipeline"
-        subtitle="Elke lead komt binnen via een ManyChat-trigger of DM, gekoppeld aan de content die 'm opleverde. Van eerste contact tot closed deal — met omzet-attributie."
+        subtitle="Van eerste contact tot closed deal, gekoppeld aan de content die 'm opleverde — met omzet-attributie."
+        action={<AddLeadDialog clients={clientOptions} content={contentOptions} />}
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <Stat label="Closed deze maand" value={fmtEur(closedValue)} delta={`${closed.length} deals`} icon={icons.money} />
         <Stat label="In pipeline" value={fmtEur(pipelineValue)} icon={icons.leads} />
-        <Stat label="Close rate" value={`${closeRate}%`} delta="+6pt vs. vorige maand" icon={icons.check} />
+        <Stat label="Close rate" value={`${closeRate}%`} delta={demo ? "+6pt vs. vorige maand" : undefined} icon={icons.check} />
         <Stat label="Nieuwe leads" value={String(leads.filter((l) => l.stage === "nieuw").length)} icon={icons.send} />
       </div>
 
@@ -60,12 +67,13 @@ export default async function Leads() {
                       <div className="text-[10px] font-mono uppercase tracking-wider text-muted mb-0.5">Bron</div>
                       <div className="text-[12px] text-foreground/80 truncate">{l.source}</div>
                     </div>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mb-3">
                       <span className="text-[11px] text-muted">{l.setter}</span>
                       <span className="font-mono text-sm" style={{ color: stage === "closed" ? "#34D399" : undefined }}>
                         {fmtEur(l.value)}
                       </span>
                     </div>
+                    {!demo && <LeadStageControl leadId={l.id} stage={l.stage} />}
                   </Card>
                 ))}
                 {items.length === 0 && (
@@ -79,7 +87,7 @@ export default async function Leads() {
 
       <p className="mt-4 text-[12px] text-muted flex items-center gap-2">
         <span className="text-accent">{icons.spark}</span>
-        Leads stromen automatisch binnen via de ManyChat- en Instagram-DM-koppeling. Sleep een kaart naar &ldquo;Closed&rdquo; en de omzet wordt toegeschreven aan de bron-content.
+        Voeg leads handmatig toe of laat ze straks automatisch binnenstromen via de ManyChat-koppeling. Zet een lead op &ldquo;Closed&rdquo; en de omzet wordt toegeschreven aan de bron-content.
       </p>
     </>
   );
