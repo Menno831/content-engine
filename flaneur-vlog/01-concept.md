@@ -46,7 +46,7 @@ De Black Friday-rollout zelf: bijna een maand lang, website gaat **interactief**
 
 - **Niet gescript, wel gestructureerd.** Regi praat vrij; wij zorgen dat elke beweging zijn verhaalfunctie vervult (zie storyboard).
 - **Cinematic maar echt.** Look van Heaton/Nijhof: ondiepe scherptediepte, natuurlijk licht waar mogelijk, rustige camerabewegingen (gimbal), géén overproductie.
-- **Stem van Regi draagt de video.** Voice-over (uit interview/voice note) bovenop B-roll = de ruggengraat. On-camera momenten zijn de ankers.
+- **Stem van Regi draagt de video.** Voice-over (uit het interview-blok op Dag 1) bovenop B-roll = de ruggengraat. On-camera momenten zijn de ankers.
 - **Eerlijkheid wint van perfectie.** Eén moment van echte twijfel of druk > tien mooie shots.
 
 ---
@@ -59,10 +59,11 @@ De Black Friday-rollout zelf: bijna een maand lang, website gaat **interactief**
 
 ---
 
-## Wat dit document NIET dichttimmert (bewust)
+## Open punten — nu vastgelegd
 
-Regi stuurt nog een voice note met zijn eigen visie. De volgende dingen vullen we definitief in zodra die binnen is (zie [`05-voicenote-prompts.md`](./05-voicenote-prompts.md)):
-- Exacte draaidatums in Dubai en Amsterdam
-- Of het fulfillment center wél/niet in deze vlog komt
-- Persoonlijke verhaallijn (waarom Dubai? wat betekent deze BF voor hem?)
-- Of er een specifiek event / pop-up / drop in beeld komt
+Er komt **geen voice note**. Alle eerder open punten zijn daarom als regie-beslissing ingevuld (volledige onderbouwing in [`05-beslissingen.md`](./05-beslissingen.md)):
+- **Persoonlijke laag:** niet Regi's onbekende "waarom Dubai", maar het werk + de afstand (founder runt €2M-maand van 5.000 km). Zijn stem komt uit een **interview-blok op Dag 1** i.p.v. een voice note.
+- **Fulfillment center:** standaard geschrapt; alleen als Regi er fysiek bij is.
+- **Einde:** cliffhanger vóór Black Friday (uitkomst = vlog #02).
+- **Specials / event:** niets vast ingepland; opportunistisch meepakken.
+- **Datums:** richtlijn eerste helft november; exact prikken bij crew-planning.

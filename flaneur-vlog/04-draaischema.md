@@ -1,6 +1,6 @@
 # 04 — Draaischema, logistiek & gear
 
-> Planning op basis van: vlog **live in november**, gekoppeld aan **Black Friday** (laatste vrijdag november). Verhuizing Dubai in **september**. Exacte datums 🟡 bevestigt Regi.
+> Planning op basis van: vlog **live in november**, gekoppeld aan **Black Friday** (laatste vrijdag november). Verhuizing Dubai in **september**. Exacte datums *(TBC)* invullen zodra crew + Regi's agenda bekend zijn — de richtlijnen hieronder staan vast.
 
 ---
 
@@ -10,12 +10,12 @@ Black Friday valt op de **laatste vrijdag van november**. De rollout duurt ~1 ma
 
 | Fase | Wanneer (richtlijn) | Wat |
 |---|---|---|
-| Pre-productie | Sept – okt | Voice note Regi → dit document finaliseren, crew boeken, datums vast |
-| **Draaidag(en) Dubai** | Begin november 🟡 | Beweging 1 + anker-momenten |
-| **Draaidag Amsterdam** | Begin–midden november 🟡 | Beweging 2 + rollout-uitleg |
-| Fulfillment (optioneel) | Zelfde reis als Amsterdam 🟡 | Alleen indien Regi erbij |
+| Pre-productie | Sept – okt | Crew boeken, datums vast, interview-vragen klaar (zie [`05-beslissingen.md`](./05-beslissingen.md)) |
+| **Draaidag(en) Dubai** | Begin november *(TBC)* | Beweging 1 + anker-momenten |
+| **Draaidag Amsterdam** | Begin–midden november *(TBC)* | Beweging 2 + rollout-uitleg |
+| Fulfillment (optioneel) | Zelfde reis als Amsterdam | Alleen indien Regi erbij |
 | Editing | Midden november | Eerste cut → revisie → final |
-| **Publicatie** | Vóór/begin Black Friday-rollout 🟡 | Live op Regi's kanaal |
+| **Publicatie** | Vóór/begin Black Friday-rollout | Live op Regi's kanaal |
 | Vlog #02 (uitkomst) | Na Black Friday | Cliffhanger uit deze vlog betaalt uit |
 
 > **Kritiek pad:** Amsterdam draaien kan alleen wanneer het team zichtbaar aan Black Friday werkt. Plan die draaidag in de week dat de werkvloer écht vol bezig is.
@@ -44,7 +44,7 @@ Draaien op een dag dat het team vol aan Black Friday werkt.
 | Middag | — | Rollout-uitleg bij scherm (2.3) |
 | Optioneel | — | Fulfillment center (2.4) — apart reisblok |
 
-> Indien Regi niet fysiek in NL is in de draaiperiode: Amsterdam wordt door een tweede videograaf gedraaid als pure B-roll, en Regi's VO erover dekt het founder-perspectief. Minder sterk — bevestig dit. 🟡
+> Indien Regi niet fysiek in NL is in de draaiperiode: Amsterdam wordt door een tweede videograaf gedraaid als pure B-roll, en Regi's VO (uit het interview-blok) erover dekt het founder-perspectief. Iets minder sterk, maar het plan staat — het verhaal valt niet om.
 
 ---
 
@@ -88,5 +88,5 @@ Draaien op een dag dat het team vol aan Black Friday werkt.
 - [ ] Toestemming fulfillment center (indien van toepassing)
 - [ ] Droneregels / vergunning Dubai-locatie gecheckt
 - [ ] Reis/verblijf videograaf geregeld (Dubai + evt. NL)
-- [ ] Welke schermen/cijfers mogen in beeld (NDA/concurrentiegevoelig) — *afstemmen met Regi*
+- [ ] Concurrentiegevoelige schermen/cijfers in de edit blurren (default: terughoudend)
 - [ ] Backup van alle footage gemaakt vóór einde draaidag

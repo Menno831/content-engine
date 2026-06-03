@@ -12,7 +12,7 @@ Dit is het complete productiepakket. Alles is opgesplitst zodat Regi zelf niets 
 | [`02-storyboard.md`](./02-storyboard.md) | Volledig shot-by-shot storyboard, scène voor scène | Crew / videograaf |
 | [`03-shotlist.md`](./03-shotlist.md) | Afvinkbare shotlist per locatie | Op de set |
 | [`04-draaischema.md`](./04-draaischema.md) | Draaidagen, logistiek, gear, planning | Productie |
-| [`05-voicenote-prompts.md`](./05-voicenote-prompts.md) | Gerichte vragen voor Regi's voice note | Regi |
+| [`05-beslissingen.md`](./05-beslissingen.md) | Vastgelegde regie-beslissingen + interview-vragen voor op de set | Regi + crew |
 | [`06-publicatie.md`](./06-publicatie.md) | Titel, thumbnail, beschrijving, uitrol | Editing / publicatie |
 
 ## In één zin
@@ -25,10 +25,11 @@ Dit is het complete productiepakket. Alles is opgesplitst zodat Regi zelf niets 
 - [x] Storyboard (shot-by-shot)
 - [x] Shotlist per locatie
 - [x] Draaischema & logistiek
-- [x] Voice note prompts voor Regi
+- [x] Regie-beslissingen vastgelegd (open punten ingevuld — geen voice note nodig)
+- [x] Interview-vragen voor op de set (vervangt de voice note)
 - [x] Publicatieplan
-- [ ] Regi's voice note verwerkt → definitieve datums + details invullen
 - [ ] Crew/videograaf bevestigd per draaidag
+- [ ] Definitieve draaidatums geprikt (richtlijn: eerste helft november)
 
 ## Referenties (door Regi aangedragen)
 

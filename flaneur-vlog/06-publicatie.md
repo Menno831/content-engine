@@ -15,7 +15,7 @@
 Founder-vlog titels (à la Heaton/Nijhof): persoonlijk + inzet + nieuwsgierigheid.
 
 1. *"Hoe ik vanuit Dubai de grootste maand van mijn bedrijf voorbereid"*
-2. *"€2.000.000 in één maand — dit is het plan"* 🟡 *(alleen als bedrag mag)*
+2. *"€2.000.000 in één maand — dit is het plan"* *(sterke hook; alleen gebruiken als Regi het bedrag publiek wil)*
 3. *"Mijn eerste vlog: van Dubai naar de grootste Black Friday ooit"*
 4. *"Een bedrijf runnen vanaf 5.000 km afstand"*
 5. *"Dit is wat niemand ziet vóór Black Friday"*
