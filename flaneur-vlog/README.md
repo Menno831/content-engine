@@ -9,6 +9,7 @@ Dit is het complete productiepakket. Alles is opgesplitst zodat Regi zelf niets 
 | Bestand | Wat het is | Voor wie |
 |---|---|---|
 | [`00-regi-brief.md`](./00-regi-brief.md) | **Compacte visuele 1-pager — in 2 min te lezen** | **Regi** |
+| `Flaneur-Vlog-Draaivisie.pdf` | **Visuele draaivisie + 5 afstemmingsvragen** (gebouwd via `build_draaivisie.py`) — hoe wíj de film inschieten, ter bevestiging door Regi | **Regi** |
 | [`01-concept.md`](./01-concept.md) | Concept, positionering, narratief, do's & don'ts | Regi + crew |
 | [`02-storyboard.md`](./02-storyboard.md) | Volledig shot-by-shot storyboard, scène voor scène | Crew / videograaf |
 | [`03-shotlist.md`](./03-shotlist.md) | Afvinkbare shotlist per locatie | Op de set |
