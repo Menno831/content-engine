@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Bouw een professionele PDF uit de Flaneur vlog-productiedocs."""
-import re
+import os
 import markdown
 from xhtml2pdf import pisa
+
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 DOCS = [
     ("01-concept.md", "Concept & narratief"),
@@ -76,6 +78,37 @@ hr { border: none; border-top: 0.5pt solid #dddddd; margin: 12pt 0; }
 .cover-meta { font-size: 9.5pt; color: #777; margin-top: 8pt; }
 .toc-h { font-size: 16pt; color: #0a0a0a; border-bottom: 2pt solid #F97316; padding-bottom: 4pt; }
 .toc li { margin: 5pt 0; font-size: 10.5pt; }
+
+/* ---- Regi 1-pager ---- */
+.regi-tag { color: #C2410C; font-size: 9pt; letter-spacing: 2.5pt; font-weight: bold; }
+.regi-h1 { font-size: 23pt; color: #0a0a0a; margin: 4pt 0 6pt 0; }
+.regi-lead { font-size: 10pt; color: #333; line-height: 1.5; margin-bottom: 6pt; }
+.regi-h2 { font-size: 11pt; color: #0a0a0a; margin: 16pt 0 6pt 0;
+           border-left: 4pt solid #F97316; padding-left: 7pt; }
+.tl { width: 100%; margin: 2pt 0; }
+.tl td { text-align: center; vertical-align: middle; padding: 9pt 4pt; color: #fff;
+         font-size: 7pt; border: 1.5pt solid #ffffff; line-height: 1.35; }
+.tl .lab { font-size: 6.2pt; letter-spacing: 1pt; }
+.tl .big { font-size: 9pt; }
+.tl-cold { background-color: #7C2D12; width: 14%; }
+.tl-1 { background-color: #EA580C; width: 26%; }
+.tl-2 { background-color: #F97316; width: 26%; }
+.tl-3 { background-color: #FB923C; width: 20%; }
+.tl-out { background-color: #C2410C; width: 14%; }
+.tl-sub { font-size: 8pt; color: #666; font-style: italic; margin: 4pt 0 2pt 0; }
+.tasks { width: 100%; margin: 2pt 0; }
+.tasks td { width: 33%; vertical-align: top; padding: 9pt; font-size: 8.3pt;
+            background-color: #fafafa; border: 0.5pt solid #eee;
+            border-top: 2.5pt solid #F97316; line-height: 1.4; }
+.tasks .num { background-color: #F97316; color: #fff; font-size: 11pt; font-weight: bold;
+              padding: 1pt 6pt; margin-bottom: 3pt; }
+.days { width: 100%; margin: 2pt 0; }
+.days th { background-color: #0a0a0a; color: #fff; font-size: 9pt; padding: 6pt; text-align: left; }
+.days td { font-size: 8.3pt; padding: 7pt; vertical-align: top;
+           background-color: #fafafa; border: 0.5pt solid #eee; line-height: 1.4; }
+.why { background-color: #FFF7ED; border: 0.5pt solid #FED7AA; border-left: 3pt solid #F97316;
+       padding: 8pt 10pt; font-size: 9pt; color: #7C2D12; margin: 14pt 0 6pt 0; }
+.more { font-size: 8pt; color: #999; font-style: italic; margin-top: 8pt; }
 """
 
 FONTS = """
@@ -97,12 +130,56 @@ cover = """
 <pdf:nextpage />
 """
 
+regi_brief = """
+<div class="regi-tag">VOOR REGI &mdash; IN 2 MINUTEN</div>
+<div class="regi-h1">Jouw eerste vlog, in het kort</div>
+<p class="regi-lead">Een POV founder-vlog die je verhuizing naar Dubai en de aanloop naar de grootste
+Black Friday van Flaneur (~&euro;2M) door elkaar weeft. Authentiek, niet gescript &mdash;
+wij waarborgen alleen de verhaallijn zodat het altijd klopt. Jij hoeft alleen voor de camera te staan.</p>
+
+<div class="regi-h2">De video in 5 beats</div>
+<table class="tl">
+  <tr>
+    <td class="tl-cold"><span class="lab">COLD OPEN</span><br><span class="big">De inzet</span><br>~0:30</td>
+    <td class="tl-1"><span class="lab">BEWEGING 1</span><br><span class="big">Dubai &mdash; de basis</span><br>~3,5 min</td>
+    <td class="tl-2"><span class="lab">BEWEGING 2</span><br><span class="big">Amsterdam &mdash; de machine</span><br>~3,5 min</td>
+    <td class="tl-3"><span class="lab">BEWEGING 3</span><br><span class="big">De gok</span><br>~2 min</td>
+    <td class="tl-out"><span class="lab">OUTRO</span><br><span class="big">Cliffhanger</span><br>~1 min</td>
+  </tr>
+</table>
+<p class="tl-sub">Rust &amp; controle (Dubai) &rarr; energie &amp; inzet (Amsterdam) &rarr; spanning (Black Friday) &rarr; cliffhanger naar deel 2.</p>
+
+<div class="regi-h2">Wat we van jou nodig hebben &mdash; 3 dingen</div>
+<table class="tasks">
+  <tr>
+    <td><div class="num">1</div><br><strong>Interview-blok</strong><br>10&ndash;15 min op Dag 1. Jij praat vrij, wij stellen 6 vragen. Hieruit knippen we de hele voice-over. Dit vervangt de voice note.</td>
+    <td><div class="num">2</div><br><strong>Twee draaidagen</strong><br>Dubai (woning + home office) en Amsterdam (kantoor vol Black Friday-team). Richtlijn: eerste helft november.</td>
+    <td><div class="num">3</div><br><strong>Toestemmingen</strong><br>Filmen op kantoor regelen, en laten weten welke schermen/cijfers n&iacute;&eacute;t in beeld mogen.</td>
+  </tr>
+</table>
+
+<div class="regi-h2">De twee draaidagen</div>
+<table class="days">
+  <tr><th>Dag 1 &mdash; Dubai</th><th>Dag 2 &mdash; Amsterdam</th></tr>
+  <tr>
+    <td>Woning + uitzicht in ochtendlicht &middot; home office &middot; interview-blok &middot; rustig reflectie-moment.</td>
+    <td>Kantoor in vol bedrijf &middot; team aan Black Friday &middot; jij legt de interactieve rollout uit.</td>
+  </tr>
+</table>
+
+<div class="why"><strong>Waarom dit werkt:</strong> we eindigen vl&aacute;k v&oacute;&oacute;r Black Friday.
+De uitkomst (~&euro;2M?) wordt deel 2 &rarr; kijkers blijven hangen en komen terug.</div>
+
+<p class="more">Alle details &mdash; shot-by-shot storyboard, gear, planning en publicatie &mdash; staan op de volgende pagina's. Deze pagina is het enige dat jij hoeft te lezen.</p>
+<pdf:nextpage />
+"""
+
 toc = '<div class="toc"><div class="toc-h">Inhoud</div><ol>'
 for _, title in DOCS:
     toc += f'<li>{title}</li>'
 toc += "</ol></div>"
 
-body = cover + toc
+body = cover + regi_brief + toc
 for path, title in DOCS:
     body += '<pdf:nextpage />'
     body += md_to_html(path)

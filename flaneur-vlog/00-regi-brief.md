@@ -1,0 +1,27 @@
+# 00 — Voor Regi, in 2 minuten
+
+> De compacte voorkant van het pakket. Dit is het **enige** dat Regi hoeft te lezen; de rest is voor de crew. In de PDF staat deze pagina visueel uitgewerkt (getekende tijdlijn + kaarten).
+
+## Jouw eerste vlog, in het kort
+Een POV founder-vlog die je verhuizing naar Dubai en de aanloop naar de grootste Black Friday van Flaneur (~€2M) door elkaar weeft. Authentiek, niet gescript — wij waarborgen alleen de verhaallijn zodat het altijd klopt. Jij hoeft alleen voor de camera te staan.
+
+## De video in 5 beats
+| Cold open | Beweging 1 | Beweging 2 | Beweging 3 | Outro |
+|---|---|---|---|---|
+| **De inzet** (~0:30) | **Dubai — de basis** (~3,5 min) | **Amsterdam — de machine** (~3,5 min) | **De gok** (~2 min) | **Cliffhanger** (~1 min) |
+
+> Rust & controle (Dubai) → energie & inzet (Amsterdam) → spanning (Black Friday) → cliffhanger naar deel 2.
+
+## Wat we van jou nodig hebben — 3 dingen
+1. **Interview-blok** — 10–15 min op Dag 1. Jij praat vrij, wij stellen 6 vragen. Hieruit knippen we de hele voice-over. Dit vervangt de voice note.
+2. **Twee draaidagen** — Dubai (woning + home office) en Amsterdam (kantoor vol Black Friday-team). Richtlijn: eerste helft november.
+3. **Toestemmingen** — Filmen op kantoor regelen, en laten weten welke schermen/cijfers níét in beeld mogen.
+
+## De twee draaidagen
+| Dag 1 — Dubai | Dag 2 — Amsterdam |
+|---|---|
+| Woning + uitzicht in ochtendlicht · home office · interview-blok · rustig reflectie-moment. | Kantoor in vol bedrijf · team aan Black Friday · jij legt de interactieve rollout uit. |
+
+**Waarom dit werkt:** we eindigen vlák vóór Black Friday. De uitkomst (~€2M?) wordt deel 2 → kijkers blijven hangen en komen terug.
+
+> Alle details — shot-by-shot storyboard, gear, planning en publicatie — staan in de rest van dit pakket.
