@@ -29,6 +29,14 @@ body { font-family: Helvetica, Arial, sans-serif; color: #1c1c1c; font-size: 10p
 .cards .ch { font-size: 10pt; font-weight: bold; color: #0b0b0b; margin-bottom: 2pt; }
 .cards .cn { font-size: 7pt; letter-spacing: 1pt; color: #F97316; font-weight: bold; }
 
+/* waarde-grid 2x2 */
+.vgrid { width: 100%; }
+.vgrid td { width: 50%; vertical-align: top; padding: 13pt 14pt; font-size: 8.7pt;
+            line-height: 1.5; background-color: #fafafa; border: 0.75pt solid #ededed;
+            border-top: 3pt solid #F97316; }
+.vgrid .ch { font-size: 10.5pt; font-weight: bold; color: #0b0b0b; margin-bottom: 2pt; }
+.vgrid .cn { font-size: 7pt; letter-spacing: 1pt; color: #F97316; font-weight: bold; }
+
 /* aanpak stappen */
 .steps { width: 100%; }
 .steps td { padding: 9pt; vertical-align: top; border-bottom: 0.75pt solid #eee; font-size: 9pt; line-height: 1.45; }
@@ -168,6 +176,50 @@ dan deel 2. Dat is precies de cliffhanger die mensen laat terugkomen. Maar dan m
 <pdf:nextpage />
 """
 
+PAGE_VALUE = """
+<table class="kick"><tr><td class="kl">VOORSTEL</td><td class="kr">WAT HET JE OPLEVERT</td></tr></table>
+
+<div class="h1">Dit is geen kostenpost, het is een asset</div>
+<p class="lead">Even eerlijk over waaróm dit de moeite waard is. Dit is geen video die je maakt en weer
+vergeet. <b>Het is een kanaal en een verhaal dat voor je blijft werken, ook als jij slaapt.</b></p>
+
+<table class="vgrid">
+  <tr>
+    <td>
+      <div class="cn">OWNED</div>
+      <div class="ch">Een kanaal dat je bezit</div>
+      Ads huur je, een founder-kanaal bezit je. Elke video blijft vindbaar en blijft mensen binnenhalen,
+      ook over een jaar nog. Je bouwt een asset, geen advertentie die stopt zodra je niet meer betaalt.
+    </td>
+    <td>
+      <div class="cn">DE JUISTE MENSEN</div>
+      <div class="ch">Niet de meeste, wel de juiste</div>
+      Dit gaat niet om views. Het gaat om de juiste mensen die Flaneur zien: talent dat bij je wil werken,
+      partners die aanhaken, en klanten die je merk echt snappen. Optimaliseren voor je ICP, niet voor cijfers.
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <div class="cn">VERTROUWEN</div>
+      <div class="ch">Een gezicht verkoopt</div>
+      Mensen kopen van merken met een gezicht erachter. Jij voor de camera bouwt vertrouwen dat geen
+      advertentie kan kopen. Zeker nu, in een tijd waarin alles AI en nep begint te voelen.
+    </td>
+    <td>
+      <div class="cn">TIMING</div>
+      <div class="ch">Voorsprong terwijl de rest wacht</div>
+      Kijk naar China: de merken die winnen zetten de founder vooraan en gaan nu. Het Westen twijfelt en is
+      te laat. Wij niet. We pakken het moment vlak voor de grootste maand van het jaar.
+    </td>
+  </tr>
+</table>
+
+<div class="advice"><b>De rekensom:</b> je bouwt geen losse video's, je bouwt een kanaal dat blijft
+werken. Eén video die het juiste talent of de juiste partner binnenhaalt verdient zichzelf al terug.
+De rest is bonus. Daarom is dit geen uitgave, maar de goedkoopste asset die je dit jaar bouwt.</div>
+<pdf:nextpage />
+"""
+
 PAGE3 = """
 <table class="kick"><tr><td class="kl">VOORSTEL</td><td class="kr">DE INVESTERING</td></tr></table>
 
@@ -180,7 +232,7 @@ blijft draaien. <b>Mijn eerlijke advies staat onderaan.</b></p>
     <td class="pc">
       <span class="tag2">OPTIE 1</span><br/>
       <span class="opt">De documentaire</span><br/>
-      <span class="amt">€4.950</span><br/>
+      <span class="amt">€5.000</span><br/>
       <span class="per">eenmalig, compleet</span><br/><br/>
       <span class="desc">De volledige founder-documentaire plus alle cutdowns. Twee draaidagen, editing,
       kleurgrading, thumbnail en copy. Alles erop en eraan, klaar om live te gaan.</span>
@@ -189,7 +241,7 @@ blijft draaien. <b>Mijn eerlijke advies staat onderaan.</b></p>
     <td class="pc reco">
       <span class="tag2">OPTIE 2 / AANRADER</span><br/>
       <span class="opt">De founder content engine</span><br/>
-      <span class="amt">€2.950</span><br/>
+      <span class="amt">€3.000</span><br/>
       <span class="per">per maand, doorlopend</span><br/><br/>
       <span class="desc">De documentaire in maand 1. Daarna elke maand een nieuwe founder-video plus
       cutdowns, inclusief plaatsen en optimaliseren. Zo blijft het kanaal groeien zonder dat het jou
@@ -211,7 +263,7 @@ Geen gedoe, geen lange contracten. We activeren, precies zoals je zei.
 <p class="foot">VOORSTEL / FLANEUR FOUNDER CONTENT / VOOR REGI</p>
 """
 
-html = f"<html><head><meta charset='utf-8'><style>{CSS}</style></head><body>{PAGE1}{PAGE2}{PAGE3}</body></html>"
+html = f"<html><head><meta charset='utf-8'><style>{CSS}</style></head><body>{PAGE1}{PAGE2}{PAGE_VALUE}{PAGE3}</body></html>"
 
 out = "Flaneur-Offerte.pdf"
 with open(out, "wb") as f:
