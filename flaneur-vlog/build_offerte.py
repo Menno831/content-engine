@@ -97,9 +97,9 @@ neerzetten, zonder dat het jou tijd of headspace kost.</b> Jij staat voor de cam
     </td>
     <td>
       <div class="cn">MEER UIT ÉÉN SHOOT</div>
-      <div class="ch">De cutdowns</div>
-      Uit datzelfde draaimateriaal knip ik 4 tot 6 korte verticale video's voor Reels, Shorts en TikTok.
-      Eén keer draaien, een maand aan content.
+      <div class="ch">De cutdowns plus trailer</div>
+      Uit datzelfde draaimateriaal knippen we tot 30 korte verticale video's voor je clip-accounts, plus
+      een trailer voor je eigen kanaal. Eén keer draaien, maanden aan content.
     </td>
     <td>
       <div class="cn">KANT EN KLAAR</div>
@@ -144,7 +144,8 @@ PAGE2 = """
 
 <table class="deliv">
   <tr><td class="ck">+</td><td>1x founder-documentaire van 8 tot 14 minuten voor YouTube</td></tr>
-  <tr><td class="ck">+</td><td>4 tot 6x korte verticale cutdowns voor Reels, Shorts en TikTok</td></tr>
+  <tr><td class="ck">+</td><td>Tot 30x korte verticale cutdowns voor je clip-accounts (Reels, Shorts, TikTok)</td></tr>
+  <tr><td class="ck">+</td><td>1x trailer voor je eigen YouTube en Instagram, om de documentaire te pushen</td></tr>
   <tr><td class="ck">+</td><td>Thumbnail, titel en beschrijving, klaar om te plaatsen</td></tr>
   <tr><td class="ck">+</td><td>Kleurgrading en sound design over het hele geheel</td></tr>
   <tr><td class="ck">+</td><td>Volledige pre-productie (concept, storyboard, draaivisie, shotlist)</td></tr>
@@ -234,8 +235,8 @@ blijft draaien. <b>Mijn eerlijke advies staat onderaan.</b></p>
       <span class="opt">De documentaire</span><br/>
       <span class="amt">€5.000</span><br/>
       <span class="per">eenmalig, compleet</span><br/><br/>
-      <span class="desc">De volledige founder-documentaire plus alle cutdowns. Twee draaidagen, editing,
-      kleurgrading, thumbnail en copy. Alles erop en eraan, klaar om live te gaan.</span>
+      <span class="desc">De volledige founder-documentaire plus tot 30 cutdowns en een trailer. Twee
+      draaidagen, editing, kleurgrading, thumbnail en copy. Alles erop en eraan, klaar om live te gaan.</span>
     </td>
     <td class="spacer">&nbsp;</td>
     <td class="pc reco">
@@ -244,8 +245,8 @@ blijft draaien. <b>Mijn eerlijke advies staat onderaan.</b></p>
       <span class="amt">€3.000</span><br/>
       <span class="per">per maand, doorlopend</span><br/><br/>
       <span class="desc">De documentaire in maand 1. Daarna elke maand een nieuwe founder-video plus
-      cutdowns, inclusief plaatsen en optimaliseren. Zo blijft het kanaal groeien zonder dat het jou
-      tijd kost.</span>
+      cutdowns, inclusief plaatsen en optimaliseren. We draaien in batches, dus één draaidag levert
+      meerdere maanden content en het kost jou bijna geen tijd. Eén draaidag per maand inbegrepen.</span>
     </td>
   </tr>
 </table>
