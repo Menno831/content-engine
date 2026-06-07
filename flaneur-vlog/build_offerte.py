@@ -1,0 +1,219 @@
+#!/usr/bin/env python3
+"""Bouwt de offerte voor Flaneur (founder content), in Menno's tone of voice
+naar Regi. Zelfde frisse visuele stijl als de Draaivisie. Geen em dashes."""
+import os
+from xhtml2pdf import pisa
+
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+CSS = """
+@page { size: A4; margin: 1.5cm 1.6cm; }
+body { font-family: Helvetica, Arial, sans-serif; color: #1c1c1c; font-size: 10pt; }
+
+.kick { width: 100%; border-bottom: 1.5pt solid #1c1c1c; margin-bottom: 14pt; }
+.kick td { padding-bottom: 5pt; font-size: 8.5pt; letter-spacing: 2pt; font-weight: bold; }
+.kick .kl { color: #F97316; }
+.kick .kr { color: #9a9a9a; text-align: right; }
+
+.h1 { font-size: 24pt; color: #0b0b0b; margin: 0 0 7pt 0; }
+.lead { font-size: 10pt; color: #3a3a3a; line-height: 1.55; margin: 0 0 4pt 0; }
+.lead b { color: #1c1c1c; }
+.h2 { font-size: 10.5pt; color: #0b0b0b; margin: 16pt 0 7pt 0; font-weight: bold; }
+.h2 .bar { color: #F97316; }
+
+/* wat we maken: 3 kaarten */
+.cards { width: 100%; }
+.cards td { width: 33%; vertical-align: top; padding: 12pt 12pt; font-size: 8.6pt;
+            line-height: 1.5; background-color: #fafafa; border: 0.75pt solid #ededed;
+            border-top: 3pt solid #F97316; }
+.cards .ch { font-size: 10pt; font-weight: bold; color: #0b0b0b; margin-bottom: 2pt; }
+.cards .cn { font-size: 7pt; letter-spacing: 1pt; color: #F97316; font-weight: bold; }
+
+/* aanpak stappen */
+.steps { width: 100%; }
+.steps td { padding: 9pt; vertical-align: top; border-bottom: 0.75pt solid #eee; font-size: 9pt; line-height: 1.45; }
+.steps .num { width: 6%; font-weight: bold; color: #fff; text-align: center; font-size: 11pt; }
+.steps .st { width: 28%; font-weight: bold; color: #0b0b0b; }
+.steps .sd { color: #3a3a3a; }
+.s1 { background-color: #C2410C; } .s2 { background-color: #EA580C; }
+.s3 { background-color: #F97316; } .s4 { background-color: #FB923C; }
+.done { color: #16A34A; font-weight: bold; font-size: 8pt; }
+
+/* deliverables */
+.deliv { width: 100%; background-color: #fafafa; border: 0.75pt solid #ededed; border-left: 3pt solid #F97316; }
+.deliv td { padding: 6pt 12pt; font-size: 9pt; color: #2a2a2a; border-bottom: 0.5pt solid #f0f0f0; }
+.deliv .ck { color: #F97316; font-weight: bold; width: 5%; }
+
+/* prijs kaarten (td = de hele kaart, geen geneste blokken ivm xhtml2pdf) */
+.price { width: 100%; }
+.price td.pc { width: 46%; vertical-align: top; padding: 16pt 16pt;
+               background-color: #fafafa; border: 0.75pt solid #ededed; }
+.price td.pc.reco { background-color: #0b0b0b; border: 0.75pt solid #0b0b0b; }
+.price td.spacer { width: 8%; background-color: #fff; }
+.tag2 { font-size: 7.5pt; letter-spacing: 1.5pt; font-weight: bold; color: #9a9a9a; }
+.reco .tag2 { color: #FB923C; }
+.opt { font-size: 12.5pt; font-weight: bold; color: #0b0b0b; line-height: 1.7; }
+.reco .opt { color: #fff; }
+.amt { font-size: 23pt; font-weight: bold; color: #F97316; line-height: 2.0; }
+.per { font-size: 8.5pt; color: #9a9a9a; }
+.desc { font-size: 8.3pt; color: #3a3a3a; line-height: 1.5; }
+.reco .desc { color: #d0d0d0; }
+
+.advice { background-color: #FFF4EC; border-left: 3pt solid #F97316; padding: 11pt 13pt;
+          font-size: 9pt; color: #7C2D12; line-height: 1.55; margin-top: 14pt; }
+.advice b { color: #7C2D12; }
+.flow { background-color: #0b0b0b; color: #fff; padding: 13pt 15pt; font-size: 9.5pt;
+        margin-top: 14pt; line-height: 1.55; }
+.flow b { color: #FB923C; }
+.foot { font-size: 7.5pt; color: #b5b5b5; letter-spacing: 0.5pt; margin-top: 10pt; }
+.note { font-size: 7.5pt; color: #b5b5b5; font-style: italic; margin-top: 4pt; }
+"""
+
+PAGE1 = """
+<table class="kick"><tr><td class="kl">VOORSTEL</td><td class="kr">FLANEUR FOUNDER CONTENT</td></tr></table>
+
+<div class="h1">Laten we Flaneur founder-led maken, Regi</div>
+<p class="lead">Kijk, je zei het zelf: we moeten activeren. En je hebt gelijk. Founder-led content is precies
+waar het nu naartoe gaat. Kijk naar Heaton met Represent, of hoe ze het in China doen: de merken die
+winnen zetten de founder vooraan en gaan snel. Niet perfect, wel echt. <b>Dit is hoe we dat voor Flaneur
+neerzetten, zonder dat het jou tijd of headspace kost.</b> Jij staat voor de camera, ik regel de rest.</p>
+
+<div class="h2"><span class="bar">|</span>&nbsp; Wat we gaan maken</div>
+<table class="cards">
+  <tr>
+    <td>
+      <div class="cn">VLAGGENSCHIP</div>
+      <div class="ch">De founder-documentaire</div>
+      Jouw verhuizing naar Dubai x de grootste Black Friday van Flaneur. Eén long-form video van 8 tot 14
+      minuten die je persoonlijke kanaal lanceert.
+    </td>
+    <td>
+      <div class="cn">MEER UIT ÉÉN SHOOT</div>
+      <div class="ch">De cutdowns</div>
+      Uit datzelfde draaimateriaal knip ik 4 tot 6 korte verticale video's voor Reels, Shorts en TikTok.
+      Eén keer draaien, een maand aan content.
+    </td>
+    <td>
+      <div class="cn">KANT EN KLAAR</div>
+      <div class="ch">Jij hoeft niks uit te zoeken</div>
+      De hele voorbereiding staat al: concept, storyboard, draaivisie, shotlist. Jij hoeft alleen te draaien
+      en hier en daar iets te bevestigen.
+    </td>
+  </tr>
+</table>
+
+<div class="h2"><span class="bar">|</span>&nbsp; Zo pakken we het aan</div>
+<table class="steps">
+  <tr>
+    <td class="num s1">1</td>
+    <td class="st">Pre-productie <span class="done">KLAAR</span></td>
+    <td class="sd">Concept, narratief, storyboard, shotlist en draaivisie. Staat allemaal al, dus we kunnen meteen door.</td>
+  </tr>
+  <tr>
+    <td class="num s2">2</td>
+    <td class="st">Twee draaidagen</td>
+    <td class="sd">Dubai (woning, home office, interview) en Amsterdam (kantoor in vol bedrijf). Richtlijn: eerste helft november.</td>
+  </tr>
+  <tr>
+    <td class="num s3">3</td>
+    <td class="st">Editing</td>
+    <td class="sd">Long-form plus cutdowns, jouw interview als voice-over, kleurgrading en sound. Strak, niet overgeproduceerd.</td>
+  </tr>
+  <tr>
+    <td class="num s4">4</td>
+    <td class="st">Oplevering en plaatsen</td>
+    <td class="sd">Thumbnail, titel en beschrijving erbij. En als je wil neem ik het posten en optimaliseren helemaal uit handen.</td>
+  </tr>
+</table>
+<pdf:nextpage />
+"""
+
+PAGE2 = """
+<table class="kick"><tr><td class="kl">VOORSTEL</td><td class="kr">WAT JE KRIJGT</td></tr></table>
+
+<div class="h1">Alles erop en eraan</div>
+<p class="lead">Geen losse onderdelen waar je zelf nog achteraan moet. <b>Eén pakket, van idee tot online.</b></p>
+
+<table class="deliv">
+  <tr><td class="ck">+</td><td>1x founder-documentaire van 8 tot 14 minuten voor YouTube</td></tr>
+  <tr><td class="ck">+</td><td>4 tot 6x korte verticale cutdowns voor Reels, Shorts en TikTok</td></tr>
+  <tr><td class="ck">+</td><td>Thumbnail, titel en beschrijving, klaar om te plaatsen</td></tr>
+  <tr><td class="ck">+</td><td>Kleurgrading en sound design over het hele geheel</td></tr>
+  <tr><td class="ck">+</td><td>Volledige pre-productie (concept, storyboard, draaivisie, shotlist)</td></tr>
+  <tr><td class="ck">+</td><td>Eén vaste verhaallijn zodat het altijd klopt, ook al is het niet gescript</td></tr>
+  <tr><td class="ck">+</td><td>Optioneel: ik plaats en optimaliseer alles voor je, jij hoeft niks te doen</td></tr>
+</table>
+
+<div class="h2"><span class="bar">|</span>&nbsp; Planning</div>
+<table class="steps">
+  <tr>
+    <td class="num s1">1</td>
+    <td class="st">Nu</td>
+    <td class="sd">Jij zegt ja en geeft feedback op de draaivisie. Wij prikken de twee draaidagen.</td>
+  </tr>
+  <tr>
+    <td class="num s3">2</td>
+    <td class="st">Eerste helft november</td>
+    <td class="sd">We draaien Dubai en Amsterdam. Jij staat voor de camera, ik regel de rest.</td>
+  </tr>
+  <tr>
+    <td class="num s4">3</td>
+    <td class="st">Circa 2 weken later</td>
+    <td class="sd">De documentaire en alle cutdowns zijn klaar om live te gaan, vlak voor Black Friday.</td>
+  </tr>
+</table>
+
+<div class="advice"><b>Waarom nu:</b> we eindigen de video vlak voor Black Friday. De uitkomst (~€2M?) wordt
+dan deel 2. Dat is precies de cliffhanger die mensen laat terugkomen. Maar dan moeten we wel op tijd draaien.</div>
+<pdf:nextpage />
+"""
+
+PAGE3 = """
+<table class="kick"><tr><td class="kl">VOORSTEL</td><td class="kr">DE INVESTERING</td></tr></table>
+
+<div class="h1">Twee manieren om dit te doen</div>
+<p class="lead">Je kan het bij de documentaire houden, of er meteen een motor van maken die elke maand
+blijft draaien. <b>Mijn eerlijke advies staat onderaan.</b></p>
+
+<table class="price">
+  <tr>
+    <td class="pc">
+      <span class="tag2">OPTIE 1</span><br/>
+      <span class="opt">De documentaire</span><br/>
+      <span class="amt">€4.950</span><br/>
+      <span class="per">eenmalig, compleet</span><br/><br/>
+      <span class="desc">De volledige founder-documentaire plus alle cutdowns. Twee draaidagen, editing,
+      kleurgrading, thumbnail en copy. Alles erop en eraan, klaar om live te gaan.</span>
+    </td>
+    <td class="spacer">&nbsp;</td>
+    <td class="pc reco">
+      <span class="tag2">OPTIE 2 / AANRADER</span><br/>
+      <span class="opt">De founder content engine</span><br/>
+      <span class="amt">€2.950</span><br/>
+      <span class="per">per maand, doorlopend</span><br/><br/>
+      <span class="desc">De documentaire in maand 1. Daarna elke maand een nieuwe founder-video plus
+      cutdowns, inclusief plaatsen en optimaliseren. Zo blijft het kanaal groeien zonder dat het jou
+      tijd kost.</span>
+    </td>
+  </tr>
+</table>
+
+<div class="advice"><b>Mijn advies:</b> start met de documentaire als vlaggenschip. Werkt het, en dat
+denk ik echt, dan schakelen we door naar doorlopend. Eén video is een momentje. Een kanaal dat blijft
+draaien is een asset. Maar we hoeven nu niks groots te beslissen, we beginnen gewoon.</div>
+
+<div class="flow">
+<b>Volgende stap:</b> zeg gewoon ja, dan prikken we de draaidagen en gaan we draaien.<br>
+Geen gedoe, geen lange contracten. We activeren, precies zoals je zei.
+</div>
+
+<p class="note">Prijzen zijn exclusief btw en eventuele reiskosten naar Dubai. Geldig tot 30 dagen na dagtekening.</p>
+<p class="foot">VOORSTEL / FLANEUR FOUNDER CONTENT / VOOR REGI</p>
+"""
+
+html = f"<html><head><meta charset='utf-8'><style>{CSS}</style></head><body>{PAGE1}{PAGE2}{PAGE3}</body></html>"
+
+out = "Flaneur-Offerte.pdf"
+with open(out, "wb") as f:
+    pisa.CreatePDF(html, dest=f)
+print(f"PDF geschreven: {out}")
