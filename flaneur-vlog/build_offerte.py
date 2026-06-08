@@ -259,11 +259,13 @@ van zes maanden: zo word ik je vaste contentteam en bouwen we iets dat blijft st
 losse video.</div>
 
 <div class="flow">
-<b>Volgende stap:</b> zeg gewoon ja, dan prikken we de draaidagen en gaan we draaien.<br>
-Geen gedoe. We activeren, precies zoals je zei, en we zijn op tijd voor Black Friday.
+<b>Ik vlieg zelf mee naar Dubai</b> om je verhaal, de shots en het storyboard ter plekke te regisseren,
+terwijl de cameraman zich puur op de beelden focust. Mijn eigen vlucht houd ik daarbij voor eigen
+rekening. Dit is net zo goed mijn project als dat van jou.<br><br>
+<b>Volgende stap:</b> zeg gewoon ja, dan prikken we de draaidagen en gaan we draaien. We zijn op tijd voor Black Friday.
 </div>
 
-<p class="note">Prijzen zijn exclusief btw en reiskosten naar Dubai (vlucht, verblijf en crew). De engine kent een minimale looptijd van zes maanden. Geldig tot 30 dagen na dagtekening.</p>
+<p class="note">Prijzen zijn exclusief btw en reiskosten naar Dubai (verblijf en crew); mijn eigen vlucht is voor mijn rekening. De engine kent een minimale looptijd van zes maanden. Geldig tot 30 dagen na dagtekening.</p>
 <p class="foot">VOORSTEL / FLANEUR FOUNDER CONTENT / VOOR REGI</p>
 """
 
