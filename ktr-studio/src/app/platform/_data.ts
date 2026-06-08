@@ -79,6 +79,7 @@ export interface ContentCard {
   reach?: number;
   leads?: number;
   permalink?: string | null;
+  dateISO?: string | null; // planningsdatum (posting_date of deadline) voor de kalender
 }
 
 export const contentCards: ContentCard[] = [

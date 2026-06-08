@@ -61,7 +61,9 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
       .select(
         "id,name,ig_handle,status,monthly_value,package,videos_per_month,editor_cost,payment_status,created_at,soul_character_id,reference_image_url,brand_prompt"
       ),
-    supabase.from("content").select("id,client_id,title,hook,format,stage,published_at,permalink"),
+    supabase
+      .from("content")
+      .select("id,client_id,title,hook,format,stage,published_at,permalink,posting_date,deadline"),
     supabase
       .from("leads")
       .select("id,client_id,name,source_label,source_content_id,stage,value,setter,created_at,closed_at"),
@@ -137,6 +139,7 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
       reach: metric?.reach ?? undefined,
       leads: leadsPerContent.get(x.id) ?? undefined,
       permalink: x.permalink ?? null,
+      dateISO: x.posting_date ?? x.deadline ?? x.published_at ?? null,
     };
   });
 

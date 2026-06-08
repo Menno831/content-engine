@@ -20,6 +20,7 @@ interface NavItem {
 const agencyNav: NavItem[] = [
   { href: "/platform", label: "Dashboard", icon: icons.dashboard, exact: true },
   { href: "/platform/pipeline", label: "Content pipeline", icon: icons.pipeline },
+  { href: "/platform/calendar", label: "Kalender", icon: icons.calendar },
   { href: "/platform/studio", label: "Studio (AI)", icon: icons.studio },
   { href: "/platform/visuals", label: "AI Visuals", icon: icons.spark },
   { href: "/platform/leads", label: "Leads & Omzet", icon: icons.leads },
@@ -37,6 +38,7 @@ const agencyNav: NavItem[] = [
 const clientNav: NavItem[] = [
   { href: "/platform", label: "Overzicht", icon: icons.dashboard, exact: true },
   { href: "/platform/pipeline", label: "Mijn content", icon: icons.pipeline },
+  { href: "/platform/calendar", label: "Kalender", icon: icons.calendar },
   { href: "/platform/analytics", label: "Prestaties", icon: icons.analytics },
   { href: "/platform/todos", label: "Mijn taken", icon: icons.check },
   { href: "/platform/reports", label: "Rapporten", icon: icons.reports },
