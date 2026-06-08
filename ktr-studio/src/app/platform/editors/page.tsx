@@ -3,6 +3,7 @@ import { getEditors } from "@/lib/editors";
 import { fmtEur, editorPayout, LATE_DEDUCTION } from "../_data";
 import { AddEditorDialog } from "./AddEditorDialog";
 import { NoData } from "../_states";
+import { ExportButton } from "../ExportButton";
 
 export default async function EditorsPage() {
   const editors = await getEditors();
@@ -21,7 +22,26 @@ export default async function EditorsPage() {
         subtitle={`Video's per editor deze maand, met automatische deductie van ${Math.round(
           LATE_DEDUCTION * 100
         )}% per te late aanlevering.`}
-        action={<AddEditorDialog />}
+        action={
+          <div className="flex items-center gap-2">
+            <ExportButton
+              filename="uitbetalingen.csv"
+              rows={editors.map((e) => {
+                const p = editorPayout(e);
+                return {
+                  editor: e.name,
+                  per_video: e.payPerVideo,
+                  videos: e.videosThisMonth,
+                  te_laat: e.lateVideos,
+                  bruto: p.gross,
+                  deductie: p.deduction,
+                  netto: p.net,
+                };
+              })}
+            />
+            <AddEditorDialog />
+          </div>
+        }
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

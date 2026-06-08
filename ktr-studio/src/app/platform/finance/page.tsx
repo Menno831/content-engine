@@ -2,6 +2,7 @@ import { PageHeader, Card, Stat, Avatar, Badge, Eyebrow, icons } from "../_compo
 import { getWorkspaceData } from "@/lib/data";
 import { fmtEur } from "../_data";
 import { PaymentStatusControl } from "./PaymentStatusControl";
+import { ExportButton } from "../ExportButton";
 
 export default async function FinancePage() {
   const { clients, demo } = await getWorkspaceData();
@@ -32,6 +33,19 @@ export default async function FinancePage() {
         eyebrow="Finance"
         title="Winst per klant"
         subtitle="Retainer, editor-kosten en netto marge per klant — plus wat er deze maand bijkwam en wie nog moet betalen."
+        action={
+          <ExportButton
+            filename="finance.csv"
+            rows={billable.map((c) => ({
+              klant: c.name,
+              pakket: c.packageName ?? "",
+              retainer: c.monthlyValue,
+              editor_kosten: c.editorCost,
+              marge: c.monthlyValue - c.editorCost,
+              betaalstatus: c.paymentStatus,
+            }))}
+          />
+        }
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

@@ -3,6 +3,7 @@ import { PageHeader, Card, Stat, Avatar, icons } from "../_components";
 import { getWorkspaceData } from "@/lib/data";
 import { AddLeadDialog } from "./AddLeadDialog";
 import { LeadStageControl } from "./LeadStageControl";
+import { ExportButton } from "../ExportButton";
 
 const stageOrder: LeadStage[] = ["nieuw", "gekwalificeerd", "call_gepland", "closed", "verloren"];
 
@@ -26,7 +27,23 @@ export default async function Leads() {
         eyebrow="Leads & Omzet"
         title="Sales pipeline"
         subtitle="Van eerste contact tot closed deal, gekoppeld aan de content die 'm opleverde — met omzet-attributie."
-        action={<AddLeadDialog clients={clientOptions} content={contentOptions} />}
+        action={
+          <div className="flex items-center gap-2">
+            <ExportButton
+              filename="leads.csv"
+              rows={leads.map((l) => ({
+                naam: l.name,
+                klant: l.client,
+                bron: l.source,
+                fase: l.stage,
+                waarde: l.value,
+                setter: l.setter,
+                datum: l.date,
+              }))}
+            />
+            <AddLeadDialog clients={clientOptions} content={contentOptions} />
+          </div>
+        }
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
