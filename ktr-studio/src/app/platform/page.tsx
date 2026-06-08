@@ -1,10 +1,17 @@
 import Link from "next/link";
-import { stageMeta, fmtEur, fmtNum, type PipelineStage } from "./_data";
+import { stageMeta, fmtEur, fmtNum, type PipelineStage, type ContentCard } from "./_data";
 import { Card, Stat, PageHeader, Avatar, Badge, icons, Eyebrow } from "./_components";
 import { getWorkspaceData } from "@/lib/data";
+import { getSessionContext } from "@/lib/auth";
 
 export default async function Dashboard() {
   const { clients, content: contentCards, leads, revenueByMonth, demo } = await getWorkspaceData();
+  const ctx = await getSessionContext();
+
+  // Klant-login: eigen overzicht i.p.v. agency-cijfers.
+  if (ctx.profile?.role === "client") {
+    return <ClientOverview content={contentCards} clientName={ctx.clientName ?? "je merk"} leadsCount={leads.length} />;
+  }
 
   const activeClients = clients.filter((c) => c.status === "actief").length;
   const totalRevenue = clients.reduce((s, c) => s + c.revenueAttributed, 0);
@@ -190,5 +197,94 @@ function OnboardingStep({
         {cta} {icons.arrowRight}
       </Link>
     </Card>
+  );
+}
+
+function ClientOverview({
+  content,
+  clientName,
+  leadsCount,
+}: {
+  content: ContentCard[];
+  clientName: string;
+  leadsCount: number;
+}) {
+  const posted = content.filter((c) => c.stage === "posted");
+  const inProduction = content.filter((c) => c.stage !== "posted");
+  const waitingApproval = content.filter((c) => c.stage === "client_approval");
+  const totalReach = posted.reduce((s, c) => s + (c.reach ?? c.views ?? 0), 0);
+
+  const stageCounts = (Object.keys(stageMeta) as PipelineStage[]).map((st) => ({
+    st,
+    count: content.filter((c) => c.stage === st).length,
+  }));
+  const totalCards = Math.max(1, content.length);
+
+  return (
+    <>
+      <PageHeader eyebrow="Overzicht" title={`Hoi, ${clientName}`} subtitle="Je content, prestaties en wat er van je nodig is — in één oogopslag." />
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <Stat label="Live geplaatst" value={String(posted.length)} icon={icons.pipeline} />
+        <Stat label="Totaal bereik" value={fmtNum(totalReach)} icon={icons.eye} />
+        <Stat label="In productie" value={String(inProduction.length)} icon={icons.studio} />
+        <Stat label="Leads via content" value={String(leadsCount)} icon={icons.leads} />
+      </div>
+
+      {waitingApproval.length > 0 && (
+        <Card className="p-5 mb-6 flex items-center justify-between gap-4 border-accent/20 bg-accent/[0.04]">
+          <div className="flex items-center gap-3">
+            <span className="grid place-items-center w-10 h-10 rounded-xl bg-accent/15 text-accent">{icons.check}</span>
+            <div>
+              <div className="font-medium text-sm">{waitingApproval.length} stuk(s) content wacht op je goedkeuring</div>
+              <div className="text-[12px] text-muted">Bekijk en keur goed of vraag een revisie.</div>
+            </div>
+          </div>
+          <Link href="/platform/approvals" className="rounded-xl bg-accent hover:bg-accent-hover text-background font-bold text-sm px-4 py-2 transition-colors whitespace-nowrap">Bekijken</Link>
+        </Card>
+      )}
+
+      <div className="grid lg:grid-cols-3 gap-6">
+        <Card className="p-6">
+          <Eyebrow>Pipeline</Eyebrow>
+          <h2 className="font-display font-extrabold text-xl mb-5">Status van je content</h2>
+          <div className="space-y-3.5">
+            {stageCounts.filter((s) => s.count > 0).map(({ st, count }) => (
+              <div key={st}>
+                <div className="flex items-center justify-between text-sm mb-1.5">
+                  <span className="text-foreground/80">{stageMeta[st].label}</span>
+                  <span className="font-mono text-muted">{count}</span>
+                </div>
+                <div className="h-1.5 rounded-full bg-white/[0.05] overflow-hidden">
+                  <div className="h-full rounded-full bg-accent/70" style={{ width: `${(count / totalCards) * 100}%` }} />
+                </div>
+              </div>
+            ))}
+            {content.length === 0 && <p className="text-sm text-muted">Nog geen content.</p>}
+          </div>
+        </Card>
+
+        <Card className="lg:col-span-2 p-6">
+          <h2 className="font-display font-extrabold text-xl mb-5">Recent gepubliceerd</h2>
+          <div className="space-y-2">
+            {posted.slice(0, 6).map((c) => (
+              <div key={c.id} className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-white/[0.02] transition-colors">
+                <span className="grid place-items-center w-9 h-9 rounded-lg bg-white/[0.04] text-accent">{icons.pipeline}</span>
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-medium truncate">{c.title}</div>
+                  <div className="text-[12px] text-muted">{fmtNum(c.views ?? 0)} views · {c.leads ?? 0} leads</div>
+                </div>
+                {c.permalink && (
+                  <a href={c.permalink} target="_blank" rel="noopener noreferrer" className="text-[12px] text-accent hover:text-accent-hover whitespace-nowrap">
+                    Bekijk ↗
+                  </a>
+                )}
+              </div>
+            ))}
+            {posted.length === 0 && <p className="text-sm text-muted">Nog niks live. Je eerste content is in productie.</p>}
+          </div>
+        </Card>
+      </div>
+    </>
   );
 }
