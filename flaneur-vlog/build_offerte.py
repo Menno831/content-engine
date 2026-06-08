@@ -102,10 +102,10 @@ neerzetten, zonder dat het jou tijd of headspace kost.</b> Jij staat voor de cam
       een trailer voor je eigen kanaal. Eén keer draaien, maanden aan content.
     </td>
     <td>
-      <div class="cn">KANT EN KLAAR</div>
-      <div class="ch">Jij hoeft niks uit te zoeken</div>
-      De hele voorbereiding staat al: concept, storyboard, draaivisie, shotlist. Jij hoeft alleen te draaien
-      en hier en daar iets te bevestigen.
+      <div class="cn">STRATEGIE</div>
+      <div class="ch">Gebouwd om bekeken te worden</div>
+      Geen video die 200 views haalt. We doen vooraf research naar wat founder-content echt laat
+      presteren, en A/B-testen elke titel en thumbnail tot het werkt.
     </td>
   </tr>
 </table>
@@ -130,7 +130,7 @@ neerzetten, zonder dat het jou tijd of headspace kost.</b> Jij staat voor de cam
   <tr>
     <td class="num s4">4</td>
     <td class="st">Oplevering en plaatsen</td>
-    <td class="sd">Thumbnail, titel en beschrijving erbij. En als je wil neem ik het posten en optimaliseren helemaal uit handen.</td>
+    <td class="sd">Thumbnail, titel en beschrijving, A/B getest tot het presteert. En als je wil neem ik posten en optimaliseren helemaal uit handen.</td>
   </tr>
 </table>
 <pdf:nextpage />
@@ -144,9 +144,9 @@ PAGE2 = """
 
 <table class="deliv">
   <tr><td class="ck">+</td><td>1x founder-documentaire van 8 tot 14 minuten voor YouTube</td></tr>
-  <tr><td class="ck">+</td><td>Tot 30x korte verticale cutdowns voor je clip-accounts (Reels, Shorts, TikTok)</td></tr>
-  <tr><td class="ck">+</td><td>1x trailer voor je eigen YouTube en Instagram, om de documentaire te pushen</td></tr>
-  <tr><td class="ck">+</td><td>Thumbnail, titel en beschrijving, klaar om te plaatsen</td></tr>
+  <tr><td class="ck">+</td><td>Tot 30x verticale cutdowns voor je clip-accounts, plus 1 trailer voor je eigen kanaal</td></tr>
+  <tr><td class="ck">+</td><td>Strategie en research vooraf: we zoeken uit welke founder-content echt bekeken wordt</td></tr>
+  <tr><td class="ck">+</td><td>Thumbnail, titel en beschrijving, A/B getest tot het presteert</td></tr>
   <tr><td class="ck">+</td><td>Kleurgrading en sound design over het hele geheel</td></tr>
   <tr><td class="ck">+</td><td>Volledige pre-productie (concept, storyboard, draaivisie, shotlist)</td></tr>
   <tr><td class="ck">+</td><td>Eén vaste verhaallijn zodat het altijd klopt, ook al is het niet gescript</td></tr>
@@ -243,24 +243,27 @@ blijft draaien. <b>Mijn eerlijke advies staat onderaan.</b></p>
       <span class="tag2">OPTIE 2 / AANRADER</span><br/>
       <span class="opt">De founder content engine</span><br/>
       <span class="amt">€3.000</span><br/>
-      <span class="per">per maand, doorlopend</span><br/><br/>
-      <span class="desc">De documentaire in maand 1. Daarna elke maand een nieuwe founder-video plus
-      cutdowns, inclusief plaatsen en optimaliseren. We draaien in batches, dus één draaidag levert
-      meerdere maanden content en het kost jou bijna geen tijd. Eén draaidag per maand inbegrepen.</span>
+      <span class="per">per maand, minimaal 6 maanden</span><br/><br/>
+      <span class="desc">In maand 1 zit de volledige documentaire (los €5.000). Daarna elke maand een
+      nieuwe founder-video plus cutdowns, strategie, plaatsen en optimaliseren. We worden je vaste
+      contentteam: alles behalve voor de camera staan nemen we uit handen. In batches gedraaid, dus
+      weinig tijd voor jou. Eén draaidag per maand inbegrepen.</span>
     </td>
   </tr>
 </table>
 
-<div class="advice"><b>Mijn advies:</b> start met de documentaire als vlaggenschip. Werkt het, en dat
-denk ik echt, dan schakelen we door naar doorlopend. Eén video is een momentje. Een kanaal dat blijft
-draaien is een asset. Maar we hoeven nu niks groots te beslissen, we beginnen gewoon.</div>
+<div class="advice"><b>Mijn advies:</b> wil je het klein houden, dan doen we de losse documentaire,
+geen verplichting. Maar de engine is waar het echt gebeurt. Van nu tot Black Friday zijn het zes
+maanden, precies de aanloop waarin een founder-kanaal momentum opbouwt. Daarom een minimale looptijd
+van zes maanden: zo word ik je vaste contentteam en bouwen we iets dat blijft staan, in plaats van één
+losse video.</div>
 
 <div class="flow">
 <b>Volgende stap:</b> zeg gewoon ja, dan prikken we de draaidagen en gaan we draaien.<br>
-Geen gedoe, geen lange contracten. We activeren, precies zoals je zei.
+Geen gedoe. We activeren, precies zoals je zei, en we zijn op tijd voor Black Friday.
 </div>
 
-<p class="note">Prijzen zijn exclusief btw en eventuele reiskosten naar Dubai. Geldig tot 30 dagen na dagtekening.</p>
+<p class="note">Prijzen zijn exclusief btw en reiskosten naar Dubai. De engine kent een minimale looptijd van zes maanden. Geldig tot 30 dagen na dagtekening.</p>
 <p class="foot">VOORSTEL / FLANEUR FOUNDER CONTENT / VOOR REGI</p>
 """
 
