@@ -14,6 +14,7 @@ DOCS = [
     ("05-beslissingen.md", "Beslissingen & interview-vragen"),
     ("06-publicatie.md", "Publicatieplan"),
     ("07-illustratie-prompts.md", "Storyboard-illustratie prompts"),
+    ("08-strategie.md", "Content- & distributiestrategie"),
 ]
 
 # Emoji die DejaVu niet kent -> vervang door tekst-equivalent
@@ -125,7 +126,7 @@ cover = """
   <div class="cover-rule"></div>
   <div class="cover-meta">Voor: Regi (Flaneur)</div>
   <div class="cover-meta">Opgesteld door KTR Studio</div>
-  <div class="cover-meta">Versie: opzet &middot; juni 2026</div>
+  <div class="cover-meta">Versie: definitief &middot; juni 2026</div>
 </div>
 <pdf:nextpage />
 """
