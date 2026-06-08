@@ -11,12 +11,6 @@ const catColor: Record<string, string> = {
   Social: "#60A5FA",
 };
 
-const SAMPLE_OUTPUT = `1. "Iedereen post elke dag — en niemand groeit. Dit is waarom."
-2. "Ik analyseerde 1.000 virale reels. 3 dingen kwamen elke keer terug."
-3. "Je hook is niet het probleem. Je eerste frame wel."
-4. "Stop met 'waarde geven'. Doe dit in plaats daarvan."
-5. "De eerste 3 seconden bepalen 90% van je bereik — zo win je ze."`;
-
 export function PromptsLab({ templates }: { templates: PromptTemplate[] }) {
   const [active, setActive] = useState<PromptTemplate | null>(null);
   const [input, setInput] = useState("");
@@ -39,14 +33,23 @@ export function PromptsLab({ templates }: { templates: PromptTemplate[] }) {
     setOutput(null);
   }
 
-  function run() {
+  async function run() {
+    if (!active) return;
     setLoading(true);
     setOutput(null);
-    // Mock: in productie -> Claude API met het prompt-template + input + knowledge base.
-    setTimeout(() => {
-      setOutput(SAMPLE_OUTPUT);
+    try {
+      const res = await fetch("/api/ai/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ template: active.prompt, input }),
+      });
+      const data = await res.json();
+      setOutput(data.ok ? data.text : data.error ?? "Er ging iets mis.");
+    } catch {
+      setOutput("Er ging iets mis bij het genereren.");
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   }
 
   return (
