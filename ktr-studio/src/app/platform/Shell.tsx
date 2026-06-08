@@ -8,6 +8,7 @@ import { DemoBanner } from "./_states";
 import { DEMO_MODE } from "@/lib/config";
 import { signOut } from "../login/actions";
 import { NotificationsBell } from "./NotificationsBell";
+import { CommandPalette } from "./CommandPalette";
 import type { Notification } from "./_data";
 
 interface NavItem {
@@ -174,11 +175,7 @@ export function Shell({
             <span className="font-display font-extrabold">{brandName}</span>
           </div>
 
-          <div className="hidden md:flex items-center gap-2.5 flex-1 max-w-md rounded-xl border border-white/[0.07] bg-white/[0.02] px-3.5 py-2 text-muted">
-            <span className="opacity-60">{icons.search}</span>
-            <span className="text-sm">{isClient ? "Zoek in je content…" : "Zoek klanten, content, leads…"}</span>
-            <span className="ml-auto font-mono text-[10px] border border-white/10 rounded px-1.5 py-0.5">⌘K</span>
-          </div>
+          <CommandPalette items={nav} placeholder={isClient ? "Zoek in je content…" : "Spring naar… (⌘K)"} />
 
           <div className="flex items-center gap-2 ml-auto">
             <NotificationsBell notifications={notifications} />
