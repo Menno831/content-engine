@@ -34,6 +34,12 @@ export interface Client {
   soulCharacter: string | null; // character-id/naam bij Higgsfield
   referenceImage: string | null; // url referentiefoto (bv. thumbnail)
   brandPrompt: string | null; // vaste stijl/branding-instructies
+  // Brand-context (onboarding) — optioneel
+  brandIdentity?: string | null;
+  brandStory?: string | null;
+  brandStrategy?: string | null;
+  brandVoice?: string | null;
+  notes?: string | null;
 }
 
 export const clients: Client[] = [

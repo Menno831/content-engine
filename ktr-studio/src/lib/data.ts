@@ -187,4 +187,55 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
 
   return { demo: false, clients, content, leads, revenueByMonth, topContent };
 }
+
+// Eén klant met volledige brand-context (voor de detailpagina).
+export async function getClient(id: string): Promise<Client | null> {
+  if (DEMO_MODE || !isSupabaseConfigured) {
+    const c = demoClients.find((x) => x.id === id);
+    if (!c) return null;
+    return {
+      ...c,
+      brandIdentity: `Persoonlijk merk van ${c.name}: een founder die transparant bouwt en deelt.`,
+      brandStory: `${c.name} groeide van onbekend naar relevante autoriteit door consistent eerlijke, waardevolle content te delen — zonder fluff.`,
+      brandStrategy: `Top-of-funnel: brede, herkenbare hooks. Mid-funnel: bewijs en klant-cases. Bottom-funnel: directe CTA richting ${c.handle}.`,
+      brandVoice: "Direct, energiek, founder-naar-founder. Korte zinnen, geen jargon, geen clichés. Spreekt de kijker aan alsof het een goede vriend is.",
+      notes: "Voorbeeld-context (demo).",
+    };
+  }
+
+  const supabase = await createClient();
+  if (!supabase) return null;
+  const { data: c } = await supabase
+    .from("clients")
+    .select(
+      "id,name,ig_handle,status,monthly_value,package,videos_per_month,editor_cost,payment_status,soul_character_id,reference_image_url,brand_prompt,brand_identity,brand_story,brand_strategy,brand_voice,notes"
+    )
+    .eq("id", id)
+    .single();
+  if (!c) return null;
+
+  return {
+    id: c.id,
+    name: c.name,
+    handle: c.ig_handle ?? "",
+    status: (c.status ?? "onboarding") as Client["status"],
+    initials: initials(c.name),
+    monthlyValue: Number(c.monthly_value ?? 0),
+    revenueAttributed: 0,
+    postsLive: 0,
+    leadsThisMonth: 0,
+    packageName: c.package ?? null,
+    videosPerMonth: Number(c.videos_per_month ?? 0),
+    editorCost: Number(c.editor_cost ?? 0),
+    paymentStatus: (c.payment_status ?? "open") as Client["paymentStatus"],
+    soulCharacter: c.soul_character_id ?? null,
+    referenceImage: c.reference_image_url ?? null,
+    brandPrompt: c.brand_prompt ?? null,
+    brandIdentity: c.brand_identity ?? null,
+    brandStory: c.brand_story ?? null,
+    brandStrategy: c.brand_strategy ?? null,
+    brandVoice: c.brand_voice ?? null,
+    notes: c.notes ?? null,
+  };
+}
 /* eslint-enable @typescript-eslint/no-explicit-any */

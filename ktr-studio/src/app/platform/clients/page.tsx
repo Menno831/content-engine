@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { fmtEur, fmtNum, type ClientStatus } from "../_data";
 import { PageHeader, Card, Avatar, Badge, Eyebrow, icons } from "../_components";
 import { getWorkspaceData } from "@/lib/data";
@@ -66,13 +67,13 @@ export default async function Clients() {
         {clients.map((c) => (
           <Card key={c.id} hover className="p-5">
             <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
+              <Link href={`/platform/clients/${c.id}`} className="flex items-center gap-3 group">
                 <Avatar initials={c.initials} size={44} />
                 <div>
-                  <div className="font-medium">{c.name}</div>
+                  <div className="font-medium group-hover:text-accent transition-colors">{c.name}</div>
                   <div className="text-[12px] text-muted">{c.handle}</div>
                 </div>
-              </div>
+              </Link>
               <Badge color={statusColor[c.status]}>
                 <span className="w-1.5 h-1.5 rounded-full" style={{ background: statusColor[c.status] }} />
                 {c.status}

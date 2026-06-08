@@ -50,6 +50,12 @@ create table if not exists clients (
   soul_character_id   text,
   reference_image_url text,
   brand_prompt        text,
+  -- Brand-context (onboarding)
+  brand_identity   text,
+  brand_story      text,
+  brand_strategy   text,
+  brand_voice      text,
+  notes            text,
   created_at       timestamptz not null default now()
 );
 
@@ -218,6 +224,8 @@ create policy "team insert clients" on clients
   for insert with check (agency_id = current_agency_id() and current_client_id() is null);
 create policy "team update clients" on clients
   for update using (agency_id = current_agency_id() and current_client_id() is null);
+create policy "team delete clients" on clients
+  for delete using (agency_id = current_agency_id() and current_client_id() is null);
 
 create policy "team insert content" on content
   for insert with check (

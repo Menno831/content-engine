@@ -2,6 +2,7 @@
 
 import { randomBytes } from "crypto";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { createClient as supabaseServer } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionContext } from "@/lib/auth";
@@ -144,4 +145,49 @@ export async function syncClientAction(clientId: string): Promise<SyncResult> {
   revalidatePath("/platform/clients");
   revalidatePath("/platform");
   return result;
+}
+
+// Brand-context (identity, story, strategy, voice, notities) opslaan.
+export async function saveBrandDocsAction(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { error: "Supabase niet geconfigureerd." };
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "auth vereist" };
+
+  const clientId = String(formData.get("client_id") ?? "");
+  if (!clientId) return { error: "Onbekende klant." };
+
+  const { error } = await supabase
+    .from("clients")
+    .update({
+      brand_identity: String(formData.get("brand_identity") ?? "").trim() || null,
+      brand_story: String(formData.get("brand_story") ?? "").trim() || null,
+      brand_strategy: String(formData.get("brand_strategy") ?? "").trim() || null,
+      brand_voice: String(formData.get("brand_voice") ?? "").trim() || null,
+      notes: String(formData.get("notes") ?? "").trim() || null,
+    })
+    .eq("id", clientId);
+  if (error) return { error: error.message };
+
+  revalidatePath(`/platform/clients/${clientId}`);
+  return { ok: "Brand-context opgeslagen." };
+}
+
+// Klant verwijderen (alleen owner/team; content/leads/etc. cascaden mee).
+export async function deleteClientAction(clientId: string): Promise<ActionResult> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { error: "Supabase niet geconfigureerd." };
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "auth vereist" };
+
+  const { error } = await supabase.from("clients").delete().eq("id", clientId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/platform/clients");
+  revalidatePath("/platform");
+  redirect("/platform/clients");
 }
