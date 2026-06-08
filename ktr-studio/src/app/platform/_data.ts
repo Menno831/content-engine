@@ -254,6 +254,27 @@ export const prospects: Prospect[] = [
   { id: "pr5", name: "TechFlow B.V.", instagram: "@techflow", youtube: "@techflow", weakness: "Founder niet zichtbaar", stage: "geen_reactie", potentialValue: 4000, note: "2x gevolgd, geen reactie" },
 ];
 
+// ── Prompts-bibliotheek (herbruikbare AI-prompts) ──────────────────
+export interface PromptTemplate {
+  id: string;
+  category: "Strategie" | "Content" | "Ideatie" | "Social";
+  name: string;
+  description: string;
+  prompt: string; // het template dat (straks) naar Claude gaat
+}
+
+export const promptTemplates: PromptTemplate[] = [
+  { id: "pt1", category: "Strategie", name: "Personal Brand-strategie", description: "Positionering, tone-of-voice, content-pijlers en een monetisatie-roadmap voor een founder.", prompt: "Maak een personal brand-strategie voor {{onderwerp}}: positionering, doelgroep, 3 content-pijlers, tone-of-voice en een 90-dagen roadmap." },
+  { id: "pt2", category: "Content", name: "Content Atomizer", description: "Zet één kernstuk om in een week aan platform-native content.", prompt: "Neem dit kernstuk: {{onderwerp}}. Maak hieruit 7 platform-native posts (Reel, carrousel, story, tweet) voor één week, elk met hook + opzet." },
+  { id: "pt3", category: "Content", name: "Reel-script", description: "Volledig reel-script: hook → verhaal → bewijs → CTA.", prompt: "Schrijf een 40-seconden reel-script over {{onderwerp}} met een scroll-stoppende hook, verhaal, bewijs en een duidelijke CTA." },
+  { id: "pt4", category: "Ideatie", name: "Hook-generator", description: "10 scroll-stoppende hooks in verschillende invalshoeken.", prompt: "Genereer 10 scroll-stoppende hooks over {{onderwerp}}, gemixt in contrarian, authority, storytelling en curiosity-angles." },
+  { id: "pt5", category: "Content", name: "Script Emulator", description: "Reverse-engineer de structuur van een sterke video en schrijf jouw script erin.", prompt: "Analyseer de structuur van deze video: {{onderwerp}}. Beschrijf de beat-voor-beat opbouw en schrijf vervolgens mijn eigen script in exact diezelfde structuur." },
+  { id: "pt6", category: "Social", name: "Titel-generator", description: "30 klikwaardige titels uit één idee of referentie.", prompt: "Genereer 30 klikwaardige titels/onderschriften over {{onderwerp}}, gerangschikt op verwachte CTR." },
+  { id: "pt7", category: "Social", name: "Thread-schrijver", description: "Virale 10–12 posts thread, in jouw stem.", prompt: "Schrijf een virale thread van 10-12 posts over {{onderwerp}}, met een sterke openingspost en een afsluitende CTA." },
+  { id: "pt8", category: "Content", name: "Carrousel-bouwer", description: "Carrousel van 6–8 slides met kop + kernzin per slide.", prompt: "Maak een carrousel van 6-8 slides over {{onderwerp}}: per slide een korte kop + één kernzin, plus een CTA-slide." },
+  { id: "pt9", category: "Content", name: "Nieuwsbrief-schrijver", description: "Van kop naar volledige nieuwsbrief via een vaste structuur.", prompt: "Schrijf een nieuwsbrief over {{onderwerp}}: pakkende kop, intro-hook, 3 kernpunten met voorbeelden en een CTA." },
+];
+
 export const fmtEur = (n: number) =>
   "€" + n.toLocaleString("nl-NL", { maximumFractionDigits: 0 });
 
