@@ -224,6 +224,36 @@ export function editorPayout(e: Editor) {
   return { gross, deduction, net: gross - deduction };
 }
 
+// ── Outreach-pijplijn (nieuwe klanten werven) ──────────────────────
+export type ProspectStage = "te_contacteren" | "dm_verstuurd" | "in_gesprek" | "audit_verstuurd" | "geen_reactie";
+
+export const prospectStageMeta: Record<ProspectStage, { label: string; color: string }> = {
+  te_contacteren: { label: "Te contacteren", color: "#60A5FA" },
+  dm_verstuurd: { label: "DM verstuurd", color: "#A78BFA" },
+  in_gesprek: { label: "In gesprek", color: "#FBBF24" },
+  audit_verstuurd: { label: "Audit verstuurd", color: "#34D399" },
+  geen_reactie: { label: "Geen reactie", color: "#6B7280" },
+};
+
+export interface Prospect {
+  id: string;
+  name: string;
+  instagram: string | null;
+  youtube: string | null;
+  weakness: string | null;
+  stage: ProspectStage;
+  potentialValue: number;
+  note: string | null;
+}
+
+export const prospects: Prospect[] = [
+  { id: "pr1", name: "FitMet Mark", instagram: "@fitmetmark", youtube: null, weakness: "Geen hooks, lage retentie", stage: "te_contacteren", potentialValue: 2500, note: "120k volgers, post inconsistent" },
+  { id: "pr2", name: "Sanne Coacht", instagram: "@sannecoacht", youtube: "@sannecoacht", weakness: "Geen CTA, geen funnel", stage: "dm_verstuurd", potentialValue: 1800, note: null },
+  { id: "pr3", name: "Bouwgroep Jansen", instagram: "@bouwjansen", youtube: null, weakness: "Amateuristische edits", stage: "in_gesprek", potentialValue: 3200, note: "Call gepland do" },
+  { id: "pr4", name: "Lisa Skincare", instagram: "@lisa.skin", youtube: null, weakness: "Geen personal brand", stage: "audit_verstuurd", potentialValue: 2200, note: "Audit zeer positief ontvangen" },
+  { id: "pr5", name: "TechFlow B.V.", instagram: "@techflow", youtube: "@techflow", weakness: "Founder niet zichtbaar", stage: "geen_reactie", potentialValue: 4000, note: "2x gevolgd, geen reactie" },
+];
+
 export const fmtEur = (n: number) =>
   "€" + n.toLocaleString("nl-NL", { maximumFractionDigits: 0 });
 

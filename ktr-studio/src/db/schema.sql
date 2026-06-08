@@ -310,6 +310,28 @@ create policy "team update editors" on editors
 -- Editor-login koppelen aan een editor-record (forward reference -> ALTER).
 alter table profiles add column if not exists editor_id uuid references editors (id) on delete set null;
 
+-- ── Outreach-pijplijn (nieuwe klanten werven) ───────────────────
+create table if not exists prospects (
+  id              uuid primary key default gen_random_uuid(),
+  agency_id       uuid not null references agencies (id) on delete cascade,
+  name            text not null,
+  instagram       text,
+  youtube         text,
+  weakness        text,
+  stage           text not null default 'te_contacteren',
+  potential_value numeric default 0,
+  note            text,
+  created_at      timestamptz not null default now()
+);
+create index if not exists idx_prospects_agency on prospects (agency_id, stage);
+alter table prospects enable row level security;
+create policy "read prospects" on prospects
+  for select using (agency_id = current_agency_id() and current_client_id() is null);
+create policy "team insert prospects" on prospects
+  for insert with check (agency_id = current_agency_id() and current_client_id() is null);
+create policy "team update prospects" on prospects
+  for update using (agency_id = current_agency_id() and current_client_id() is null);
+
 -- ── AI Visuals (Higgsfield Soul) generatie-historie ─────────────
 create table if not exists generations (
   id          uuid primary key default gen_random_uuid(),

@@ -1,0 +1,81 @@
+import { PageHeader, Card, Stat, Avatar, icons } from "../_components";
+import { getProspects } from "@/lib/prospects";
+import { DEMO_MODE, isSupabaseConfigured } from "@/lib/config";
+import { prospectStageMeta, fmtEur, type ProspectStage } from "../_data";
+import { AddProspectDialog } from "./AddProspectDialog";
+import { ProspectStageControl } from "./ProspectStageControl";
+
+const stageOrder: ProspectStage[] = ["te_contacteren", "dm_verstuurd", "in_gesprek", "audit_verstuurd", "geen_reactie"];
+
+export default async function OutreachPage() {
+  const prospects = await getProspects();
+  const demo = DEMO_MODE || !isSupabaseConfigured;
+
+  const pipelineValue = prospects
+    .filter((p) => p.stage !== "geen_reactie")
+    .reduce((s, p) => s + p.potentialValue, 0);
+  const inGesprek = prospects.filter((p) => p.stage === "in_gesprek").length;
+  const auditSent = prospects.filter((p) => p.stage === "audit_verstuurd").length;
+
+  return (
+    <>
+      <PageHeader
+        eyebrow="Outreach"
+        title="Nieuwe klanten werven"
+        subtitle="Je acquisitie-pijplijn: van prospect tot audit. Houd bij wie je benadert, wie reageert en wat het oplevert."
+        action={<AddProspectDialog />}
+      />
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <Stat label="Prospects" value={String(prospects.length)} icon={icons.leads} />
+        <Stat label="Potentiële waarde" value={fmtEur(pipelineValue)} icon={icons.money} />
+        <Stat label="In gesprek" value={String(inGesprek)} icon={icons.send} />
+        <Stat label="Audit verstuurd" value={String(auditSent)} icon={icons.check} />
+      </div>
+
+      <div className="flex gap-4 overflow-x-auto pb-4 -mx-1 px-1">
+        {stageOrder.map((stage) => {
+          const items = prospects.filter((p) => p.stage === stage);
+          const meta = prospectStageMeta[stage];
+          const value = items.reduce((s, p) => s + p.potentialValue, 0);
+          return (
+            <div key={stage} className="w-[290px] shrink-0">
+              <div className="flex items-center justify-between mb-3 px-1">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full" style={{ background: meta.color }} />
+                  <span className="font-display font-bold text-sm">{meta.label}</span>
+                  <span className="font-mono text-[11px] text-muted">{items.length}</span>
+                </div>
+                <span className="font-mono text-[11px] text-muted">{fmtEur(value)}</span>
+              </div>
+
+              <div className="space-y-3 min-h-[100px] rounded-2xl bg-white/[0.015] border border-white/[0.04] p-2.5">
+                {items.map((p) => (
+                  <Card key={p.id} hover className="p-4">
+                    <div className="flex items-center gap-2.5 mb-3">
+                      <Avatar initials={p.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()} size={32} />
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-medium truncate">{p.name}</div>
+                        <div className="text-[11px] text-muted truncate">{p.instagram ?? p.youtube ?? "—"}</div>
+                      </div>
+                      <span className="font-mono text-[12px] text-emerald-400">{fmtEur(p.potentialValue)}</span>
+                    </div>
+                    {p.weakness && (
+                      <div className="rounded-lg bg-white/[0.03] border border-white/[0.05] px-2.5 py-2 mb-2">
+                        <div className="text-[10px] font-mono uppercase tracking-wider text-muted mb-0.5">Zwakte</div>
+                        <div className="text-[12px] text-foreground/80">{p.weakness}</div>
+                      </div>
+                    )}
+                    {p.note && <div className="text-[11px] text-muted">{p.note}</div>}
+                    {!demo && <ProspectStageControl prospectId={p.id} stage={p.stage} />}
+                  </Card>
+                ))}
+                {items.length === 0 && <div className="text-center text-[12px] text-muted py-6">Leeg</div>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
+}
