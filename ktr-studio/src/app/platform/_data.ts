@@ -275,6 +275,44 @@ export const promptTemplates: PromptTemplate[] = [
   { id: "pt9", category: "Content", name: "Nieuwsbrief-schrijver", description: "Van kop naar volledige nieuwsbrief via een vaste structuur.", prompt: "Schrijf een nieuwsbrief over {{onderwerp}}: pakkende kop, intro-hook, 3 kernpunten met voorbeelden en een CTA." },
 ];
 
+// ── Eden: Capture-boards (second brain) ────────────────────────────
+export interface Capture {
+  id: string;
+  board: string;
+  kind: "link" | "note" | "idea" | "swipe";
+  title: string;
+  url: string | null;
+  body: string | null;
+  source: string | null;
+}
+
+export const captures: Capture[] = [
+  { id: "cap1", board: "Swipe file", kind: "swipe", title: "Reel: 'Niemand zegt je dit over hooks'", url: "https://instagram.com/reel/demo", body: null, source: "@viralcreator" },
+  { id: "cap2", board: "Swipe file", kind: "swipe", title: "Carrousel: 7 fouten van beginnende founders", url: "https://instagram.com/p/demo", body: null, source: "@buildinpublic" },
+  { id: "cap3", board: "Ideeën", kind: "idea", title: "Serie: 'Ik bouw een agency in 30 dagen'", url: null, body: "Wekelijkse behind-the-scenes, transparant over omzet.", source: null },
+  { id: "cap4", board: "Ideeën", kind: "note", title: "Hook-formule: pijn → twist → bewijs", url: null, body: "Werkt vooral voor talking-heads onder 30s.", source: null },
+  { id: "cap5", board: "Inspiratie", kind: "link", title: "Artikel: retentie-curves uitgelegd", url: "https://example.com/retention", body: null, source: null },
+];
+
+// ── Eden: Discover (swipe-file van best presterende content) ───────
+export interface DiscoverItem {
+  id: string;
+  title: string;
+  creator: string;
+  category: "Productiviteit" | "Zelfontwikkeling" | "Business" | "Health" | "Content";
+  views: number;
+  format: "Reel" | "Short" | "Carrousel";
+}
+
+export const discoverItems: DiscoverItem[] = [
+  { id: "d1", title: "Zo plan ik 30 dagen content in 1 uur", creator: "@sannecoacht", category: "Productiviteit", views: 1240000, format: "Reel" },
+  { id: "d2", title: "De 3 hooks die mij €40k opleverden", creator: "@daankoster", category: "Business", views: 842000, format: "Reel" },
+  { id: "d3", title: "Stop met dagelijks posten — doe dit", creator: "@viralcreator", category: "Content", views: 2100000, format: "Short" },
+  { id: "d4", title: "Mijn ochtendroutine als founder", creator: "@buildinpublic", category: "Zelfontwikkeling", views: 510000, format: "Reel" },
+  { id: "d5", title: "7 tools die mijn workflow verdubbelden", creator: "@toolstack", category: "Productiviteit", views: 680000, format: "Carrousel" },
+  { id: "d6", title: "Waarom niemand je content ziet", creator: "@growthlars", category: "Content", views: 1500000, format: "Reel" },
+];
+
 export const fmtEur = (n: number) =>
   "€" + n.toLocaleString("nl-NL", { maximumFractionDigits: 0 });
 

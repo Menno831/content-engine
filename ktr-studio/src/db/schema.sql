@@ -333,6 +333,29 @@ create policy "team insert prospects" on prospects
 create policy "team update prospects" on prospects
   for update using (agency_id = current_agency_id() and current_client_id() is null);
 
+-- ── Eden: Capture-boards + Discover-swipefile ───────────────────
+create table if not exists captures (
+  id          uuid primary key default gen_random_uuid(),
+  agency_id   uuid not null references agencies (id) on delete cascade,
+  board       text not null default 'Swipe file',
+  kind        text not null default 'link',
+  title       text not null,
+  url         text,
+  body        text,
+  source      text,
+  created_at  timestamptz not null default now()
+);
+create index if not exists idx_captures_agency on captures (agency_id, board, created_at desc);
+alter table captures enable row level security;
+create policy "read captures" on captures
+  for select using (agency_id = current_agency_id() and current_client_id() is null);
+create policy "team insert captures" on captures
+  for insert with check (agency_id = current_agency_id() and current_client_id() is null);
+create policy "team update captures" on captures
+  for update using (agency_id = current_agency_id() and current_client_id() is null);
+create policy "team delete captures" on captures
+  for delete using (agency_id = current_agency_id() and current_client_id() is null);
+
 -- ── AI Visuals (Higgsfield Soul) generatie-historie ─────────────
 create table if not exists generations (
   id          uuid primary key default gen_random_uuid(),

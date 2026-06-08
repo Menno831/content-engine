@@ -26,6 +26,8 @@ const agencyNav: NavItem[] = [
   { href: "/platform/prompts", label: "Prompts", icon: icons.spark },
   { href: "/platform/visuals", label: "AI Visuals", icon: icons.spark },
   { href: "/platform/brand-studio", label: "Brand Studio", icon: icons.thumb },
+  { href: "/platform/boards", label: "Boards", icon: icons.dashboard },
+  { href: "/platform/discover", label: "Discover", icon: icons.analytics },
   { href: "/platform/leads", label: "Leads & Omzet", icon: icons.leads },
   { href: "/platform/outreach", label: "Outreach", icon: icons.rocket },
   { href: "/platform/analytics", label: "Analytics", icon: icons.analytics },
