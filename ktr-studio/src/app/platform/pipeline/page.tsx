@@ -1,6 +1,9 @@
 import { stageMeta, fmtNum, type PipelineStage } from "../_data";
 import { PageHeader, Card, Badge, icons } from "../_components";
 import { getWorkspaceData } from "@/lib/data";
+import { getEditors } from "@/lib/editors";
+import { AddContentDialog } from "./AddContentDialog";
+import { ContentStageControl } from "./ContentStageControl";
 
 const stageOrder: PipelineStage[] = [
   "ideation",
@@ -21,18 +24,18 @@ const formatColor: Record<string, string> = {
 };
 
 export default async function Pipeline() {
-  const { content: contentCards } = await getWorkspaceData();
+  const { content: contentCards, clients, demo } = await getWorkspaceData();
+  const editors = await getEditors();
+  const clientOptions = clients.map((c) => ({ id: c.id, label: c.name }));
+  const editorOptions = editors.map((e) => ({ id: e.id, label: e.name }));
+
   return (
     <>
       <PageHeader
         eyebrow="Content pipeline"
         title="Productieboard"
-        subtitle="Van idee tot live — alle content over je klanten in één board. Vervangt je losse Monday/Trello."
-        action={
-          <button className="flex items-center gap-2 rounded-xl bg-accent hover:bg-accent-hover text-background font-bold text-sm px-4 py-2.5 transition-colors">
-            {icons.plus} Kaart toevoegen
-          </button>
-        }
+        subtitle="Van idee tot live — alle content over je klanten in één board. Vervangt je losse Monday."
+        action={<AddContentDialog clients={clientOptions} editors={editorOptions} />}
       />
 
       <div className="flex gap-4 overflow-x-auto pb-4 -mx-1 px-1">
@@ -100,6 +103,7 @@ export default async function Pipeline() {
                         </span>
                       )}
                     </div>
+                    {!demo && <ContentStageControl contentId={card.id} stage={card.stage} />}
                   </Card>
                 ))}
 
