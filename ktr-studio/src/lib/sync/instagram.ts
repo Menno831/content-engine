@@ -80,7 +80,7 @@ export async function syncClientInstagram(clientId: string): Promise<SyncResult>
           title: m.caption.slice(0, 80) || "(zonder bijschrift)",
           hook: m.caption.slice(0, 140),
           format: m.type,
-          stage: "live",
+          stage: "posted",
           source,
           external_id: m.externalId,
           permalink: m.permalink,

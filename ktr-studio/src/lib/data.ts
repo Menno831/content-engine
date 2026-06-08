@@ -95,7 +95,7 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
       revenueAttributed: cLeads
         .filter((l) => l.stage === "closed" && inThisMonth(l.closed_at))
         .reduce((s, l) => s + Number(l.value ?? 0), 0),
-      postsLive: contentRows.filter((x) => x.client_id === c.id && x.stage === "live").length,
+      postsLive: contentRows.filter((x) => x.client_id === c.id && x.stage === "posted").length,
       leadsThisMonth: cLeads.filter((l) => inThisMonth(l.created_at)).length,
     };
   });

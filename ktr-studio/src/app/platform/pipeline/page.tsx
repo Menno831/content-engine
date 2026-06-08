@@ -2,7 +2,16 @@ import { stageMeta, fmtNum, type PipelineStage } from "../_data";
 import { PageHeader, Card, Badge, icons } from "../_components";
 import { getWorkspaceData } from "@/lib/data";
 
-const stageOrder: PipelineStage[] = ["idee", "script", "review", "goedgekeurd", "live"];
+const stageOrder: PipelineStage[] = [
+  "ideation",
+  "ready_for_editing",
+  "quality_control",
+  "revisions_needed",
+  "revisions_completed",
+  "client_approval",
+  "ready_for_posting",
+  "posted",
+];
 
 const formatColor: Record<string, string> = {
   Reel: "#F97316",
@@ -56,7 +65,7 @@ export default async function Pipeline() {
                     </p>
                     <div className="flex items-center justify-between pt-3 border-t border-white/[0.05]">
                       <span className="text-[11px] text-muted truncate max-w-[120px]">{card.client}</span>
-                      {card.stage === "live" ? (
+                      {card.stage === "posted" ? (
                         <div className="flex items-center gap-2.5 text-[11px]">
                           <span className="flex items-center gap-1 text-muted">
                             <span className="w-3.5 h-3.5">{icons.eye}</span>

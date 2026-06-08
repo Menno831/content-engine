@@ -66,7 +66,10 @@ create table if not exists integrations (
 );
 
 -- ── Content ──────────────────────────────────────────────────────
-create type content_stage  as enum ('idee', 'script', 'review', 'goedgekeurd', 'live');
+-- Pipeline-fases zijn app-gestuurd (vrij tekstveld) zodat we ze kunnen
+-- aanpassen zonder DB-migratie. Huidige set (Monday-workflow):
+--   ideation, ready_for_editing, quality_control, revisions_needed,
+--   revisions_completed, client_approval, ready_for_posting, posted
 create type content_format as enum ('Reel', 'Carrousel', 'Story', 'Short');
 
 create table if not exists content (
@@ -76,7 +79,7 @@ create table if not exists content (
   hook         text,
   script       text,
   format       content_format not null default 'Reel',
-  stage        content_stage  not null default 'idee',
+  stage        text           not null default 'ideation',
   -- Koppeling naar de echte post zodra live
   source       integration_provider,
   external_id  text,            -- post-/video-id bij het platform

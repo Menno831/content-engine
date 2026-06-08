@@ -33,14 +33,25 @@ export const clients: Client[] = [
 ];
 
 // ── Content pipeline (kanban) ──────────────────────────────────────
-export type PipelineStage = "idee" | "script" | "review" | "goedgekeurd" | "live";
+export type PipelineStage =
+  | "ideation"
+  | "ready_for_editing"
+  | "quality_control"
+  | "revisions_needed"
+  | "revisions_completed"
+  | "client_approval"
+  | "ready_for_posting"
+  | "posted";
 
 export const stageMeta: Record<PipelineStage, { label: string; hint: string }> = {
-  idee: { label: "Ideeën", hint: "Hooks & concepten" },
-  script: { label: "Script", hint: "In productie" },
-  review: { label: "Review", hint: "Wacht op klant" },
-  goedgekeurd: { label: "Goedgekeurd", hint: "Klaar om te plannen" },
-  live: { label: "Live", hint: "Gepubliceerd" },
+  ideation: { label: "Ideation", hint: "Hooks & concepten" },
+  ready_for_editing: { label: "Ready for Editing", hint: "Klaar voor montage" },
+  quality_control: { label: "Quality Control", hint: "Interne check" },
+  revisions_needed: { label: "Revisions Needed", hint: "Aanpassen" },
+  revisions_completed: { label: "Revisions Completed", hint: "Aangepast" },
+  client_approval: { label: "Client Approval", hint: "Wacht op klant" },
+  ready_for_posting: { label: "Ready for Posting", hint: "Klaar om te plannen" },
+  posted: { label: "Posted", hint: "Gepubliceerd" },
 };
 
 export interface ContentCard {
@@ -57,14 +68,16 @@ export interface ContentCard {
 }
 
 export const contentCards: ContentCard[] = [
-  { id: "p1", title: "Waarom niemand je content ziet", client: "Lars Vermeer", stage: "idee", format: "Reel", hook: "3 redenen waarom je reels floppen (en niemand zegt het je)", assignee: "AI", due: "5 jun" },
-  { id: "p2", title: "Mijn grootste fout als founder", client: "Daan Koster", stage: "idee", format: "Reel", hook: "Ik verloor €40k door deze ene aanname", assignee: "Menno", due: "6 jun" },
-  { id: "p3", title: "Het 5-min content systeem", client: "Sophie de Wit", stage: "script", format: "Carrousel", hook: "Zo maak ik 30 posts in 1 uur", assignee: "Eva", due: "4 jun" },
-  { id: "p4", title: "Cold DM teardown", client: "Lars Vermeer", stage: "script", format: "Reel", hook: "Deze DM leverde een klant van €12k op", assignee: "AI", due: "7 jun" },
-  { id: "p5", title: "Klant-resultaat reveal", client: "Daan Koster", stage: "review", format: "Reel", hook: "0 → 300 leden in 90 dagen, hier is hoe", assignee: "Eva", due: "3 jun" },
-  { id: "p6", title: "Founder ochtendroutine", client: "Sophie de Wit", stage: "goedgekeurd", format: "Short", hook: "De routine die mijn omzet verdubbelde", assignee: "Menno", due: "2 jun" },
-  { id: "p7", title: "Hoe ik 1 klant closede via Reels", client: "Daan Koster", stage: "live", format: "Reel", hook: "1 reel = 1 klant van €3.200", assignee: "Eva", due: "28 mei", views: 84200, leads: 22 },
-  { id: "p8", title: "3 hooks die altijd werken", client: "Lars Vermeer", stage: "live", format: "Carrousel", hook: "Steel deze 3 hooks", assignee: "AI", due: "26 mei", views: 51800, leads: 14 },
+  { id: "p1", title: "Waarom niemand je content ziet", client: "Lars Vermeer", stage: "ideation", format: "Reel", hook: "3 redenen waarom je reels floppen (en niemand zegt het je)", assignee: "AI", due: "5 jun" },
+  { id: "p2", title: "Mijn grootste fout als founder", client: "Daan Koster", stage: "ideation", format: "Reel", hook: "Ik verloor €40k door deze ene aanname", assignee: "Menno", due: "6 jun" },
+  { id: "p3", title: "Het 5-min content systeem", client: "Sophie de Wit", stage: "ready_for_editing", format: "Carrousel", hook: "Zo maak ik 30 posts in 1 uur", assignee: "Eva", due: "4 jun" },
+  { id: "p4", title: "Cold DM teardown", client: "Lars Vermeer", stage: "quality_control", format: "Reel", hook: "Deze DM leverde een klant van €12k op", assignee: "AI", due: "7 jun" },
+  { id: "p9", title: "De 'stop met X' hook", client: "Daan Koster", stage: "revisions_needed", format: "Reel", hook: "Stop met dagelijks posten — doe dit", assignee: "Eva", due: "5 jun" },
+  { id: "p10", title: "3 tools die ik dagelijks gebruik", client: "Sophie de Wit", stage: "revisions_completed", format: "Carrousel", hook: "Mijn complete content-stack", assignee: "Eva", due: "4 jun" },
+  { id: "p5", title: "Klant-resultaat reveal", client: "Daan Koster", stage: "client_approval", format: "Reel", hook: "0 → 300 leden in 90 dagen, hier is hoe", assignee: "Eva", due: "3 jun" },
+  { id: "p6", title: "Founder ochtendroutine", client: "Sophie de Wit", stage: "ready_for_posting", format: "Short", hook: "De routine die mijn omzet verdubbelde", assignee: "Menno", due: "2 jun" },
+  { id: "p7", title: "Hoe ik 1 klant closede via Reels", client: "Daan Koster", stage: "posted", format: "Reel", hook: "1 reel = 1 klant van €3.200", assignee: "Eva", due: "28 mei", views: 84200, leads: 22 },
+  { id: "p8", title: "3 hooks die altijd werken", client: "Lars Vermeer", stage: "posted", format: "Carrousel", hook: "Steel deze 3 hooks", assignee: "AI", due: "26 mei", views: 51800, leads: 14 },
 ];
 
 // ── Leads / sales pipeline (ManyChat → call → close) ───────────────
