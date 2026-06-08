@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 export interface SessionContext {
   user: { id: string; email?: string } | null;
   profile: { role: string; full_name: string | null; client_id: string | null } | null;
-  agency: { id: string; name: string; brand_name: string | null; accent: string | null } | null;
+  agency: { id: string; name: string; brand_name: string | null; accent: string | null; monthly_target: number | null } | null;
   clientName: string | null; // gevuld als de gebruiker een client-login is
 }
 
@@ -23,7 +23,7 @@ export async function getSessionContext(): Promise<SessionContext> {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role, full_name, client_id, agencies(id, name, brand_name, accent)")
+    .select("role, full_name, client_id, agencies(id, name, brand_name, accent, monthly_target)")
     .eq("user_id", user.id)
     .single();
 

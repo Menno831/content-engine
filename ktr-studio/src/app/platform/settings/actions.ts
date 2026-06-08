@@ -24,9 +24,11 @@ export async function updateAgencyAction(_prev: SettingsResult, formData: FormDa
   if (!brandName) return { error: "Merknaam is verplicht." };
   if (!/^#[0-9a-fA-F]{6}$/.test(accent)) return { error: "Accentkleur moet een hexcode zijn (bijv. #F97316)." };
 
+  const monthlyTarget = Number(formData.get("monthly_target") ?? 0) || 0;
+
   const { error } = await supabase
     .from("agencies")
-    .update({ brand_name: brandName, accent })
+    .update({ brand_name: brandName, accent, monthly_target: monthlyTarget })
     .eq("id", agency.id);
   if (error) return { error: error.message };
 

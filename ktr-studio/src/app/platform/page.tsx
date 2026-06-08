@@ -48,6 +48,10 @@ export default async function Dashboard() {
     );
   }
 
+  const monthlyTarget = demo ? 20000 : Number(ctx.agency?.monthly_target ?? 0);
+  const monthClosed = revenueByMonth[revenueByMonth.length - 1]?.v ?? 0;
+  const targetPct = monthlyTarget > 0 ? Math.min(100, Math.round((monthClosed / monthlyTarget) * 100)) : 0;
+
   return (
     <>
       <PageHeader
@@ -63,6 +67,24 @@ export default async function Dashboard() {
         <Stat label="Leads deze maand" value={String(totalLeads)} delta={demo ? "+22% vs. vorige maand" : undefined} icon={icons.leads} />
         <Stat label="Closed via content" value={fmtEur(closedValue)} delta={`${closed.length} deals`} icon={icons.check} />
       </div>
+
+      {monthlyTarget > 0 && (
+        <Card className="p-6 mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2.5">
+              <span className="grid place-items-center w-9 h-9 rounded-xl bg-accent/15 text-accent">{icons.target}</span>
+              <div>
+                <div className="font-display font-bold">Maanddoel</div>
+                <div className="text-[12px] text-muted">{fmtEur(monthClosed)} van {fmtEur(monthlyTarget)}</div>
+              </div>
+            </div>
+            <span className="font-display font-extrabold text-2xl">{targetPct}%</span>
+          </div>
+          <div className="h-2.5 rounded-full bg-white/[0.05] overflow-hidden">
+            <div className="h-full rounded-full bg-gradient-to-r from-accent/70 to-accent transition-all" style={{ width: `${targetPct}%` }} />
+          </div>
+        </Card>
+      )}
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Omzetgrafiek */}

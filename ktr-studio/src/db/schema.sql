@@ -13,6 +13,7 @@ create table if not exists agencies (
   -- White-label
   brand_name  text,
   accent      text default '#F97316',
+  monthly_target numeric default 0,  -- maand-omzetdoel
   created_at  timestamptz not null default now()
 );
 

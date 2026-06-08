@@ -7,7 +7,7 @@ import { Card, icons } from "../_components";
 const initial: SettingsResult = {};
 const PRESETS = ["#F97316", "#6366F1", "#10B981", "#EC4899", "#F43F5E", "#0EA5E9", "#EAB308"];
 
-export function SettingsForm({ brandName, accent }: { brandName: string; accent: string }) {
+export function SettingsForm({ brandName, accent, monthlyTarget }: { brandName: string; accent: string; monthlyTarget: number }) {
   const [name, setName] = useState(brandName);
   const [color, setColor] = useState(accent);
   const [state, action, pending] = useActionState(updateAgencyAction, initial);
@@ -53,6 +53,17 @@ export function SettingsForm({ brandName, accent }: { brandName: string; accent:
               className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-3.5 py-2.5 text-sm font-mono outline-none focus:border-accent/40"
             />
           </div>
+
+          <label className="block">
+            <span className="block text-[12px] font-mono uppercase tracking-wider text-muted mb-1.5">Maand-omzetdoel (€)</span>
+            <input
+              name="monthly_target"
+              type="number"
+              defaultValue={monthlyTarget || ""}
+              placeholder="20000"
+              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-3.5 py-2.5 text-sm outline-none focus:border-accent/40"
+            />
+          </label>
 
           {state.error && <p className="text-[13px] text-red-400">{state.error}</p>}
           {state.ok && <p className="text-[13px] text-emerald-400">{state.ok} — ververs om de kleur overal te zien.</p>}
