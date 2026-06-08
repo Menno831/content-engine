@@ -1,123 +1,132 @@
-# 02 — Storyboard (shot-by-shot)
+# 02: Storyboard (shot-by-shot)
 
-> Volledig storyboard, vastgelegd. Eerdere open punten zijn als regie-beslissing ingevuld (zie [`05-beslissingen.md`](./05-beslissingen.md)). Markering ✳️ = aanname die de crew op de set mag bijstellen zonder dat het verhaal omvalt. Dit is de **structuur**, niet het script: Regi praat vrij (zijn stem komt uit het interview-blok op Dag 1), deze indeling waarborgt dat het verhaal klopt.
+> Regi, dit is de **structuur** van de film, niet het script. Jij praat vrij (je stem komt uit het interviewblok op Dag 1), deze indeling zorgt alleen dat het verhaal altijd klopt. De video wordt Engels, dus de gesproken regels hieronder staan tussen aanhalingstekens in het Engels: dat is wat er daadwerkelijk in beeld terugkomt.
 
-**Geschatte totale duur:** ~10–12 min
-**Structuur:** Cold open → Beweging 1 (Dubai) → Beweging 2 (Amsterdam) → Beweging 3 (Rollout/climax) → Outro/cliffhanger
+**Geschatte totale duur:** ~10 tot 12 min
+**Structuur (5 beats):** Cold open → Beweging 1 (Dubai) → Beweging 2 (Amsterdam) → Beweging 3 (rollout/climax) → Outro/cliffhanger
 
-Legenda: **VO** = voice-over · **OTF** = on-the-fly / on-camera tegen lens · **B-roll** = beeld zonder directe spraak
+Legenda: **VO** = voice-over · **OTF** = on-camera tegen de lens · **B-roll** = beeld zonder directe spraak
 
 ---
 
-## COLD OPEN — De inzet (0:00–0:30)
+## Waarom deze opbouw werkt
+
+Even kort waaróm we het zo bouwen, zodat je ziet dat elke beat een functie heeft:
+
+1. **Cold open (de inzet).** De eerste 30 seconden bepalen of mensen blijven kijken. Daarom openen we niet met een begroeting maar met de spanning: het bedrag, de deadline, de afstand. Dit is precies wat de best presterende founder-vlogs (Heaton, Nijhof) doen.
+2. **Beweging 1 → 2 → 3 (contrast).** Rust en controle in Dubai, dan de energie van het team in Amsterdam, dan de spanning van de rollout. Dat ritme van laag → hoog → spanning houdt de kijker vast; een vlakke video verliest mensen.
+3. **De persoonlijke inzet (waarom het ertoe doet).** Mensen kijken niet voor een bedrijf, ze kijken voor jou. Daarom hangt elk hoofdstuk aan jouw perspectief en niet aan Flaneur-promo.
+4. **De cliffhanger (de reden om terug te komen).** We eindigen vóór de uitkomst. Dat maakt deel 2 onvermijdelijk en levert abonnees op, en het is meteen de natuurlijke aanleiding om door te gaan.
+
+---
+
+## COLD OPEN: de inzet (0:00 tot 0:30)
 
 Doel: in 30 seconden vastpinnen waaróm je moet blijven kijken. We openen op de spanning, niet op de begroeting.
 
 | # | Beeld | Audio / tekst | Notities |
 |---|---|---|---|
-| 0.1 | Snelle montage: Dubai skyline ochtend → handen op laptop → Amsterdam kantoor vol mensen → "2.000.000" cijfer in beeld | VO Regi (uit interview): *"Over een paar weken doen we de grootste dag in de geschiedenis van Flaneur. Ik zit hier in Dubai. Mijn team van 30 man zit daar."* | Strakke cuts op de beat. Cijfer €2M kort, niet opschepperig — als inzet. ✳️ bedrag alleen subtiel in beeld |
-| 0.2 | Regi kijkt uit raam Dubai-woning, rug naar camera | VO: *"Dit is hoe we het voorbereiden."* | Beat. Dan → titel/intro |
-| 0.3 | Titelkaart / kanaalnaam (kort) | Muziek swell | Houd het kort, geen lange intro-leader |
+| 0.1 | Snelle montage: Dubai skyline ochtend → handen op laptop → Amsterdam kantoor vol mensen → "2.000.000" in beeld | VO (uit interview): *"In a few weeks we're doing the biggest day in Flaneur's history. I'm sitting here in Dubai. My team of 30 is over there."* | Strakke cuts op de beat. Het bedrag kort, niet opschepperig, puur als inzet |
+| 0.2 | Jij kijkt uit het raam van de Dubai-woning, rug naar camera | VO: *"This is how we prepare for it."* | Beat, dan → titel/intro |
+| 0.3 | Titelkaart / kanaalnaam (kort) | Muziek swell | Hou het kort, geen lange intro-leader |
 
 ---
 
-## BEWEGING 1 — DUBAI: de nieuwe basis (0:30–4:00)
+## BEWEGING 1: Dubai, de nieuwe basis (0:30 tot 4:00)
 
-Doel: setting + persoonlijk verhaal. Rust, controle, ambitie. Hier leren we Regi kennen.
+Doel: setting + persoonlijk verhaal. Rust, controle, ambitie. Hier leren mensen jou kennen.
 
-### Scène 1.1 — Aankomst / de woning (0:30–1:30)
+### Scène 1.1: aankomst / de woning (0:30 tot 1:30)
 
 | # | Beeld | Audio / tekst | Notities |
 |---|---|---|---|
-| 1.1a | Establishing: gevel/uitzicht van de woning, ochtendlicht | VO: intro — wie hij is, dat hij net terug is verhuisd naar Dubai (feitelijk brengen, reden niet forceren) | Drone of breed statief-shot. Dit is de "wow" — woning op beeld. |
-| 1.1b | Regi loopt door de woning, gimbal volgt | OTF/VO: *"Ik ben net terug. Even rondleiding."* | Authentiek, niet gestaged. Laat ruimte ademen. |
+| 1.1a | Establishing: gevel/uitzicht van de woning, ochtendlicht | VO: intro, wie je bent, dat je net terug bent verhuisd naar Dubai (feitelijk, reden niet forceren) | Drone of breed statief-shot. Dit is de "wow": de woning op beeld |
+| 1.1b | Jij loopt door de woning, gimbal volgt | OTF/VO: *"I just got back. Let me show you around."* | Authentiek, niet gestaged. Laat ruimte ademen |
 | 1.1c | Detailshots: koffie, ochtendroutine, uitzicht | VO doorlopend | B-roll voor onder de VO |
 
-### Scène 1.2 — De home office (1:30–3:00)
+### Scène 1.2: de home office (1:30 tot 3:00)
 
 | # | Beeld | Audio / tekst | Notities |
 |---|---|---|---|
-| 1.2a | Regi zet zich aan bureau, opent laptop | OTF: *"Dit is waar alles gebeurt."* | Het commandocentrum. |
-| 1.2b | Over-the-shoulder: dashboards, planning, Black Friday-voorbereiding op scherm | VO: legt uit wat er moet gebeuren richting BF | ✳️ concurrentiegevoelige cijfers/scherm blurren in de edit |
-| 1.2c | Regi belt/videocallt met Amsterdam-team | OTF kort fragment van het gesprek | Brug naar Beweging 2 — "ik check in bij het team" |
+| 1.2a | Jij zet je aan het bureau, opent laptop | OTF: *"This is where it all happens."* | Het commandocentrum |
+| 1.2b | Over-the-shoulder: dashboards, planning, Black Friday-voorbereiding op scherm | VO: legt uit wat er moet gebeuren richting BF | Concurrentiegevoelige cijfers/scherm blurren in de edit |
+| 1.2c | Jij belt/videocallt met het Amsterdam-team | OTF kort fragment van het gesprek | Brug naar Beweging 2: "ik check in bij het team" |
 
-### Scène 1.3 — De founder reflecteert (3:00–4:00)
+### Scène 1.3: de founder reflecteert (3:00 tot 4:00)
 
 | # | Beeld | Audio / tekst | Notities |
 |---|---|---|---|
-| 1.3a | Regi aan bureau / op bank, rustig praten tegen lens | OTF (anker-moment): *de inzet, de druk, waarom dit jaar anders is* (uit interview-blok Dag 1) | Belangrijkste persoonlijke moment van beweging 1. Eerlijk, geen verkooppraat. |
-| 1.3b | Stilte-beeld: uitzicht, hij denkt na | Muziek | Adempauze vóór het tempo omhoog gaat |
+| 1.3a | Jij aan bureau / op de bank, rustig praten tegen de lens | OTF (anker-moment): de inzet, de druk, waarom dit jaar anders is (uit interviewblok) | Belangrijkste persoonlijke moment van beweging 1. Eerlijk, geen verkooppraat |
+| 1.3b | Stilte-beeld: uitzicht, je denkt na | Muziek | Adempauze vóór het tempo omhoog gaat |
 
 ---
 
-## BEWEGING 2 — AMSTERDAM: de machine draait (4:00–7:30)
+## BEWEGING 2: Amsterdam, de machine draait (4:00 tot 7:30)
 
 Doel: contrast. Van stilte naar energie. Het team dat het waarmaakt.
 
-### Scène 2.1 — Knip naar Amsterdam (4:00–4:30)
+### Scène 2.1: knip naar Amsterdam (4:00 tot 4:30)
 
 | # | Beeld | Audio / tekst | Notities |
 |---|---|---|---|
-| 2.1a | Harde cut naar Amsterdam: kantoorgevel (+ aankomst-shot Regi áls hij fysiek meereist ✳️) | VO: *"Dus ik ga naar Amsterdam. Kijken hoe het er écht aan toe gaat."* (of, als hij in Dubai blijft: *"Mijn team in Amsterdam draait op volle toeren."*) | Markeer de geografische sprong duidelijk (locatie-tekst in beeld kan) |
-| 2.1b | Establishing kantoor, drukte zichtbaar door ramen | Muziek tempo omhoog | |
+| 2.1a | Harde cut naar Amsterdam: kantoorgevel (+ aankomst-shot áls je fysiek meereist) | VO: *"So I'm going to Amsterdam. To see how it really goes."* (of, als je in Dubai blijft: *"My team in Amsterdam is running at full speed."*) | Markeer de geografische sprong duidelijk (locatie-tekst in beeld kan) |
+| 2.1b | Establishing kantoor, drukte zichtbaar door de ramen | Muziek tempo omhoog | |
 
-### Scène 2.2 — Het kantoor in vol bedrijf (4:30–6:00)
-
-| # | Beeld | Audio / tekst | Notities |
-|---|---|---|---|
-| 2.2a | Regi loopt binnen, wordt begroet, gimbal volgt POV | OTF: *"30 man hier, allemaal bezig met Black Friday."* | De founder die terugkomt. Energie. |
-| 2.2b | B-roll: teams aan het werk, schermen, post-its, overleg | VO: legt de rollout uit — bijna een maand, interactieve website (teasen, mechanisme niet weggeven) | Dit is waar de "interactieve rollout" wordt uitgelegd |
-| 2.2c | Korte interactie met 1–2 teamleden (geen interview, gewoon echt moment) | OTF natuurlijk gesprek | Houd het kort, het blijft Regi's vlog |
-
-### Scène 2.3 — De rollout uitgelegd (6:00–7:30)
+### Scène 2.2: het kantoor in vol bedrijf (4:30 tot 6:00)
 
 | # | Beeld | Audio / tekst | Notities |
 |---|---|---|---|
-| 2.3a | Regi bij een scherm/whiteboard legt de Black Friday-rollout uit | OTF (anker-moment): *"Dit jaar doen we het anders. De website gaat bijna een maand lang interactief open — het publiek bepaalt mee."* | Kernuitleg van het concept. Maak het concreet maar bewaar de verrassing voor de kijker. |
-| 2.3b | B-roll: schermen/proces rond de rollout (geen volledige onthulling) | VO doorlopend | Teasen, niet tonen — mechanisme bewaren voor het publiek |
+| 2.2a | Jij loopt binnen, wordt begroet, gimbal volgt POV | OTF: *"30 people here, all working on Black Friday."* | De founder die terugkomt. Energie |
+| 2.2b | B-roll: teams aan het werk, schermen, post-its, overleg | VO: legt de rollout uit, bijna een maand, interactieve website (teasen, mechanisme niet weggeven) | Hier wordt de "interactieve rollout" uitgelegd |
+| 2.2c | Korte interactie met 1 of 2 teamleden (geen interview, gewoon echt moment) | OTF natuurlijk gesprek | Hou het kort, het blijft jouw vlog |
 
-### Scène 2.4 — Fulfillment center (STANDAARD GESCHRAPT — alleen als Regi erbij is)
-
-> Beslissing: standaard **niet** in de vlog. Regi is hier normaal niet → wordt "te Flaneur" i.p.v. founder (zijn eigen punt). **Alleen draaien als Regi op een draaidag fysiek meegaat;** dan via zijn eigen verhaal over de schaal/druk.
+### Scène 2.3: de rollout uitgelegd (6:00 tot 7:30)
 
 | # | Beeld | Audio / tekst | Notities |
 |---|---|---|---|
-| 2.4a | Regi bezoekt het fulfillment center | OTF: *"Hier gaan straks tienduizenden orders doorheen. Dit is het deel dat niemand ziet."* | Maakt het founder i.p.v. merk: het gaat om de schaal/druk die Regi voelt, niet om Flaneur-promo |
+| 2.3a | Jij bij een scherm/whiteboard legt de Black Friday-rollout uit | OTF (anker-moment): *"This year we're doing it differently. The site opens up interactively for almost a month, the audience decides with us."* | Kernuitleg van het concept. Maak het concreet maar bewaar de verrassing voor de kijker |
+| 2.3b | B-roll: schermen/proces rond de rollout (geen volledige onthulling) | VO doorlopend | Teasen, niet tonen, mechanisme bewaren voor het publiek |
+
+### Scène 2.4: fulfillment center (standaard geschrapt, alleen als je erbij bent)
+
+> Standaard **niet** in de vlog. Je bent hier normaal niet, dus het wordt snel "te Flaneur" in plaats van founder (jouw eigen punt). **Alleen draaien als je op een draaidag fysiek meegaat;** dan via je eigen verhaal over de schaal en de druk.
+
+| # | Beeld | Audio / tekst | Notities |
+|---|---|---|---|
+| 2.4a | Jij bezoekt het fulfillment center | OTF: *"This is where tens of thousands of orders are about to go through. This is the part nobody sees."* | Maakt het founder in plaats van merk: het gaat om de schaal en de druk die jij voelt |
 
 ---
 
-## BEWEGING 3 — DE GOK / CLIMAX (7:30–9:30)
+## BEWEGING 3: de gok / climax (7:30 tot 9:30)
 
 Doel: de inzet maximaal voelbaar maken. Vooruitblik naar het moment zelf.
 
 | # | Beeld | Audio / tekst | Notities |
 |---|---|---|---|
-| 3.1 | Terug bij Regi (Dubai of hotel), avond/laat licht | OTF: *"Alles staat klaar. Nu is het wachten."* | Toon-omslag: van actie naar spanning |
-| 3.2 | Montage: countdown, laatste checks, team-energie, Regi's gezicht | VO: de stakes — wat als het lukt, wat als niet (uit interview-blok) | Bouw spanning met muziek + cuts |
-| 3.3 | De drempel vlak vóór de rollout — Regi klaar om live te gaan | OTF/stil moment | **Vastgelegd: eindigen vóór de uitkomst** = sterkste cliffhanger (uitkomst = vlog #02) |
+| 3.1 | Terug bij jou (Dubai of hotel), avond/laat licht | OTF: *"Everything's ready. Now we wait."* | Toon-omslag: van actie naar spanning |
+| 3.2 | Montage: countdown, laatste checks, team-energie, jouw gezicht | VO: de stakes, wat als het lukt, wat als niet (uit interviewblok) | Bouw spanning met muziek + cuts |
+| 3.3 | De drempel vlak vóór de rollout, jij klaar om live te gaan | OTF/stil moment | Eindigen vóór de uitkomst is de sterkste cliffhanger (uitkomst = vlog #02) |
 
 ---
 
-## OUTRO — De cliffhanger (9:30–10:30)
+## OUTRO: de cliffhanger (9:30 tot 10:30)
 
 | # | Beeld | Audio / tekst | Notities |
 |---|---|---|---|
-| 4.1 | Regi recht in de lens, rustig | OTF: *"Of dit de grootste maand van Flaneur wordt, weten we over een paar weken. Dat laat ik jullie zien."* | Directe belofte = reden om te abonneren |
-| 4.2 | Laatste beeld: uitzicht / leeg bureau / skyline | VO afsluiter + zachte CTA *"Abonneer om deel 2 te zien."* | Geen harde sell. Founder-toon. |
+| 4.1 | Jij recht in de lens, rustig | OTF: *"Whether this becomes Flaneur's biggest month ever, we'll know in a few weeks. And I'll show you."* | Directe belofte is de reden om te abonneren |
+| 4.2 | Laatste beeld: uitzicht / leeg bureau / skyline | VO afsluiter + zachte CTA: *"Subscribe to see part 2."* | Geen harde sell. Founder-toon |
 | 4.3 | End card | Muziek uit | Abonneer + volgende video teaser |
 
 ---
 
-## Vastgelegde keuzes (samengevat)
+## De vastgelegde keuzes (samengevat)
 
-Alle eerder open punten zijn beslist — volledige onderbouwing in [`05-beslissingen.md`](./05-beslissingen.md).
+1. **€2M:** verbaal als inzet, alleen subtiel in beeld.
+2. **Dubai:** feitelijk brengen ("net terug verhuisd"), reden niet forceren; persoonlijke laag op het werk en de afstand.
+3. **Amsterdam:** plan werkt beide kanten op: B-roll + jouw VO, on-site áls je meereist.
+4. **Rollout:** teasen, niet onthullen.
+5. **Fulfillment:** standaard geschrapt, alleen als je erbij bent.
+6. **Einde:** cliffhanger vóór Black Friday, uitkomst = vlog #02.
+7. **Specials:** niets vast ingepland, opportunistisch meepakken.
 
-1. **€2M** — verbaal als inzet, alleen subtiel in beeld.
-2. **Dubai** — feitelijk brengen ("net terug verhuisd"), reden niet forceren; persoonlijke laag op het werk + de afstand.
-3. **Amsterdam** — plan werkt beide kanten op: B-roll + Regi's VO; on-site áls hij meereist.
-4. **Rollout** — teasen, niet onthullen.
-5. **Fulfillment** — standaard geschrapt; alleen als Regi erbij is.
-6. **Einde** — cliffhanger vóór Black Friday; uitkomst = vlog #02.
-7. **Specials** — niets vast ingepland; opportunistisch meepakken.
-
-> **De stem van Regi** komt niet uit een voice note maar uit een **interview-blok op Dag 1** (10–15 min). Vragen staan in [`05-beslissingen.md`](./05-beslissingen.md). Daaruit knipt de editor alle VO.
+> **Jouw stem** komt uit het **interviewblok op Dag 1** (10 tot 15 min). De vragen staan in [`05-interview.md`](./05-interview.md). Daaruit knipt de editor alle voice-over.

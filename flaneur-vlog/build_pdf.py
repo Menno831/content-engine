@@ -11,7 +11,7 @@ DOCS = [
     ("02-storyboard.md", "Storyboard (shot-by-shot)"),
     ("03-shotlist.md", "Shotlist per locatie"),
     ("04-draaischema.md", "Draaischema, logistiek & gear"),
-    ("05-beslissingen.md", "Beslissingen & interview-vragen"),
+    ("05-interview.md", "Het interview (vooraf klaar)"),
     ("06-publicatie.md", "Publicatieplan"),
     ("07-illustratie-prompts.md", "Storyboard-illustratie prompts"),
     ("08-strategie.md", "Content- & distributiestrategie"),
@@ -43,11 +43,11 @@ CSS = """
 @page { size: A4; margin: 2.2cm 1.8cm 2cm 1.8cm;
         @frame footer { -pdf-frame-content: footerContent;
                         bottom: 1cm; height: 1cm; left: 1.8cm; right: 1.8cm; } }
-body { font-family: "DejaVu", sans-serif; font-size: 9.5pt; color: #1a1a1a; line-height: 1.5; }
+body { font-family: "DejaVu", sans-serif; font-size: 9.5pt; color: #1f1f1f; line-height: 1.55; }
 h1 { font-size: 19pt; color: #0a0a0a; border-bottom: 2.5pt solid #F97316;
-     padding-bottom: 5pt; margin-top: 8pt; }
-h2 { font-size: 13.5pt; color: #0a0a0a; margin-top: 16pt;
-     border-left: 4pt solid #F97316; padding-left: 7pt; }
+     padding-bottom: 5pt; margin-top: 8pt; margin-bottom: 10pt; }
+h2 { font-size: 13.5pt; color: #0a0a0a; margin-top: 20pt; margin-bottom: 6pt;
+     border-left: 4pt solid #F97316; padding-left: 9pt; }
 h3 { font-size: 11pt; color: #C2410C; margin-top: 12pt; }
 h4 { font-size: 9.8pt; color: #1a1a1a; margin-top: 9pt; }
 p { margin: 4pt 0; }
@@ -56,9 +56,9 @@ strong { color: #0a0a0a; }
 ul, ol { margin: 4pt 0 4pt 6pt; }
 li { margin: 2pt 0; }
 table { width: 100%; margin: 7pt 0; border: 0.5pt solid #d8d8d8; }
-th { background-color: #F97316; color: #ffffff; font-size: 8pt;
-     padding: 3pt; text-align: left; }
-td { font-size: 8pt; padding: 3pt; border-bottom: 0.5pt solid #e6e6e6;
+th { background-color: #F97316; color: #ffffff; font-size: 7.5pt;
+     padding: 4pt 5pt; text-align: left; letter-spacing: 0.5pt; text-transform: uppercase; }
+td { font-size: 8pt; padding: 4pt 5pt; border-bottom: 0.5pt solid #e6e6e6;
      vertical-align: top; }
 tr:nth-child(even) td { background-color: #fafafa; }
 code { font-family: "DejaVuMono", monospace; font-size: 8pt;
@@ -120,40 +120,39 @@ FONTS = """
 
 cover = """
 <div class="cover">
-  <div class="cover-tag">FOUNDER VLOG &mdash; PRODUCTIEPAKKET</div>
+  <div class="cover-tag">FOUNDER VLOG &middot; PRODUCTIEPAKKET</div>
   <div class="cover-title">Flaneur</div>
   <div class="cover-sub">Vlog #01 &middot; Dubai &rarr; Black Friday</div>
   <div class="cover-rule"></div>
   <div class="cover-meta">Voor: Regi (Flaneur)</div>
-  <div class="cover-meta">Opgesteld door KTR Studio</div>
   <div class="cover-meta">Versie: definitief &middot; juni 2026</div>
 </div>
 <pdf:nextpage />
 """
 
 regi_brief = """
-<div class="regi-tag">VOOR REGI &mdash; IN 2 MINUTEN</div>
+<div class="regi-tag">VOOR REGI &middot; IN 2 MINUTEN</div>
 <div class="regi-h1">Jouw eerste vlog, in het kort</div>
 <p class="regi-lead">Een POV founder-vlog die je verhuizing naar Dubai en de aanloop naar de grootste
-Black Friday van Flaneur (~&euro;2M) door elkaar weeft. Authentiek, niet gescript &mdash;
+Black Friday van Flaneur (~&euro;2M) door elkaar weeft. Authentiek, niet gescript,
 wij waarborgen alleen de verhaallijn zodat het altijd klopt. Jij hoeft alleen voor de camera te staan.</p>
 
 <div class="regi-h2">De video in 5 beats</div>
 <table class="tl">
   <tr>
     <td class="tl-cold"><span class="lab">COLD OPEN</span><br><span class="big">De inzet</span><br>~0:30</td>
-    <td class="tl-1"><span class="lab">BEWEGING 1</span><br><span class="big">Dubai &mdash; de basis</span><br>~3,5 min</td>
-    <td class="tl-2"><span class="lab">BEWEGING 2</span><br><span class="big">Amsterdam &mdash; de machine</span><br>~3,5 min</td>
+    <td class="tl-1"><span class="lab">BEWEGING 1</span><br><span class="big">Dubai, de basis</span><br>~3,5 min</td>
+    <td class="tl-2"><span class="lab">BEWEGING 2</span><br><span class="big">Amsterdam, de machine</span><br>~3,5 min</td>
     <td class="tl-3"><span class="lab">BEWEGING 3</span><br><span class="big">De gok</span><br>~2 min</td>
     <td class="tl-out"><span class="lab">OUTRO</span><br><span class="big">Cliffhanger</span><br>~1 min</td>
   </tr>
 </table>
 <p class="tl-sub">Rust &amp; controle (Dubai) &rarr; energie &amp; inzet (Amsterdam) &rarr; spanning (Black Friday) &rarr; cliffhanger naar deel 2.</p>
 
-<div class="regi-h2">Wat we van jou nodig hebben &mdash; 3 dingen</div>
+<div class="regi-h2">Wat we van jou nodig hebben: 3 dingen</div>
 <table class="tasks">
   <tr>
-    <td><div class="num">1</div><br><strong>Interview-blok</strong><br>10&ndash;15 min op Dag 1. Jij praat vrij, wij stellen 6 vragen. Hieruit knippen we de hele voice-over. Dit vervangt de voice note.</td>
+    <td><div class="num">1</div><br><strong>Interview-blok</strong><br>10&ndash;15 min op Dag 1. Jij praat vrij, wij stellen 6 vragen. Hieruit knippen we de hele voice-over.</td>
     <td><div class="num">2</div><br><strong>Twee draaidagen</strong><br>Dubai (woning + home office) en Amsterdam (kantoor vol Black Friday-team). Richtlijn: eerste helft november.</td>
     <td><div class="num">3</div><br><strong>Toestemmingen</strong><br>Filmen op kantoor regelen, en laten weten welke schermen/cijfers n&iacute;&eacute;t in beeld mogen.</td>
   </tr>
@@ -161,7 +160,7 @@ wij waarborgen alleen de verhaallijn zodat het altijd klopt. Jij hoeft alleen vo
 
 <div class="regi-h2">De twee draaidagen</div>
 <table class="days">
-  <tr><th>Dag 1 &mdash; Dubai</th><th>Dag 2 &mdash; Amsterdam</th></tr>
+  <tr><th>Dag 1: Dubai</th><th>Dag 2: Amsterdam</th></tr>
   <tr>
     <td>Woning + uitzicht in ochtendlicht &middot; home office &middot; interview-blok &middot; rustig reflectie-moment.</td>
     <td>Kantoor in vol bedrijf &middot; team aan Black Friday &middot; jij legt de interactieve rollout uit.</td>
@@ -171,7 +170,7 @@ wij waarborgen alleen de verhaallijn zodat het altijd klopt. Jij hoeft alleen vo
 <div class="why"><strong>Waarom dit werkt:</strong> we eindigen vl&aacute;k v&oacute;&oacute;r Black Friday.
 De uitkomst (~&euro;2M?) wordt deel 2 &rarr; kijkers blijven hangen en komen terug.</div>
 
-<p class="more">Alle details &mdash; shot-by-shot storyboard, gear, planning en publicatie &mdash; staan op de volgende pagina's. Deze pagina is het enige dat jij hoeft te lezen.</p>
+<p class="more">Alle details (shot-by-shot storyboard, gear, planning en publicatie) staan op de volgende pagina's. Deze pagina is het enige dat jij hoeft te lezen.</p>
 <pdf:nextpage />
 """
 
@@ -185,7 +184,7 @@ for path, title in DOCS:
     body += '<pdf:nextpage />'
     body += md_to_html(path)
 
-footer = '<div id="footerContent" style="text-align:center; color:#999; font-size:7.5pt;">Flaneur Vlog #01 &middot; Productiepakket &middot; KTR Studio &middot; vertrouwelijk</div>'
+footer = '<div id="footerContent" style="text-align:center; color:#999; font-size:7.5pt;">Flaneur Vlog #01 &middot; Productiepakket &middot; vertrouwelijk</div>'
 
 full = f"<html><head><style>{FONTS}{CSS}</style></head><body>{footer}{body}</body></html>"
 

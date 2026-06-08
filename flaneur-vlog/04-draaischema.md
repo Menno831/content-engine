@@ -1,6 +1,6 @@
-# 04 — Draaischema, logistiek & gear
+# 04: Draaischema, logistiek & gear
 
-> Planning op basis van: vlog **live in november**, gekoppeld aan **Black Friday** (laatste vrijdag november). Verhuizing Dubai in **september**. Exacte datums *(TBC)* invullen zodra crew + Regi's agenda bekend zijn — de richtlijnen hieronder staan vast.
+> Planning op basis van: vlog **live in november**, gekoppeld aan **Black Friday** (laatste vrijdag november). Verhuizing Dubai in **september**. Exacte datums *(TBC)* invullen zodra crew + Regi's agenda bekend zijn, de richtlijnen hieronder staan vast.
 
 ---
 
@@ -10,7 +10,7 @@ Black Friday valt op de **laatste vrijdag van november**. De rollout duurt ~1 ma
 
 | Fase | Wanneer (richtlijn) | Wat |
 |---|---|---|
-| Pre-productie | Sept – okt | Crew boeken, datums vast, interview-vragen klaar (zie [`05-beslissingen.md`](./05-beslissingen.md)) |
+| Pre-productie | Sept, okt | Crew boeken, datums vast, interview-vragen klaar (zie [`05-interview.md`](./05-interview.md)) |
 | **Draaidag(en) Dubai** | Begin november *(TBC)* | Beweging 1 + anker-momenten |
 | **Draaidag Amsterdam** | Begin–midden november *(TBC)* | Beweging 2 + rollout-uitleg |
 | Fulfillment (optioneel) | Zelfde reis als Amsterdam | Alleen indien Regi erbij |
@@ -22,29 +22,29 @@ Black Friday valt op de **laatste vrijdag van november**. De rollout duurt ~1 ma
 
 ---
 
-## Draaidagen — indeling
+## Draaidagen: indeling
 
-### Dag 1 — Dubai (woning + home office)
+### Dag 1: Dubai (woning + home office)
 Halve tot hele dag. Beste licht: ochtend (woning/uitzicht) + namiddag (office).
 
 | Blok | Tijd | Scènes |
 |---|---|---|
 | Ochtend | Gouden ochtendlicht | Establishing woning, uitzicht, Regi rondloopt (Scène 1.1) |
-| Late ochtend | — | Home office, over-the-shoulder, call met Amsterdam (1.2) |
-| Middag | — | Anker-momenten: cold open + reflectie (1.3) |
+| Late ochtend | | Home office, over-the-shoulder, call met Amsterdam (1.2) |
+| Middag | | Anker-momenten: cold open + reflectie (1.3) |
 | Optie | Avondlicht | Climax-moment "nu is het wachten" (3.1) |
 
-### Dag 2 — Amsterdam (kantoor)
+### Dag 2: Amsterdam (kantoor)
 Draaien op een dag dat het team vol aan Black Friday werkt.
 
 | Blok | Tijd | Scènes |
 |---|---|---|
 | Ochtend | Bij aankomst team | Establishing, binnenkomst Regi (2.1, 2.2a) |
 | Midden | Drukte piek | B-roll werkvloer, team-interacties (2.2b/c) |
-| Middag | — | Rollout-uitleg bij scherm (2.3) |
-| Optioneel | — | Fulfillment center (2.4) — apart reisblok |
+| Middag | | Rollout-uitleg bij scherm (2.3) |
+| Optioneel | | Fulfillment center (2.4), apart reisblok |
 
-> Indien Regi niet fysiek in NL is in de draaiperiode: Amsterdam wordt door een tweede videograaf gedraaid als pure B-roll, en Regi's VO (uit het interview-blok) erover dekt het founder-perspectief. Iets minder sterk, maar het plan staat — het verhaal valt niet om.
+> Indien Regi niet fysiek in NL is in de draaiperiode: Amsterdam wordt door een tweede videograaf gedraaid als pure B-roll, en Regi's VO (uit het interview-blok) erover dekt het founder-perspectief. Iets minder sterk, maar het plan staat, het verhaal valt niet om.
 
 ---
 
@@ -66,7 +66,7 @@ Draaien op een dag dat het team vol aan Black Friday werkt.
 ### Camera & beeld
 - [ ] Hoofdcamera (full-frame, mooie low-light) + 2 lenzen (wide + 35/50mm)
 - [ ] Gimbal
-- [ ] Drone (Dubai establishing + evt. fulfillment) — *⚠️ check droneregels Dubai/locatie*
+- [ ] Drone (Dubai establishing + evt. fulfillment), *⚠️ check droneregels Dubai/locatie*
 - [ ] Extra accu's + geheugenkaarten (dubbel wat je denkt nodig te hebben)
 - [ ] ND-filters (fel Dubai-licht)
 
@@ -84,7 +84,7 @@ Draaien op een dag dat het team vol aan Black Friday werkt.
 ---
 
 ## Logistiek & toestemmingen
-- [ ] Toestemming filmen op Amsterdam-kantoor (privacy team — wie wil niet in beeld?)
+- [ ] Toestemming filmen op Amsterdam-kantoor (privacy team, wie wil niet in beeld?)
 - [ ] Toestemming fulfillment center (indien van toepassing)
 - [ ] Droneregels / vergunning Dubai-locatie gecheckt
 - [ ] Reis/verblijf videograaf geregeld (Dubai + evt. NL)

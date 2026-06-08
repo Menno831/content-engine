@@ -1,4 +1,4 @@
-# 08 — Content- & distributiestrategie
+# 08: Content- & distributiestrategie
 
 > Dit document beschrijft wat er **ná de draaidagen** gebeurt: hoe we van twee dagen draaimateriaal een maand+ aan content maken, hoe we zorgen dat de video daadwerkelijk bekeken wordt (geen 200-views-video), en hoe dit doorgroeit naar een doorlopende founder content engine. Dit is de strategie-laag bovenop het draaiboek.
 
@@ -8,15 +8,15 @@
 
 Eén shoot, maximale output. Uit twee draaidagen halen we:
 
-- **1x long-form founder-documentaire** (8–14 min) — het vlaggenschip
-- **Tot 30x verticale cutdowns** — voor de clip-accounts
-- **1x trailer** — voor Regi's eigen YouTube/Instagram, om de documentaire te pushen
+- **1x long-form founder-documentaire** (8–14 min), het vlaggenschip
+- **Tot 30x verticale cutdowns**, voor de clip-accounts
+- **1x trailer**, voor Regi's eigen YouTube/Instagram, om de documentaire te pushen
 
-Het doel is niet "views om de views". Het doel is dat de **juiste mensen** kijken — talent dat bij Flaneur wil werken, partners die aanhaken, klanten die het merk echt snappen — en dat het founder-kanaal momentum opbouwt richting Black Friday en daarna.
+Het doel is niet "views om de views". Het doel is dat de **juiste mensen** kijken, talent dat bij Flaneur wil werken, partners die aanhaken, klanten die het merk echt snappen, en dat het founder-kanaal momentum opbouwt richting Black Friday en daarna.
 
 ---
 
-## 1. Research vooraf — wat wordt er écht bekeken?
+## 1. Research vooraf: wat wordt er écht bekeken?
 
 Voordat we een titel of thumbnail kiezen, doen we onderzoek. Niet gokken, maar kijken wat in deze niche (founder-/brand-/ondernemerscontent) daadwerkelijk presteert.
 
@@ -29,7 +29,7 @@ Voordat we een titel of thumbnail kiezen, doen we onderzoek. Niet gokken, maar k
 
 ---
 
-## 2. Packaging & A/B-testen — titel + thumbnail
+## 2. Packaging & A/B-testen: titel + thumbnail
 
 De packaging bepaalt of een video überhaupt aangeklikt wordt. Daar zit het grootste rendement, dus daar testen we het hardst.
 
@@ -42,20 +42,20 @@ De packaging bepaalt of een video überhaupt aangeklikt wordt. Daar zit het groo
 
 ---
 
-## 3. De cutdowns — tot 30 clips voor de clip-accounts
+## 3. De cutdowns: tot 30 clips voor de clip-accounts
 
 Regi heeft meerdere clip-accounts. Die voeden we met verticale clips uit hetzelfde draaimateriaal.
 
 - **Volume:** tot 30 verticale clips per shoot, zodat er genoeg is om te testen en te spreiden.
-- **Selectie:** we knippen de sterkste momenten — anker-momenten (praat-tegen-lens), verrassende uitspraken, hoge-energie kantoorbeelden, de inzet (€2M) en de cliffhanger.
+- **Selectie:** we knippen de sterkste momenten, anker-momenten (praat-tegen-lens), verrassende uitspraken, hoge-energie kantoorbeelden, de inzet (€2M) en de cliffhanger.
 - **Testen op clip-accounts:** spreid de clips, kijk welke aanslaan, en dubbel down op het type dat het hardst gaat. De clip-accounts zijn je goedkope testlab voor hooks.
 - **Doorverwijzing:** winnende clips kunnen kijkers naar de long-form en/of Regi's hoofdkanaal sturen.
 
-> De clips zijn niet alleen distributie — ze zijn **data**. Wat op een clip-account werkt, vertelt je welke hooks en onderwerpen je in de volgende long-form moet zetten.
+> De clips zijn niet alleen distributie, ze zijn **data**. Wat op een clip-account werkt, vertelt je welke hooks en onderwerpen je in de volgende long-form moet zetten.
 
 ---
 
-## 4. De trailer — push op Regi's eigen kanaal
+## 4. De trailer: push op Regi's eigen kanaal
 
 Eén korte, krachtige trailer (≈30–60 sec) voor Regi's persoonlijke YouTube/Instagram.
 
@@ -66,7 +66,7 @@ Eén korte, krachtige trailer (≈30–60 sec) voor Regi's persoonlijke YouTube/
 
 ---
 
-## 5. Distributie — de release-week
+## 5. Distributie: de release-week
 
 | Kanaal | Wat | Wanneer |
 |---|---|---|
@@ -76,11 +76,11 @@ Eén korte, krachtige trailer (≈30–60 sec) voor Regi's persoonlijke YouTube/
 | Community / story | Aankondiging op releasedag | Releasedag |
 | Cliffhanger-clip | Los geknipt "dat laat ik jullie zien"-moment | Rond release |
 
-> Detail per video — titel-, thumbnail- en beschrijvingsopties — staat in [`06-publicatie.md`](./06-publicatie.md).
+> Detail per video, titel-, thumbnail- en beschrijvingsopties, staat in [`06-publicatie.md`](./06-publicatie.md).
 
 ---
 
-## 6. Van losse video naar engine — de cadans
+## 6. Van losse video naar engine: de cadans
 
 De documentaire is de start. De engine maakt er een ritme van.
 
@@ -91,7 +91,7 @@ De documentaire is de start. De engine maakt er een ritme van.
 
 ---
 
-## 7. Meten — waar sturen we op?
+## 7. Meten: waar sturen we op?
 
 - **CTR** op titel/thumbnail (pakt de packaging?).
 - **Retentie** op 30 sec en op 50% (pakt de hook + de structuur?).
