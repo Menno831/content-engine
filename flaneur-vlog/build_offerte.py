@@ -263,7 +263,7 @@ losse video.</div>
 Geen gedoe. We activeren, precies zoals je zei, en we zijn op tijd voor Black Friday.
 </div>
 
-<p class="note">Prijzen zijn exclusief btw en reiskosten naar Dubai. De engine kent een minimale looptijd van zes maanden. Geldig tot 30 dagen na dagtekening.</p>
+<p class="note">Prijzen zijn exclusief btw en reiskosten naar Dubai (vlucht, verblijf en crew). De engine kent een minimale looptijd van zes maanden. Geldig tot 30 dagen na dagtekening.</p>
 <p class="foot">VOORSTEL / FLANEUR FOUNDER CONTENT / VOOR REGI</p>
 """
 
