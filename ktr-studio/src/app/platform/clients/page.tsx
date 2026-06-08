@@ -4,6 +4,7 @@ import { getWorkspaceData } from "@/lib/data";
 import { NotConnected } from "../_states";
 import { AddClientDialog } from "./AddClientDialog";
 import { SyncButton } from "./SyncButton";
+import { PortalAccessButton } from "./PortalAccessButton";
 
 const statusColor: Record<ClientStatus, string> = {
   actief: "#34D399",
@@ -91,9 +92,7 @@ export default async function Clients() {
               <span className="text-[12px] text-muted">{fmtEur(c.monthlyValue)}/mnd</span>
               <div className="flex items-center gap-2">
                 <SyncButton clientId={c.id} />
-                <button className="flex items-center gap-1.5 text-[13px] text-accent hover:text-accent-hover transition-colors">
-                  Open portaal {icons.arrowRight}
-                </button>
+                <PortalAccessButton clientId={c.id} clientName={c.name} />
               </div>
             </div>
           </Card>
