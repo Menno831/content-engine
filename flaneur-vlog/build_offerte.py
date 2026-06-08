@@ -242,21 +242,21 @@ blijft draaien. <b>Mijn eerlijke advies staat onderaan.</b></p>
     <td class="pc reco">
       <span class="tag2">OPTIE 2 / AANRADER</span><br/>
       <span class="opt">De founder content engine</span><br/>
-      <span class="amt">€3.000</span><br/>
+      <span class="amt">€3.500</span><br/>
       <span class="per">per maand, minimaal 6 maanden</span><br/><br/>
-      <span class="desc">In maand 1 zit de volledige documentaire (los €5.000). Daarna elke maand een
-      nieuwe founder-video plus cutdowns, strategie, plaatsen en optimaliseren. We worden je vaste
-      contentteam: alles behalve voor de camera staan nemen we uit handen. In batches gedraaid, dus
-      weinig tijd voor jou. Eén draaidag per maand inbegrepen.</span>
+      <span class="desc">Elke maand een nieuwe founder-video plus cutdowns, strategie, plaatsen en
+      optimaliseren, met de founder-documentaire (los €5.000) als vlaggenschip getimed op Black Friday.
+      We worden je vaste contentteam: alles behalve voor de camera staan nemen we uit handen. In batches
+      gedraaid, dus weinig tijd voor jou. Eén draaidag per maand inbegrepen.</span>
     </td>
   </tr>
 </table>
 
 <div class="advice"><b>Mijn advies:</b> wil je het klein houden, dan doen we de losse documentaire,
-geen verplichting. Maar de engine is waar het echt gebeurt. Van nu tot Black Friday zijn het zes
-maanden, precies de aanloop waarin een founder-kanaal momentum opbouwt. Daarom een minimale looptijd
-van zes maanden: zo word ik je vaste contentteam en bouwen we iets dat blijft staan, in plaats van één
-losse video.</div>
+geen verplichting. Maar de engine is waar het echt gebeurt: voor minder dan de kosten van één extra
+medewerker nemen we een hele contentrol over, van strategie tot plaatsen. Van nu tot Black Friday zijn
+het zes maanden, precies de aanloop waarin een founder-kanaal momentum opbouwt. Daarom een minimale
+looptijd van zes maanden: zo word ik je vaste contentteam en bouwen we iets dat blijft staan.</div>
 
 <div class="flow">
 <b>Ik vlieg zelf mee naar Dubai</b> om je verhaal, de shots en het storyboard ter plekke te regisseren,
