@@ -22,7 +22,9 @@ In demo-modus (standaard) zie je het hele platform met voorbeelddata.
 
 ### 1. Supabase (database + auth)
 1. Maak een project op [supabase.com](https://supabase.com).
-2. **SQL Editor** → plak de inhoud van `src/db/schema.sql` → run.
+2. **SQL Editor** → plak de inhoud van `src/db/schema.sql` → run (verse install,
+   bevat alle tabellen). Heb je al een ouder project? Draai dan de migraties in
+   `src/db/migrations/` op volgorde (`001` → `007`); draai `004` los (enum-wijziging).
 3. **Settings → API** → zet in `.env.local`:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
