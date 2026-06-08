@@ -45,6 +45,10 @@ create table if not exists clients (
   videos_per_month int default 0,
   editor_cost      numeric default 0,
   payment_status   text default 'open', -- 'betaald' | 'open' | 'te_laat'
+  -- AI Visuals (Higgsfield Soul)
+  soul_character_id   text,
+  reference_image_url text,
+  brand_prompt        text,
   created_at       timestamptz not null default now()
 );
 
@@ -305,3 +309,21 @@ create policy "team update editors" on editors
 
 -- Editor-login koppelen aan een editor-record (forward reference -> ALTER).
 alter table profiles add column if not exists editor_id uuid references editors (id) on delete set null;
+
+-- ── AI Visuals (Higgsfield Soul) generatie-historie ─────────────
+create table if not exists generations (
+  id          uuid primary key default gen_random_uuid(),
+  agency_id   uuid not null references agencies (id) on delete cascade,
+  client_id   uuid references clients (id) on delete cascade,
+  kind        text not null default 'image',
+  prompt      text,
+  output_url  text,
+  status      text not null default 'done',
+  created_at  timestamptz not null default now()
+);
+create index if not exists idx_generations_client on generations (client_id, created_at desc);
+alter table generations enable row level security;
+create policy "read generations" on generations
+  for select using (agency_id = current_agency_id() and current_client_id() is null);
+create policy "team insert generations" on generations
+  for insert with check (agency_id = current_agency_id() and current_client_id() is null);

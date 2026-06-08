@@ -58,7 +58,9 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
   const [clientsRes, contentRes, leadsRes, metricsRes] = await Promise.all([
     supabase
       .from("clients")
-      .select("id,name,ig_handle,status,monthly_value,package,videos_per_month,editor_cost,payment_status,created_at"),
+      .select(
+        "id,name,ig_handle,status,monthly_value,package,videos_per_month,editor_cost,payment_status,created_at,soul_character_id,reference_image_url,brand_prompt"
+      ),
     supabase.from("content").select("id,client_id,title,hook,format,stage,published_at,permalink"),
     supabase
       .from("leads")
@@ -112,6 +114,9 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
       editorCost: Number(c.editor_cost ?? 0),
       paymentStatus: (c.payment_status ?? "open") as Client["paymentStatus"],
       createdThisMonth: inThisMonth(c.created_at),
+      soulCharacter: c.soul_character_id ?? null,
+      referenceImage: c.reference_image_url ?? null,
+      brandPrompt: c.brand_prompt ?? null,
     };
   });
 

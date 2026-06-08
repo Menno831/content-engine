@@ -29,3 +29,6 @@ export const providerConfigured = {
 } as const;
 
 export type ProviderKey = keyof typeof providerConfigured;
+
+/** Higgsfield (AI Visuals / Soul-characters) — server-side. */
+export const isHiggsfieldConfigured = Boolean(process.env.HIGGSFIELD_API_KEY);

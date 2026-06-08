@@ -30,14 +30,18 @@ export interface Client {
   editorCost: number;
   paymentStatus: PaymentStatus;
   createdThisMonth?: boolean; // nieuw deze maand
+  // AI / Higgsfield Soul-character
+  soulCharacter: string | null; // character-id/naam bij Higgsfield
+  referenceImage: string | null; // url referentiefoto (bv. thumbnail)
+  brandPrompt: string | null; // vaste stijl/branding-instructies
 }
 
 export const clients: Client[] = [
-  { id: "c1", name: "Lars Vermeer", handle: "@larsbuilds", status: "actief", initials: "LV", monthlyValue: 2500, revenueAttributed: 18400, postsLive: 12, leadsThisMonth: 47, packageName: "Growth", videosPerMonth: 12, editorCost: 720, paymentStatus: "betaald" },
-  { id: "c2", name: "Sophie de Wit", handle: "@sophie.scales", status: "actief", initials: "SW", monthlyValue: 1800, revenueAttributed: 9200, postsLive: 9, leadsThisMonth: 31, packageName: "Starter", videosPerMonth: 8, editorCost: 480, paymentStatus: "open" },
-  { id: "c3", name: "Daan Koster", handle: "@daankoster", status: "actief", initials: "DK", monthlyValue: 3200, revenueAttributed: 27600, postsLive: 16, leadsThisMonth: 68, packageName: "Scale", videosPerMonth: 16, editorCost: 960, paymentStatus: "betaald" },
-  { id: "c4", name: "Imza Health", handle: "@imza.health", status: "onboarding", initials: "IH", monthlyValue: 2200, revenueAttributed: 0, postsLive: 0, leadsThisMonth: 4, packageName: "Growth", videosPerMonth: 12, editorCost: 720, paymentStatus: "open", createdThisMonth: true },
-  { id: "c5", name: "Noor Bakker", handle: "@noorbakker", status: "gepauzeerd", initials: "NB", monthlyValue: 1500, revenueAttributed: 3100, postsLive: 3, leadsThisMonth: 8, packageName: "Starter", videosPerMonth: 6, editorCost: 360, paymentStatus: "te_laat" },
+  { id: "c1", name: "Lars Vermeer", handle: "@larsbuilds", status: "actief", initials: "LV", monthlyValue: 2500, revenueAttributed: 18400, postsLive: 12, leadsThisMonth: 47, packageName: "Growth", videosPerMonth: 12, editorCost: 720, paymentStatus: "betaald", soulCharacter: "lars_soul_v2", referenceImage: null, brandPrompt: "Strakke tech-founder look, koel kleurenpalet, minimalistische kantoor-setting." },
+  { id: "c2", name: "Sophie de Wit", handle: "@sophie.scales", status: "actief", initials: "SW", monthlyValue: 1800, revenueAttributed: 9200, postsLive: 9, leadsThisMonth: 31, packageName: "Starter", videosPerMonth: 8, editorCost: 480, paymentStatus: "open", soulCharacter: "sophie_soul_v1", referenceImage: null, brandPrompt: "Warme, toegankelijke uitstraling, natuurlijk licht, pastel-accenten." },
+  { id: "c3", name: "Daan Koster", handle: "@daankoster", status: "actief", initials: "DK", monthlyValue: 3200, revenueAttributed: 27600, postsLive: 16, leadsThisMonth: 68, packageName: "Scale", videosPerMonth: 16, editorCost: 960, paymentStatus: "betaald", soulCharacter: "daan_soul_v3", referenceImage: null, brandPrompt: "Energieke ondernemer, high-contrast, dynamische crops, donkere achtergrond + oranje accent." },
+  { id: "c4", name: "Imza Health", handle: "@imza.health", status: "onboarding", initials: "IH", monthlyValue: 2200, revenueAttributed: 0, postsLive: 0, leadsThisMonth: 4, packageName: "Growth", videosPerMonth: 12, editorCost: 720, paymentStatus: "open", createdThisMonth: true, soulCharacter: null, referenceImage: null, brandPrompt: "Klinisch & clean, wit + zachtgroen, vertrouwen uitstralend." },
+  { id: "c5", name: "Noor Bakker", handle: "@noorbakker", status: "gepauzeerd", initials: "NB", monthlyValue: 1500, revenueAttributed: 3100, postsLive: 3, leadsThisMonth: 8, packageName: "Starter", videosPerMonth: 6, editorCost: 360, paymentStatus: "te_laat", soulCharacter: "noor_soul_v1", referenceImage: null, brandPrompt: "Speels en kleurrijk, lifestyle-setting, zonnig." },
 ];
 
 // ── Content pipeline (kanban) ──────────────────────────────────────
