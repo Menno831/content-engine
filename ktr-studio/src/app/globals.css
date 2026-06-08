@@ -327,3 +327,18 @@ body::before {
     animation-iteration-count: 1 !important;
   }
 }
+
+/* Print: alleen de merk-content (Brand Studio) tonen */
+@media print {
+  aside,
+  header,
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+  .print-card {
+    break-inside: avoid;
+  }
+}
