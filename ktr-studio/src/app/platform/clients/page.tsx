@@ -4,6 +4,7 @@ import { getWorkspaceData } from "@/lib/data";
 import { NotConnected } from "../_states";
 import { AddClientDialog } from "./AddClientDialog";
 import { SyncButton } from "./SyncButton";
+import { SyncAllButton } from "./SyncAllButton";
 import { PortalAccessButton } from "./PortalAccessButton";
 
 const statusColor: Record<ClientStatus, string> = {
@@ -22,7 +23,12 @@ export default async function Clients() {
         eyebrow="Klanten"
         title="Portalen & white-label"
         subtitle="Elke klant heeft een eigen omgeving in jouw huisstijl — eigen logo, eigen kleur, eigen domein. Zij zien alleen hun content, leads en rapporten."
-        action={<AddClientDialog />}
+        action={
+          <div className="flex items-center gap-2">
+            <SyncAllButton />
+            <AddClientDialog />
+          </div>
+        }
       />
 
       {/* MRR strip */}

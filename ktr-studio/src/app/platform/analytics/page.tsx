@@ -80,8 +80,23 @@ export default async function Analytics() {
               <div key={i} className="flex items-center gap-4">
                 <span className="font-display font-extrabold text-lg text-muted w-5">{i + 1}</span>
                 <div className="min-w-0 flex-1">
-                  <div className="text-sm font-medium truncate">{c.title}</div>
-                  <div className="text-[12px] text-muted">{c.client}</div>
+                  {c.permalink ? (
+                    <a
+                      href={c.permalink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium truncate block hover:text-accent transition-colors"
+                      title="Open op Instagram"
+                    >
+                      {c.title} ↗
+                    </a>
+                  ) : (
+                    <div className="text-sm font-medium truncate">{c.title}</div>
+                  )}
+                  <div className="text-[12px] text-muted">
+                    {c.client}
+                    {c.reach > 0 && <span> · {fmtNum(c.reach)} bereik</span>}
+                  </div>
                   <div className="mt-2 h-1.5 rounded-full bg-white/[0.05] overflow-hidden">
                     <div className="h-full rounded-full bg-accent/70" style={{ width: `${(c.views / maxViews) * 100}%` }} />
                   </div>

@@ -67,12 +67,25 @@ export default async function Pipeline() {
                       <span className="text-[11px] text-muted truncate max-w-[120px]">{card.client}</span>
                       {card.stage === "posted" ? (
                         <div className="flex items-center gap-2.5 text-[11px]">
-                          <span className="flex items-center gap-1 text-muted">
-                            <span className="w-3.5 h-3.5">{icons.eye}</span>
-                            {fmtNum(card.views ?? 0)}
-                          </span>
+                          {card.permalink ? (
+                            <a
+                              href={card.permalink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1 text-accent hover:text-accent-hover"
+                              title="Open reel op Instagram"
+                            >
+                              <span className="w-3.5 h-3.5">{icons.eye}</span>
+                              {fmtNum(card.views ?? 0)}
+                            </a>
+                          ) : (
+                            <span className="flex items-center gap-1 text-muted">
+                              <span className="w-3.5 h-3.5">{icons.eye}</span>
+                              {fmtNum(card.views ?? 0)}
+                            </span>
+                          )}
                           <span className="flex items-center gap-1 text-emerald-400">
-                            {card.leads} leads
+                            {card.leads ?? 0} leads
                           </span>
                         </div>
                       ) : (

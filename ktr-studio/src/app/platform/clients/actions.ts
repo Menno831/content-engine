@@ -107,6 +107,25 @@ export async function createClientAction(
   return { ok: `Klant "${name}" toegevoegd.` };
 }
 
+export async function syncAllClientsAction(): Promise<{ ok: boolean; synced?: number; total?: number; error?: string }> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { ok: false, error: "Supabase niet geconfigureerd." };
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "auth vereist" };
+
+  const { data: clients } = await supabase.from("clients").select("id");
+  let synced = 0;
+  for (const c of clients ?? []) {
+    const r = await syncClientInstagram(c.id);
+    if (r.ok) synced++;
+  }
+  revalidatePath("/platform/clients");
+  revalidatePath("/platform");
+  return { ok: true, synced, total: clients?.length ?? 0 };
+}
+
 export async function syncClientAction(clientId: string): Promise<SyncResult> {
   const supabase = await supabaseServer();
   if (!supabase) return { ok: false, error: "Supabase niet geconfigureerd." };

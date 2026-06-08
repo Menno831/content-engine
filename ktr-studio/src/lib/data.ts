@@ -22,7 +22,15 @@ export interface WorkspaceData {
   content: ContentCard[];
   leads: Lead[];
   revenueByMonth: { m: string; v: number }[];
-  topContent: { title: string; client: string; views: number; leads: number; revenue: number }[];
+  topContent: {
+    title: string;
+    client: string;
+    views: number;
+    reach: number;
+    leads: number;
+    revenue: number;
+    permalink: string | null;
+  }[];
 }
 
 function demoBundle(): WorkspaceData {
@@ -49,7 +57,7 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
 
   const [clientsRes, contentRes, leadsRes, metricsRes] = await Promise.all([
     supabase.from("clients").select("id,name,ig_handle,status,monthly_value"),
-    supabase.from("content").select("id,client_id,title,hook,format,stage,published_at"),
+    supabase.from("content").select("id,client_id,title,hook,format,stage,published_at,permalink"),
     supabase
       .from("leads")
       .select("id,client_id,name,source_label,source_content_id,stage,value,setter,created_at,closed_at"),
@@ -114,7 +122,9 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
         ? new Date(x.published_at).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })
         : "—",
       views: metric?.views ?? undefined,
+      reach: metric?.reach ?? undefined,
       leads: leadsPerContent.get(x.id) ?? undefined,
+      permalink: x.permalink ?? null,
     };
   });
 
@@ -150,10 +160,12 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
       title: x.title,
       client: x.client,
       views: x.views ?? 0,
+      reach: x.reach ?? 0,
       leads: x.leads ?? 0,
       revenue: leadRows
         .filter((l) => l.source_content_id === x.id && l.stage === "closed")
         .reduce((s, l) => s + Number(l.value ?? 0), 0),
+      permalink: x.permalink ?? null,
     }))
     .sort((a, b) => b.views - a.views)
     .slice(0, 5);

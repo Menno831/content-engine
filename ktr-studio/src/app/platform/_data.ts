@@ -64,7 +64,9 @@ export interface ContentCard {
   assignee: string;
   due: string;
   views?: number;
+  reach?: number;
   leads?: number;
+  permalink?: string | null;
 }
 
 export const contentCards: ContentCard[] = [
@@ -76,8 +78,8 @@ export const contentCards: ContentCard[] = [
   { id: "p10", title: "3 tools die ik dagelijks gebruik", client: "Sophie de Wit", stage: "revisions_completed", format: "Carrousel", hook: "Mijn complete content-stack", assignee: "Eva", due: "4 jun" },
   { id: "p5", title: "Klant-resultaat reveal", client: "Daan Koster", stage: "client_approval", format: "Reel", hook: "0 → 300 leden in 90 dagen, hier is hoe", assignee: "Eva", due: "3 jun" },
   { id: "p6", title: "Founder ochtendroutine", client: "Sophie de Wit", stage: "ready_for_posting", format: "Short", hook: "De routine die mijn omzet verdubbelde", assignee: "Menno", due: "2 jun" },
-  { id: "p7", title: "Hoe ik 1 klant closede via Reels", client: "Daan Koster", stage: "posted", format: "Reel", hook: "1 reel = 1 klant van €3.200", assignee: "Eva", due: "28 mei", views: 84200, leads: 22 },
-  { id: "p8", title: "3 hooks die altijd werken", client: "Lars Vermeer", stage: "posted", format: "Carrousel", hook: "Steel deze 3 hooks", assignee: "AI", due: "26 mei", views: 51800, leads: 14 },
+  { id: "p7", title: "Hoe ik 1 klant closede via Reels", client: "Daan Koster", stage: "posted", format: "Reel", hook: "1 reel = 1 klant van €3.200", assignee: "Eva", due: "28 mei", views: 84200, reach: 96400, leads: 22, permalink: "https://www.instagram.com/reel/C8x1demo01/" },
+  { id: "p8", title: "3 hooks die altijd werken", client: "Lars Vermeer", stage: "posted", format: "Carrousel", hook: "Steel deze 3 hooks", assignee: "AI", due: "26 mei", views: 51800, reach: 60200, leads: 14, permalink: "https://www.instagram.com/reel/C8x1demo02/" },
 ];
 
 // ── Leads / sales pipeline (ManyChat → call → close) ───────────────
@@ -121,11 +123,11 @@ export const revenueByMonth = [
 
 // Top presterende content
 export const topContent = [
-  { title: "1 reel = 1 klant van €3.200", client: "Daan Koster", views: 84200, leads: 22, revenue: 9600 },
-  { title: "0 → 300 leden in 90 dagen", client: "Daan Koster", views: 67100, leads: 18, revenue: 7400 },
-  { title: "Steel deze 3 hooks", client: "Lars Vermeer", views: 51800, leads: 14, revenue: 5000 },
-  { title: "De routine die mijn omzet verdubbelde", client: "Sophie de Wit", views: 42300, leads: 11, revenue: 3600 },
-  { title: "Ik verloor €40k door deze fout", client: "Daan Koster", views: 38900, leads: 9, revenue: 2800 },
+  { title: "1 reel = 1 klant van €3.200", client: "Daan Koster", views: 84200, reach: 96400, leads: 22, revenue: 9600, permalink: "https://www.instagram.com/reel/C8x1demo01/" },
+  { title: "0 → 300 leden in 90 dagen", client: "Daan Koster", views: 67100, reach: 78300, leads: 18, revenue: 7400, permalink: "https://www.instagram.com/reel/C8x1demo03/" },
+  { title: "Steel deze 3 hooks", client: "Lars Vermeer", views: 51800, reach: 60200, leads: 14, revenue: 5000, permalink: "https://www.instagram.com/reel/C8x1demo02/" },
+  { title: "De routine die mijn omzet verdubbelde", client: "Sophie de Wit", views: 42300, reach: 49100, leads: 11, revenue: 3600, permalink: "https://www.instagram.com/reel/C8x1demo04/" },
+  { title: "Ik verloor €40k door deze fout", client: "Daan Koster", views: 38900, reach: 44200, leads: 9, revenue: 2800, permalink: "https://www.instagram.com/reel/C8x1demo05/" },
 ];
 
 // ── Studio: AI-gegenereerde hooks (mock output) ────────────────────
