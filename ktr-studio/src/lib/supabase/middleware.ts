@@ -1,14 +1,15 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { isSupabaseConfigured } from "@/lib/config";
+import { DEMO_MODE, isSupabaseConfigured } from "@/lib/config";
 
 /**
- * Vernieuwt de sessie en beschermt /platform. In demo-modus (Supabase nog
- * niet geconfigureerd) laten we alles door, zodat de mockup zichtbaar blijft.
+ * Vernieuwt de sessie en beschermt /platform. In demo-modus (showroom) of
+ * zolang Supabase niet geconfigureerd is, laten we alles door — dan is het
+ * dashboard publiek bekijkbaar met demo-data, zonder login.
  */
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
-  if (!isSupabaseConfigured) return response;
+  if (DEMO_MODE || !isSupabaseConfigured) return response;
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
