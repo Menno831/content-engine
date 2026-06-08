@@ -56,7 +56,9 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
   if (!supabase) return demoBundle();
 
   const [clientsRes, contentRes, leadsRes, metricsRes] = await Promise.all([
-    supabase.from("clients").select("id,name,ig_handle,status,monthly_value"),
+    supabase
+      .from("clients")
+      .select("id,name,ig_handle,status,monthly_value,package,videos_per_month,editor_cost,payment_status,created_at"),
     supabase.from("content").select("id,client_id,title,hook,format,stage,published_at,permalink"),
     supabase
       .from("leads")
@@ -105,6 +107,11 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
         .reduce((s, l) => s + Number(l.value ?? 0), 0),
       postsLive: contentRows.filter((x) => x.client_id === c.id && x.stage === "posted").length,
       leadsThisMonth: cLeads.filter((l) => inThisMonth(l.created_at)).length,
+      packageName: c.package ?? null,
+      videosPerMonth: Number(c.videos_per_month ?? 0),
+      editorCost: Number(c.editor_cost ?? 0),
+      paymentStatus: (c.payment_status ?? "open") as Client["paymentStatus"],
+      createdThisMonth: inThisMonth(c.created_at),
     };
   });
 

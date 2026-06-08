@@ -33,15 +33,30 @@ create table if not exists profiles (
 create type client_status as enum ('actief', 'onboarding', 'gepauzeerd');
 
 create table if not exists clients (
-  id             uuid primary key default gen_random_uuid(),
-  agency_id      uuid not null references agencies (id) on delete cascade,
-  name           text not null,
-  ig_handle      text,
-  yt_channel_id  text,
-  contact_email  text,
-  status         client_status not null default 'onboarding',
-  monthly_value  numeric default 0,
-  created_at     timestamptz not null default now()
+  id               uuid primary key default gen_random_uuid(),
+  agency_id        uuid not null references agencies (id) on delete cascade,
+  name             text not null,
+  ig_handle        text,
+  yt_channel_id    text,
+  contact_email    text,
+  status           client_status not null default 'onboarding',
+  package          text,
+  monthly_value    numeric default 0,   -- retainer
+  videos_per_month int default 0,
+  editor_cost      numeric default 0,
+  payment_status   text default 'open', -- 'betaald' | 'open' | 'te_laat'
+  created_at       timestamptz not null default now()
+);
+
+-- ── Editors (voor productie + uitbetalingen) ────────────────────
+create table if not exists editors (
+  id            uuid primary key default gen_random_uuid(),
+  agency_id     uuid not null references agencies (id) on delete cascade,
+  name          text not null,
+  email         text,
+  pay_per_video numeric default 0,
+  active        boolean not null default true,
+  created_at    timestamptz not null default now()
 );
 
 -- ── Integraties (stuurt de "verbonden / niet verbonden"-UI) ─────
@@ -86,6 +101,13 @@ create table if not exists content (
   external_id  text,            -- post-/video-id bij het platform
   permalink    text,
   published_at timestamptz,
+  -- Productie-velden (Monday: Type, Deadline, Posting Date, editor)
+  content_type text,
+  deadline     date,
+  posting_date date,
+  editor_id    uuid references editors (id) on delete set null,
+  delivered_at timestamptz,     -- wanneer de editor aanleverde
+  paid         boolean not null default false,
   created_at   timestamptz not null default now()
 );
 
@@ -271,3 +293,12 @@ create policy "update todos" on todos
     agency_id = current_agency_id()
     and (current_client_id() is null or client_id = current_client_id())
   );
+
+-- Editors: alleen owner/team.
+alter table editors enable row level security;
+create policy "read editors" on editors
+  for select using (agency_id = current_agency_id() and current_client_id() is null);
+create policy "team insert editors" on editors
+  for insert with check (agency_id = current_agency_id() and current_client_id() is null);
+create policy "team update editors" on editors
+  for update using (agency_id = current_agency_id() and current_client_id() is null);

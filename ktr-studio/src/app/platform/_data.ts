@@ -12,6 +12,8 @@ export const BRAND = {
 
 export type ClientStatus = "actief" | "onboarding" | "gepauzeerd";
 
+export type PaymentStatus = "betaald" | "open" | "te_laat";
+
 export interface Client {
   id: string;
   name: string;
@@ -22,14 +24,20 @@ export interface Client {
   revenueAttributed: number; // omzet toegeschreven aan content deze maand
   postsLive: number;
   leadsThisMonth: number;
+  // Finance
+  packageName: string | null;
+  videosPerMonth: number;
+  editorCost: number;
+  paymentStatus: PaymentStatus;
+  createdThisMonth?: boolean; // nieuw deze maand
 }
 
 export const clients: Client[] = [
-  { id: "c1", name: "Lars Vermeer", handle: "@larsbuilds", status: "actief", initials: "LV", monthlyValue: 2500, revenueAttributed: 18400, postsLive: 12, leadsThisMonth: 47 },
-  { id: "c2", name: "Sophie de Wit", handle: "@sophie.scales", status: "actief", initials: "SW", monthlyValue: 1800, revenueAttributed: 9200, postsLive: 9, leadsThisMonth: 31 },
-  { id: "c3", name: "Daan Koster", handle: "@daankoster", status: "actief", initials: "DK", monthlyValue: 3200, revenueAttributed: 27600, postsLive: 16, leadsThisMonth: 68 },
-  { id: "c4", name: "Imza Health", handle: "@imza.health", status: "onboarding", initials: "IH", monthlyValue: 2200, revenueAttributed: 0, postsLive: 0, leadsThisMonth: 4 },
-  { id: "c5", name: "Noor Bakker", handle: "@noorbakker", status: "gepauzeerd", initials: "NB", monthlyValue: 1500, revenueAttributed: 3100, postsLive: 3, leadsThisMonth: 8 },
+  { id: "c1", name: "Lars Vermeer", handle: "@larsbuilds", status: "actief", initials: "LV", monthlyValue: 2500, revenueAttributed: 18400, postsLive: 12, leadsThisMonth: 47, packageName: "Growth", videosPerMonth: 12, editorCost: 720, paymentStatus: "betaald" },
+  { id: "c2", name: "Sophie de Wit", handle: "@sophie.scales", status: "actief", initials: "SW", monthlyValue: 1800, revenueAttributed: 9200, postsLive: 9, leadsThisMonth: 31, packageName: "Starter", videosPerMonth: 8, editorCost: 480, paymentStatus: "open" },
+  { id: "c3", name: "Daan Koster", handle: "@daankoster", status: "actief", initials: "DK", monthlyValue: 3200, revenueAttributed: 27600, postsLive: 16, leadsThisMonth: 68, packageName: "Scale", videosPerMonth: 16, editorCost: 960, paymentStatus: "betaald" },
+  { id: "c4", name: "Imza Health", handle: "@imza.health", status: "onboarding", initials: "IH", monthlyValue: 2200, revenueAttributed: 0, postsLive: 0, leadsThisMonth: 4, packageName: "Growth", videosPerMonth: 12, editorCost: 720, paymentStatus: "open", createdThisMonth: true },
+  { id: "c5", name: "Noor Bakker", handle: "@noorbakker", status: "gepauzeerd", initials: "NB", monthlyValue: 1500, revenueAttributed: 3100, postsLive: 3, leadsThisMonth: 8, packageName: "Starter", videosPerMonth: 6, editorCost: 360, paymentStatus: "te_laat" },
 ];
 
 // ── Content pipeline (kanban) ──────────────────────────────────────
@@ -170,6 +178,31 @@ export const todos: Todo[] = [
   { id: "t3", client: "Sophie de Wit", title: "Stuur foto's voor carrousel", done: false, due: "ma 9 jun" },
   { id: "t4", client: "Lars Vermeer", title: "Bekijk ideation-batch juni", done: true, due: null },
 ];
+
+// ── Editors (uitbetalingen + deadline-deducties) ───────────────────
+export interface Editor {
+  id: string;
+  name: string;
+  payPerVideo: number;
+  active: boolean;
+  videosThisMonth: number;
+  lateVideos: number; // te laat aangeleverd t.o.v. deadline
+}
+
+export const editors: Editor[] = [
+  { id: "e1", name: "Eva", payPerVideo: 60, active: true, videosThisMonth: 22, lateVideos: 1 },
+  { id: "e2", name: "Sam", payPerVideo: 55, active: true, videosThisMonth: 14, lateVideos: 3 },
+  { id: "e3", name: "Tom", payPerVideo: 65, active: false, videosThisMonth: 0, lateVideos: 0 },
+];
+
+/** 10% deductie per te late video. */
+export const LATE_DEDUCTION = 0.1;
+
+export function editorPayout(e: Editor) {
+  const gross = e.videosThisMonth * e.payPerVideo;
+  const deduction = e.lateVideos * e.payPerVideo * LATE_DEDUCTION;
+  return { gross, deduction, net: gross - deduction };
+}
 
 export const fmtEur = (n: number) =>
   "€" + n.toLocaleString("nl-NL", { maximumFractionDigits: 0 });
