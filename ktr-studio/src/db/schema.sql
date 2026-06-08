@@ -17,7 +17,7 @@ create table if not exists agencies (
 );
 
 -- ── Profielen (koppelt auth-users aan een agency + rol) ─────────
-create type member_role as enum ('owner', 'team', 'client');
+create type member_role as enum ('owner', 'team', 'client', 'editor', 'setter');
 
 create table if not exists profiles (
   user_id    uuid primary key references auth.users (id) on delete cascade,
@@ -302,3 +302,6 @@ create policy "team insert editors" on editors
   for insert with check (agency_id = current_agency_id() and current_client_id() is null);
 create policy "team update editors" on editors
   for update using (agency_id = current_agency_id() and current_client_id() is null);
+
+-- Editor-login koppelen aan een editor-record (forward reference -> ALTER).
+alter table profiles add column if not exists editor_id uuid references editors (id) on delete set null;

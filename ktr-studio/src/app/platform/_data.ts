@@ -195,6 +195,21 @@ export const editors: Editor[] = [
   { id: "e3", name: "Tom", payPerVideo: 65, active: false, videosThisMonth: 0, lateVideos: 0 },
 ];
 
+// ── Team (logins + rollen) ─────────────────────────────────────────
+export interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+  role: "owner" | "team" | "editor" | "setter";
+}
+
+export const team: TeamMember[] = [
+  { id: "u1", name: "Menno Kater", email: "menno@ktrstudio.nl", role: "owner" },
+  { id: "u2", name: "Eva", email: "eva@ktrstudio.nl", role: "editor" },
+  { id: "u3", name: "Jesse", email: "jesse@ktrstudio.nl", role: "editor" },
+  { id: "u4", name: "Nienke", email: "nienke@ktrstudio.nl", role: "setter" },
+];
+
 /** 10% deductie per te late video. */
 export const LATE_DEDUCTION = 0.1;
 

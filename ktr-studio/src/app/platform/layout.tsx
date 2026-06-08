@@ -8,14 +8,22 @@ export default async function PlatformLayout({ children }: { children: ReactNode
   const notifications = await getNotifications();
 
   // Geen sessie (showroom/demo) -> behandel als agency-owner.
-  const role = (ctx.profile?.role as "owner" | "team" | "client") ?? "owner";
+  const role = (ctx.profile?.role as "owner" | "team" | "client" | "editor" | "setter") ?? "owner";
   const isClient = role === "client";
+
+  const roleLabels: Record<string, string> = {
+    owner: "Agency owner",
+    team: "Team",
+    client: "Klantportaal",
+    editor: "Editor",
+    setter: "Setter",
+  };
 
   const brandName = ctx.agency?.brand_name || "KTR Studio";
   const displayName = isClient
     ? ctx.clientName ?? "Klant"
     : ctx.profile?.full_name || "Menno Kater";
-  const roleLabel = isClient ? "Klantportaal" : role === "team" ? "Team" : "Agency owner";
+  const roleLabel = roleLabels[role] ?? "Team";
 
   return (
     <Shell

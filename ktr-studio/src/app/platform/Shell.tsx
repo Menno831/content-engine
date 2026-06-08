@@ -28,6 +28,7 @@ const agencyNav: NavItem[] = [
   { href: "/platform/todos", label: "Taken", icon: icons.check },
   { href: "/platform/reports", label: "Rapporten", icon: icons.reports },
   { href: "/platform/clients", label: "Klanten", icon: icons.clients },
+  { href: "/platform/team", label: "Team", icon: icons.leads },
 ];
 
 // Klantportaal: alleen de eigen content, prestaties, taken en rapporten.
@@ -38,6 +39,27 @@ const clientNav: NavItem[] = [
   { href: "/platform/todos", label: "Mijn taken", icon: icons.check },
   { href: "/platform/reports", label: "Rapporten", icon: icons.reports },
 ];
+
+// Editor (bv. Jesse): het productieboard + taken.
+const editorNav: NavItem[] = [
+  { href: "/platform/pipeline", label: "Productieboard", icon: icons.pipeline },
+  { href: "/platform/todos", label: "Taken", icon: icons.check },
+];
+
+// Setter (bv. Nienke): de CRM/sales pipeline.
+const setterNav: NavItem[] = [
+  { href: "/platform", label: "Overzicht", icon: icons.dashboard, exact: true },
+  { href: "/platform/leads", label: "CRM & Leads", icon: icons.leads },
+];
+
+type Role = "owner" | "team" | "client" | "editor" | "setter";
+
+function navFor(role: Role): NavItem[] {
+  if (role === "client") return clientNav;
+  if (role === "editor") return editorNav;
+  if (role === "setter") return setterNav;
+  return agencyNav;
+}
 
 function initialsOf(name: string) {
   return name.trim().split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase() || "?";
@@ -52,7 +74,7 @@ export function Shell({
   notifications,
 }: {
   children: ReactNode;
-  role: "owner" | "team" | "client";
+  role: Role;
   brandName: string;
   displayName: string;
   roleLabel: string;
@@ -60,7 +82,8 @@ export function Shell({
 }) {
   const pathname = usePathname();
   const isClient = role === "client";
-  const nav = isClient ? clientNav : agencyNav;
+  const isAgency = role === "owner" || role === "team";
+  const nav = navFor(role);
   const brandParts = brandName.split(" ");
 
   return (
@@ -140,7 +163,7 @@ export function Shell({
 
           <div className="flex items-center gap-2 ml-auto">
             <NotificationsBell notifications={notifications} />
-            {!isClient && (
+            {isAgency && (
               <Link
                 href="/platform/studio"
                 className="flex items-center gap-2 rounded-xl bg-accent hover:bg-accent-hover text-background font-bold text-sm px-4 py-2 transition-colors"
