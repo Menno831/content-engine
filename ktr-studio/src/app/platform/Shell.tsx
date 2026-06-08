@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import type { ReactNode, CSSProperties } from "react";
 import { icons, Avatar } from "./_components";
 import { DemoBanner } from "./_states";
 import { DEMO_MODE } from "@/lib/config";
@@ -30,6 +30,7 @@ const agencyNav: NavItem[] = [
   { href: "/platform/reports", label: "Rapporten", icon: icons.reports },
   { href: "/platform/clients", label: "Klanten", icon: icons.clients },
   { href: "/platform/team", label: "Team", icon: icons.leads },
+  { href: "/platform/settings", label: "Instellingen", icon: icons.settings },
 ];
 
 // Klantportaal: alleen de eigen content, prestaties, taken en rapporten.
@@ -72,6 +73,7 @@ export function Shell({
   brandName,
   displayName,
   roleLabel,
+  accent,
   notifications,
 }: {
   children: ReactNode;
@@ -79,6 +81,7 @@ export function Shell({
   brandName: string;
   displayName: string;
   roleLabel: string;
+  accent: string;
   notifications: Notification[];
 }) {
   const pathname = usePathname();
@@ -87,8 +90,14 @@ export function Shell({
   const nav = navFor(role);
   const brandParts = brandName.split(" ");
 
+  // White-label: hertint het hele platform met de agency-accentkleur.
+  const themeStyle = {
+    "--accent": accent,
+    "--accent-hover": `color-mix(in srgb, ${accent}, white 18%)`,
+  } as CSSProperties;
+
   return (
-    <div className="min-h-screen flex bg-background text-foreground">
+    <div className="min-h-screen flex bg-background text-foreground" style={themeStyle}>
       {/* ── Sidebar ── */}
       <aside className="hidden lg:flex flex-col w-64 shrink-0 border-r border-white/[0.06] bg-[#080808] sticky top-0 h-screen">
         {/* Brand (white-label slot) */}

@@ -20,6 +20,7 @@ export default async function PlatformLayout({ children }: { children: ReactNode
   };
 
   const brandName = ctx.agency?.brand_name || "KTR Studio";
+  const accent = ctx.agency?.accent || "#F97316";
   const displayName = isClient
     ? ctx.clientName ?? "Klant"
     : ctx.profile?.full_name || "Menno Kater";
@@ -31,6 +32,7 @@ export default async function PlatformLayout({ children }: { children: ReactNode
       brandName={brandName}
       displayName={displayName}
       roleLabel={roleLabel}
+      accent={accent}
       notifications={notifications}
     >
       {children}
