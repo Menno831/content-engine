@@ -7,6 +7,8 @@ import { icons, Avatar } from "./_components";
 import { DemoBanner } from "./_states";
 import { DEMO_MODE } from "@/lib/config";
 import { signOut } from "../login/actions";
+import { NotificationsBell } from "./NotificationsBell";
+import type { Notification } from "./_data";
 
 interface NavItem {
   href: string;
@@ -21,15 +23,17 @@ const agencyNav: NavItem[] = [
   { href: "/platform/studio", label: "Studio (AI)", icon: icons.studio },
   { href: "/platform/leads", label: "Leads & Omzet", icon: icons.leads },
   { href: "/platform/analytics", label: "Analytics", icon: icons.analytics },
+  { href: "/platform/todos", label: "Taken", icon: icons.check },
   { href: "/platform/reports", label: "Rapporten", icon: icons.reports },
   { href: "/platform/clients", label: "Klanten", icon: icons.clients },
 ];
 
-// Klantportaal: alleen de eigen content, prestaties en rapporten.
+// Klantportaal: alleen de eigen content, prestaties, taken en rapporten.
 const clientNav: NavItem[] = [
   { href: "/platform", label: "Overzicht", icon: icons.dashboard, exact: true },
   { href: "/platform/pipeline", label: "Mijn content", icon: icons.pipeline },
   { href: "/platform/analytics", label: "Prestaties", icon: icons.analytics },
+  { href: "/platform/todos", label: "Mijn taken", icon: icons.check },
   { href: "/platform/reports", label: "Rapporten", icon: icons.reports },
 ];
 
@@ -43,12 +47,14 @@ export function Shell({
   brandName,
   displayName,
   roleLabel,
+  notifications,
 }: {
   children: ReactNode;
   role: "owner" | "team" | "client";
   brandName: string;
   displayName: string;
   roleLabel: string;
+  notifications: Notification[];
 }) {
   const pathname = usePathname();
   const isClient = role === "client";
@@ -131,10 +137,7 @@ export function Shell({
           </div>
 
           <div className="flex items-center gap-2 ml-auto">
-            <button className="relative grid place-items-center w-9 h-9 rounded-xl border border-white/[0.07] bg-white/[0.02] text-muted hover:text-foreground transition-colors">
-              {icons.bell}
-              <span className="absolute top-2 right-2.5 w-1.5 h-1.5 rounded-full bg-accent" />
-            </button>
+            <NotificationsBell notifications={notifications} />
             {!isClient && (
               <Link
                 href="/platform/studio"

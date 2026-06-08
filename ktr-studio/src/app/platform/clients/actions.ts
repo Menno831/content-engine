@@ -97,6 +97,7 @@ export async function createClientAction(
     agency_id: agency.id,
     name,
     ig_handle: String(formData.get("ig_handle") ?? "").trim() || null,
+    contact_email: String(formData.get("contact_email") ?? "").trim() || null,
     monthly_value: Number(formData.get("monthly_value") ?? 0) || 0,
     status: "onboarding",
   });

@@ -38,6 +38,7 @@ create table if not exists clients (
   name           text not null,
   ig_handle      text,
   yt_channel_id  text,
+  contact_email  text,
   status         client_status not null default 'onboarding',
   monthly_value  numeric default 0,
   created_at     timestamptz not null default now()
@@ -211,4 +212,62 @@ create policy "team update leads" on leads
   for update using (
     current_client_id() is null
     and client_id in (select id from clients where agency_id = current_agency_id())
+  );
+
+-- ════════════════════════════════════════════════════════════════
+-- Notificaties (bell + e-mail) en content-to-do's per klant.
+-- ════════════════════════════════════════════════════════════════
+create table if not exists notifications (
+  id          uuid primary key default gen_random_uuid(),
+  agency_id   uuid not null references agencies (id) on delete cascade,
+  client_id   uuid references clients (id) on delete cascade,
+  audience    text not null default 'client',  -- 'client' | 'agency'
+  type        text not null default 'info',    -- 'ideation' | 'approval' | 'todo' | 'info'
+  title       text not null,
+  body        text,
+  link        text,
+  read        boolean not null default false,
+  created_at  timestamptz not null default now()
+);
+create index if not exists idx_notif_client on notifications (client_id, read, created_at desc);
+
+create table if not exists todos (
+  id          uuid primary key default gen_random_uuid(),
+  agency_id   uuid not null references agencies (id) on delete cascade,
+  client_id   uuid not null references clients (id) on delete cascade,
+  title       text not null,
+  done        boolean not null default false,
+  due         date,
+  created_at  timestamptz not null default now()
+);
+create index if not exists idx_todos_client on todos (client_id, done);
+
+alter table notifications enable row level security;
+alter table todos         enable row level security;
+
+-- Lezen: agency-team alles van de agency; client-login alleen eigen klant.
+create policy "read notifications" on notifications
+  for select using (
+    agency_id = current_agency_id()
+    and (current_client_id() is null or client_id = current_client_id())
+  );
+create policy "team insert notifications" on notifications
+  for insert with check (agency_id = current_agency_id() and current_client_id() is null);
+create policy "update notifications" on notifications
+  for update using (
+    agency_id = current_agency_id()
+    and (current_client_id() is null or client_id = current_client_id())
+  );
+
+create policy "read todos" on todos
+  for select using (
+    agency_id = current_agency_id()
+    and (current_client_id() is null or client_id = current_client_id())
+  );
+create policy "team insert todos" on todos
+  for insert with check (agency_id = current_agency_id() and current_client_id() is null);
+create policy "update todos" on todos
+  for update using (
+    agency_id = current_agency_id()
+    and (current_client_id() is null or client_id = current_client_id())
   );

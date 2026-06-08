@@ -138,6 +138,39 @@ export const generatedHooks = [
   { hook: "Stop met 'waarde geven'. Doe dit in plaats daarvan.", angle: "Controversieel", score: 81 },
 ];
 
+// ── Notificaties (bell) ────────────────────────────────────────────
+export interface Notification {
+  id: string;
+  type: "ideation" | "approval" | "todo" | "info";
+  title: string;
+  body: string | null;
+  link: string | null;
+  read: boolean;
+  date: string;
+}
+
+export const notifications: Notification[] = [
+  { id: "n1", type: "ideation", title: "Nieuwe ideation staat klaar", body: "3 nieuwe concepten voor je — bekijk en reageer.", link: "/platform/pipeline", read: false, date: "2u geleden" },
+  { id: "n2", type: "approval", title: "Klant-resultaat reveal wacht op goedkeuring", body: "Daan Koster · Client Approval", link: "/platform/pipeline", read: false, date: "5u geleden" },
+  { id: "n3", type: "todo", title: "Nieuwe taak: lever 3 ruwe clips aan", body: "Deadline vrijdag", link: "/platform/todos", read: true, date: "gisteren" },
+];
+
+// ── Content-to-do's per klant ──────────────────────────────────────
+export interface Todo {
+  id: string;
+  client: string;
+  title: string;
+  done: boolean;
+  due: string | null;
+}
+
+export const todos: Todo[] = [
+  { id: "t1", client: "Daan Koster", title: "Lever 3 ruwe clips aan voor montage", done: false, due: "vr 6 jun" },
+  { id: "t2", client: "Daan Koster", title: "Keur 'Klant-resultaat reveal' goed", done: false, due: "do 5 jun" },
+  { id: "t3", client: "Sophie de Wit", title: "Stuur foto's voor carrousel", done: false, due: "ma 9 jun" },
+  { id: "t4", client: "Lars Vermeer", title: "Bekijk ideation-batch juni", done: true, due: null },
+];
+
 export const fmtEur = (n: number) =>
   "€" + n.toLocaleString("nl-NL", { maximumFractionDigits: 0 });
 

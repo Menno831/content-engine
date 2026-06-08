@@ -1,9 +1,11 @@
 import type { ReactNode } from "react";
 import { getSessionContext } from "@/lib/auth";
+import { getNotifications } from "@/lib/notifications";
 import { Shell } from "./Shell";
 
 export default async function PlatformLayout({ children }: { children: ReactNode }) {
   const ctx = await getSessionContext();
+  const notifications = await getNotifications();
 
   // Geen sessie (showroom/demo) -> behandel als agency-owner.
   const role = (ctx.profile?.role as "owner" | "team" | "client") ?? "owner";
@@ -16,7 +18,13 @@ export default async function PlatformLayout({ children }: { children: ReactNode
   const roleLabel = isClient ? "Klantportaal" : role === "team" ? "Team" : "Agency owner";
 
   return (
-    <Shell role={role} brandName={brandName} displayName={displayName} roleLabel={roleLabel}>
+    <Shell
+      role={role}
+      brandName={brandName}
+      displayName={displayName}
+      roleLabel={roleLabel}
+      notifications={notifications}
+    >
       {children}
     </Shell>
   );
