@@ -1,45 +1,78 @@
 "use client";
 
 import { useState } from "react";
-import { clients, generatedHooks } from "../_data";
+import { clients } from "../_data";
 import { PageHeader, Card, Badge, Eyebrow, icons } from "../_components";
 
-const SAMPLE_SCRIPT = `HOOK (0–3s)
-"Iedereen post elke dag — en niemand groeit. Dit is waarom."
-[Talking head, recht in de camera, geen intro]
+const TONES = ["Contrarian", "Storytelling", "Educatief", "Klant-case"];
 
-PROBLEEM (3–10s)
-Je doet alles 'goed': consistent posten, waarde geven, mooie edits.
-Maar je bereik blijft hangen. Want je vecht tegen het algoritme
-in plaats van mét de kijker.
+async function callAI(template: string, input: string): Promise<{ text: string; mock: boolean; error?: string }> {
+  try {
+    const res = await fetch("/api/ai/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ template, input }),
+    });
+    const data = await res.json();
+    if (!data.ok) return { text: "", mock: false, error: data.error ?? "Er ging iets mis." };
+    return { text: data.text, mock: Boolean(data.mock) };
+  } catch {
+    return { text: "", mock: false, error: "Er ging iets mis bij het genereren." };
+  }
+}
 
-INZICHT (10–22s)
-De eerste 3 seconden bepalen 90% van je bereik.
-Niet je hashtags. Niet je posttijd. Je eerste frame.
-
-BEWIJS (22–35s)
-Ik testte dit met een klant: zelfde content, alleen ander openingsframe.
-Resultaat: van 4.000 naar 84.000 views. Eén reel.
-
-CTA (35–40s)
-Wil je mijn frame-formule? Reageer met 'FRAME' en ik stuur 'm.`;
+function parseHooks(text: string): string[] {
+  return text
+    .split("\n")
+    .map((l) => l.replace(/^\s*(\d+[.)]|[-*•])\s*/, "").replace(/^["'“”]+|["'“”]+$/g, "").trim())
+    .filter((l) => l.length > 3)
+    .slice(0, 8);
+}
 
 export default function Studio() {
   const [client, setClient] = useState(clients[0].name);
   const [topic, setTopic] = useState("");
-  const [generated, setGenerated] = useState(false);
+  const [tones, setTones] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedHook, setSelectedHook] = useState<number | null>(null);
+  const [hooks, setHooks] = useState<string[] | null>(null);
+  const [mock, setMock] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function generate() {
+  const [selectedHook, setSelectedHook] = useState<string | null>(null);
+  const [script, setScript] = useState<string | null>(null);
+  const [scriptLoading, setScriptLoading] = useState(false);
+
+  function toggleTone(t: string) {
+    setTones((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
+  }
+
+  async function generate() {
+    if (!topic.trim()) return;
     setLoading(true);
-    setGenerated(false);
+    setHooks(null);
     setSelectedHook(null);
-    // Mock: in de echte build roept dit Claude aan via /api/studio
-    setTimeout(() => {
-      setLoading(false);
-      setGenerated(true);
-    }, 900);
+    setScript(null);
+    setError(null);
+
+    const toneStr = tones.length ? ` Toon: ${tones.join(", ")}.` : "";
+    const template = `Genereer 5 scroll-stopping reel-hooks voor de personal brand van ${client} over het onderwerp "{{onderwerp}}".${toneStr} Geef alleen de hooks, één per regel, zonder nummering of aanhalingstekens.`;
+    const { text, mock: isMock, error: err } = await callAI(template, topic);
+    if (err) setError(err);
+    else {
+      setHooks(parseHooks(text));
+      setMock(isMock);
+    }
+    setLoading(false);
+  }
+
+  async function selectHook(hook: string) {
+    setSelectedHook(hook);
+    setScript(null);
+    setScriptLoading(true);
+    const template = `Schrijf een volledig reel-script van ~40 seconden voor ${client} op basis van deze hook: "${hook}". Onderwerp: "{{onderwerp}}". Gebruik secties: HOOK (0-3s), PROBLEEM, INZICHT, BEWIJS, CTA. Voeg korte regie-aanwijzingen toe tussen [haakjes].`;
+    const { text, error: err } = await callAI(template, topic);
+    setScript(err ? err : text);
+    setScriptLoading(false);
   }
 
   return (
@@ -56,9 +89,7 @@ export default function Studio() {
           <Eyebrow>Briefing</Eyebrow>
           <h2 className="font-display font-extrabold text-xl mb-5">Wat maken we?</h2>
 
-          <label className="block text-[12px] font-mono uppercase tracking-wider text-muted mb-2">
-            Klant
-          </label>
+          <label className="block text-[12px] font-mono uppercase tracking-wider text-muted mb-2">Klant</label>
           <select
             value={client}
             onChange={(e) => setClient(e.target.value)}
@@ -71,9 +102,7 @@ export default function Studio() {
             ))}
           </select>
 
-          <label className="block text-[12px] font-mono uppercase tracking-wider text-muted mb-2">
-            Onderwerp / invalshoek
-          </label>
+          <label className="block text-[12px] font-mono uppercase tracking-wider text-muted mb-2">Onderwerp / invalshoek</label>
           <textarea
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
@@ -83,10 +112,15 @@ export default function Studio() {
           />
 
           <div className="flex flex-wrap gap-2 mb-5">
-            {["Contrarian", "Storytelling", "Educatief", "Klant-case"].map((t) => (
+            {TONES.map((t) => (
               <button
                 key={t}
-                className="rounded-full border border-white/[0.08] hover:border-accent/30 hover:text-accent px-3 py-1.5 text-[12px] text-muted transition-all"
+                onClick={() => toggleTone(t)}
+                className={`rounded-full px-3 py-1.5 text-[12px] transition-all ${
+                  tones.includes(t)
+                    ? "bg-accent text-background font-bold"
+                    : "border border-white/[0.08] hover:border-accent/30 hover:text-accent text-muted"
+                }`}
               >
                 {t}
               </button>
@@ -95,8 +129,8 @@ export default function Studio() {
 
           <button
             onClick={generate}
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-2 rounded-xl bg-accent hover:bg-accent-hover disabled:opacity-60 text-background font-bold text-sm px-4 py-3 transition-colors"
+            disabled={loading || !topic.trim()}
+            className="w-full flex items-center justify-center gap-2 rounded-xl bg-accent hover:bg-accent-hover disabled:opacity-50 text-background font-bold text-sm px-4 py-3 transition-colors"
           >
             {loading ? (
               <>
@@ -108,13 +142,13 @@ export default function Studio() {
             )}
           </button>
           <p className="mt-3 text-[11px] text-muted text-center">
-            Mock-output · in productie aangedreven door Claude
+            {mock ? "Mock-output · koppel ANTHROPIC_API_KEY voor echt" : "Aangedreven door Claude"}
           </p>
         </Card>
 
         {/* Output */}
         <div className="lg:col-span-3 space-y-5">
-          {!generated && !loading && (
+          {!hooks && !loading && !error && (
             <Card className="p-12 text-center border-dashed">
               <span className="inline-grid place-items-center w-14 h-14 rounded-2xl bg-accent/10 text-accent mb-4">
                 {icons.spark}
@@ -123,6 +157,12 @@ export default function Studio() {
               <p className="text-muted text-sm max-w-sm mx-auto">
                 Vul een briefing in en genereer hooks + een volledig script in seconden.
               </p>
+            </Card>
+          )}
+
+          {error && (
+            <Card className="p-6 border-red-400/30 bg-red-400/[0.05]">
+              <p className="text-sm text-red-300">{error}</p>
             </Card>
           )}
 
@@ -137,53 +177,54 @@ export default function Studio() {
             </Card>
           )}
 
-          {generated && (
+          {hooks && hooks.length > 0 && (
             <>
               <Card className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="font-display font-extrabold text-xl">Hook-opties</h2>
-                  <Badge color="#34D399">{icons.check} {generatedHooks.length} gegenereerd</Badge>
+                  <Badge color="#34D399">{icons.check} {hooks.length} gegenereerd</Badge>
                 </div>
                 <div className="space-y-2.5">
-                  {generatedHooks.map((h, i) => (
+                  {hooks.map((h, i) => (
                     <button
                       key={i}
-                      onClick={() => setSelectedHook(i)}
+                      onClick={() => selectHook(h)}
                       className={`w-full text-left rounded-xl border p-4 transition-all ${
-                        selectedHook === i
+                        selectedHook === h
                           ? "border-accent/40 bg-accent/[0.06]"
                           : "border-white/[0.07] hover:border-accent/25 bg-white/[0.01]"
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <p className="text-sm leading-snug">&ldquo;{h.hook}&rdquo;</p>
-                        <span className="shrink-0 font-mono text-[11px] text-accent">{h.score}</span>
-                      </div>
-                      <div className="mt-2 flex items-center gap-2">
-                        <Badge color="#A78BFA">{h.angle}</Badge>
-                        <span className="text-[11px] text-muted">hook-score {h.score}/100</span>
-                      </div>
+                      <p className="text-sm leading-snug">&ldquo;{h}&rdquo;</p>
                     </button>
                   ))}
                 </div>
               </Card>
 
-              {selectedHook !== null && (
+              {selectedHook && (
                 <Card className="p-6">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="font-display font-extrabold text-xl">Volledig script</h2>
-                    <div className="flex gap-2">
-                      <button className="rounded-lg border border-white/[0.08] hover:border-accent/30 px-3 py-1.5 text-[12px] transition-all">
+                    {script && (
+                      <button
+                        onClick={() => navigator.clipboard?.writeText(script)}
+                        className="rounded-lg border border-white/[0.08] hover:border-accent/30 px-3 py-1.5 text-[12px] transition-all"
+                      >
                         Kopieer
                       </button>
-                      <button className="flex items-center gap-1.5 rounded-lg bg-accent hover:bg-accent-hover text-background font-bold px-3 py-1.5 text-[12px] transition-colors">
-                        {icons.arrowRight} Naar pipeline
-                      </button>
-                    </div>
+                    )}
                   </div>
-                  <pre className="whitespace-pre-wrap font-mono text-[12.5px] leading-relaxed text-foreground/85 bg-black/30 rounded-xl p-5 border border-white/[0.05]">
-                    {SAMPLE_SCRIPT}
-                  </pre>
+                  {scriptLoading ? (
+                    <div className="space-y-3">
+                      {[0, 1, 2, 3, 4].map((i) => (
+                        <div key={i} className="h-3 rounded bg-white/[0.05] animate-pulse" style={{ width: `${90 - i * 6}%` }} />
+                      ))}
+                    </div>
+                  ) : (
+                    <pre className="whitespace-pre-wrap font-mono text-[12.5px] leading-relaxed text-foreground/85 bg-black/30 rounded-xl p-5 border border-white/[0.05]">
+                      {script}
+                    </pre>
+                  )}
                 </Card>
               )}
             </>
