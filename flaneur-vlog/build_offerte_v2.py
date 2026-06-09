@@ -230,8 +230,8 @@ HTML = """<!doctype html><html lang="nl"><head><meta charset="utf-8">
   verplichting. Maar de engine is waar het echt gebeurt. Van nu tot Black Friday is precies de aanloop waarin een
   founder-kanaal momentum opbouwt, en met de fabriekstoegang die nu openligt wil je niet wachten. Daarom die zes
   maanden: zo word ik je vaste contentteam en bouwen we iets dat blijft staan.</p>
-  <p>En er staat nog een factuur van &euro;1.450 open. Kies je voor de engine, dan strepen we die gewoon weg en
-  beginnen we met een schone lei.</p>
+  <p>En die openstaande factuur? Kies je voor de engine, dan strepen we die gewoon weg en beginnen we met een
+  schone lei.</p>
 
   <div class="flow"><strong>Volgende stap:</strong> laat me weten welke kant je op wil, dan prikken we meteen de
   draaidagen. Istanbul kan al snel, Dubai zetten we vast voor de eerste helft van november. Dan zijn we ruim op
