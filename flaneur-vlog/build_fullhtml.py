@@ -8,8 +8,7 @@ import markdown
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 DOCS = [
-    "00-regi-brief.md", "01-concept.md", "05-interview.md",
-    "06-publicatie.md", "08-strategie.md",
+    "00-regi-brief.md", "01-concept.md", "06-publicatie.md", "08-strategie.md",
 ]
 
 BASE = "https://d8j0ntlcm91z4.cloudfront.net/user_2zm0bcmvhYtqhUNIemq9z5Hr7Ai/"
@@ -56,8 +55,8 @@ def md_html(path):
 
 def storyboard_html():
     out = ['<section class="doc sb"><h1>Visueel storyboard</h1>',
-           '<p>Referentiebeelden in volgorde die de look en de opbouw van de film laten zien. '
-           'Warme grade in Dubai, koelere grade in Amsterdam.</p>']
+           '<p>Zo ziet het eruit. Een reeks beelden in volgorde, zodat je de film al voor je ziet. '
+           'Warm in Dubai, koeler in Amsterdam: dat contrast draagt het verhaal.</p>']
     for beat, frames in SB_FRAMES:
         out.append(f'<h2>{beat}</h2><div class="sbgrid">')
         for sc, cap, fn in frames:

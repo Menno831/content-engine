@@ -13,7 +13,7 @@ Publiceer **vóór of aan het begin van de Black Friday-rollout**, niet erna: de
 > Vuistregel: één concrete inzet + één persoonlijk element. Geen clickbait.
 
 ## Thumbnail
-Jouw gezicht (of POV) + één sterk anker (Dubai-uitzicht of het drukke kantoor). Hoog contrast, max 2 tot 3 woorden. Test 2 varianten: rust/Dubai vs. energie/kantoor.
+Jouw gezicht (of POV) + één sterk anker (Dubai-uitzicht of het drukke kantoor). Hoog contrast, max 2 tot 3 woorden. We maken er drie compleet verschillende en testen welke wint.
 
 ## Beschrijving (template, Engels)
 

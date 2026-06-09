@@ -4,7 +4,7 @@
 
 ## De kernvraag die we beantwoorden
 
-> "What does it really look like to run a brand like Flaneur in the run-up to the biggest sales day of the year, from inside the founder's head?"
+> "What does it really look like to run a brand like Flaneur in the run-up to the biggest sales day of the year, from inside your head?"
 
 Dit is geen merkvideo van Flaneur, het is een founder-vlog van jou. Flaneur is het decor, niet het onderwerp.
 
@@ -67,4 +67,4 @@ De Black Friday-rollout zelf: bijna een maand lang gaat de website **interactief
 
 ---
 
-> **Jouw stem** komt uit een kort **interviewblok op Dag 1** (10 tot 15 min). De vragen staan klaar in [`05-interview.md`](./05-interview.md). Daaruit knipt de editor alle voice-over.
+> **Jouw stem** komt uit een kort **interviewblok op Dag 1** (10 tot 15 min): jij praat vrij, ik stel een paar vragen, en daaruit knipt de editor de hele voice-over. Verder hoef je niks voor te bereiden.
