@@ -67,8 +67,9 @@ def storyboard_html():
     return "".join(out)
 
 CSS = """
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@500&display=swap');
-:root{--accent:#F97316;--accent2:#C2410C;--ink:#17150f;--muted:#6f6a62;--line:#ece9e4;--bg:#fbfaf8}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500&display=swap');
+/* Displayfont op een plek: vervang var(--display) door jouw font zodra de naam bekend is */
+:root{--display:'Inter',system-ui,sans-serif;--accent:#F97316;--accent2:#C2410C;--ink:#17150f;--muted:#6f6a62;--line:#ece9e4;--bg:#fbfaf8}
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 body{font-family:'Inter',system-ui,-apple-system,sans-serif;color:var(--ink);background:var(--bg);line-height:1.65;font-size:15px;-webkit-font-smoothing:antialiased}
@@ -77,15 +78,15 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;color:var(--ink);bac
 /* cover */
 .cover{min-height:90vh;display:flex;flex-direction:column;justify-content:center;padding:64px 0}
 .cover .tag{font-family:'JetBrains Mono',monospace;letter-spacing:.34em;font-size:12px;color:var(--accent);text-transform:uppercase}
-.cover h1{font-family:'Syne',sans-serif;font-weight:800;font-size:92px;line-height:.92;letter-spacing:-2.5px;margin:20px 0 12px;color:#100f0b}
+.cover h1{font-family:var(--display);font-weight:900;font-size:88px;line-height:.92;letter-spacing:-3px;margin:20px 0 12px;color:#100f0b}
 .cover .sub{font-size:21px;color:var(--muted);font-weight:500}
 .cover .rule{width:68px;height:5px;background:var(--accent);border-radius:3px;margin:36px 0}
 .cover .meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);letter-spacing:.05em;line-height:1.9}
 
 /* secties */
 section.doc{padding-top:62px}
-section.doc>h1{font-family:'Syne',sans-serif;font-weight:800;font-size:31px;letter-spacing:-.5px;color:#100f0b;padding-top:18px;margin-bottom:18px;border-top:3px solid var(--accent);display:inline-block}
-h2{font-family:'Syne',sans-serif;font-weight:700;font-size:20px;letter-spacing:-.2px;margin:30px 0 10px;color:#100f0b}
+section.doc>h1{font-family:var(--display);font-weight:800;font-size:31px;letter-spacing:-.5px;color:#100f0b;padding-top:18px;margin-bottom:18px;border-top:3px solid var(--accent);display:inline-block}
+h2{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.2px;margin:30px 0 10px;color:#100f0b}
 h3{font-weight:700;font-size:15.5px;color:var(--accent2);margin:20px 0 6px}
 h4{font-weight:700;font-size:14px;margin:14px 0 4px}
 p{margin:10px 0}
