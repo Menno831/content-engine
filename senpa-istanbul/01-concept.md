@@ -15,15 +15,6 @@ Dit is geen fabrieks-rondleiding. Het is een **founder die je meeneemt naar de p
 - **Founder-led.** Jij die je eigen maker bezoekt, de standaard die je eist, de relatie. Dat is echt, geen marketing.
 - **Tijdloos.** Dit is geen video die veroudert. Het is een merkverhaal dat jaren meegaat.
 
-## De vertrouwelijkheids-lijn (belangrijk)
-
-De fabriek maakt voor andere grote merken. Die merken en hun producten brengen we **sowieso niet** in beeld; dat ligt gevoelig en juridisch vast. Twee niveaus:
-
-- **Default (veilig, waar we vanuit gaan):** we claimen geen namen. De kracht zit in de toegang, de schaal en het vakmanschap zelf, plus dat Flaneur hier gemaakt wordt. Dat staat als een huis, ook zonder één merk te noemen.
-- **[Optioneel, TBC met de fabriek]:** mógen we de grote namen verbaal noemen, dan voegen we één tasteful verwijzing toe ("the factory trusted by some of the biggest names in fashion"). We gaan er niet vanuit dat het mag, we houden het open tot de fabriek het bevestigt.
-
-In beide gevallen filmen we de Flaneur-productie en het pure ambacht: handen, stoffen, machines, processen, schaal. Niks dat andermans designs verraadt.
-
 ## Toon & stijl
 
 Cinematisch en premium, met respect voor het ambacht. Weinig woorden, veel beeld: textuur, licht, handen, geluid van de machines. De look van een high-end merkfilm, niet van een bedrijfsvideo.

@@ -16,7 +16,7 @@
 2. *"What does real quality look like on the floor?"*
 3. *"What do you look for in a brand you choose to work with?"*
 
-## De makers (werknemers, met toestemming)
+## De makers (werknemers)
 Korte, menselijke momenten. Hoeft geen formeel interview, één of twee zinnen plus hun handen aan het werk is genoeg.
 1. *"How long have you been doing this?"*
 2. *"What's the part of the work you're most proud of?"*

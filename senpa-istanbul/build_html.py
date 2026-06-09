@@ -6,8 +6,7 @@ import markdown
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 DOCS = [
-    "01-concept.md", "02-structuur.md", "03-shotlist.md",
-    "04-interview.md", "05-logistiek.md",
+    "01-concept.md", "02-structuur.md", "03-shotlist.md", "04-interview.md",
 ]
 
 def md_html(path):

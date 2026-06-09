@@ -1,8 +1,6 @@
 # 03: Shotlist (afvinkbaar, per zone)
 
 > Print/open dit op locatie. "Must" = de film werkt niet zonder. "Nice" = extra dekking voor de edit. Vink af tijdens het draaien. Camerabewegingen: **Static** · **Gimbal** · **Handheld** · **Drone** · **Slider/Macro**.
->
-> **Vertrouwelijkheid:** geen andere merken, labels, tech-packs, designs of klantnamen in beeld. Bij twijfel: niet draaien, of de fabriekscontact vragen. Filmen we materiaal/processen, check dat er geen herkenbare designs van andere merken in frame liggen.
 
 ---
 
@@ -32,7 +30,7 @@
 
 ## Zone E: stikken (sewing lines)
 - [ ] **Must** Naald door stof, extreme close-up, *Macro*
-- [ ] **Must** Werker geconcentreerd aan de machine (toestemming), *Static medium*
+- [ ] **Must** Werker geconcentreerd aan de machine, *Static medium*
 - [ ] **Must** Rij naaimachines in werking, *Gimbal langs de lijn*
 - [ ] Nice Handen + machine ritme, *Macro slow-mo*
 
@@ -54,7 +52,7 @@ Praat-tegen-de-lens momenten, dragen de VO. Draai elk in 2 framings (medium + ti
 - [ ] **Must** Reflectie: wat het je waard is, *rustige hoek*
 - [ ] **Must** Outro-belofte ("I'd rather show you"), *waar dan ook, rustig*
 
-## Zone I: mensen & portretten (met toestemming)
+## Zone I: mensen & portretten
 - [ ] Nice Portret van een vakman/vrouw aan het werk, *Static*
 - [ ] Nice Handen-collage van verschillende werkers, *Macro*
 - [ ] Nice Korte echte interactie jij <-> maker, *Gimbal/Handheld*

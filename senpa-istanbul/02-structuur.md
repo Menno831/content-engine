@@ -11,8 +11,7 @@ De buitenkant zegt niks. Geen logo's, geen glamour. Juist dat is de hook.
 
 ## Beweging 2: de schaal
 De floor opent zich: de omvang, de machines, de mensen, het ritme.
-- VO (default): *"This is one of the places the best clothing in the world is actually made."*
-- VO [optioneel, alleen als de fabriek het toestaat]: *"...the kind of place the biggest names in fashion trust."*
+- VO: *"This is one of the places the best clothing in the world is actually made."*
 - Beeld: brede establishing van de werkvloer, rijen machines, beweging, geluid.
 
 ## Beweging 3: het ambacht
