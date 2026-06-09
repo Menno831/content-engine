@@ -8,8 +8,8 @@ import markdown
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 DOCS = [
-    "00-regi-brief.md", "01-concept.md", "02-storyboard.md", "03-shotlist.md",
-    "04-draaischema.md", "05-interview.md", "06-publicatie.md", "08-strategie.md",
+    "00-regi-brief.md", "01-concept.md", "05-interview.md",
+    "06-publicatie.md", "08-strategie.md",
 ]
 
 BASE = "https://d8j0ntlcm91z4.cloudfront.net/user_2zm0bcmvhYtqhUNIemq9z5Hr7Ai/"
@@ -48,7 +48,11 @@ SB_FRAMES = [
 def md_html(path):
     with open(path, encoding="utf-8") as f:
         raw = f.read()
-    return markdown.markdown(raw, extensions=["tables", "fenced_code", "sane_lists"])
+    html = markdown.markdown(raw, extensions=["tables", "fenced_code", "sane_lists"])
+    # strip interne nummering uit de koppen voor de Regi-versie (01: Concept -> Concept)
+    import re
+    html = re.sub(r'(<h1>)\s*\d+:\s*', r'\1', html, count=1)
+    return html
 
 def storyboard_html():
     out = ['<section class="doc sb"><h1>Visueel storyboard</h1>',

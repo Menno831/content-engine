@@ -1,6 +1,6 @@
 # 00: Voor Regi, in 2 minuten
 
-> De compacte voorkant van het pakket. Dit is het **enige** dat je hoeft te lezen; de rest is voor de crew. In de PDF staat deze pagina visueel uitgewerkt (getekende tijdlijn + kaarten).
+> Regi, in het kort: wat we maken, wat het je oplevert, en wat we van jou nodig hebben. Meer hoef je niet te lezen.
 
 ## Jouw eerste vlog, in het kort
 
@@ -27,5 +27,3 @@ Een POV founder-vlog die je verhuizing naar Dubai en de aanloop naar de grootste
 | Woning + uitzicht in ochtendlicht · home office · interviewblok · rustig reflectie-moment. | Kantoor in vol bedrijf · team aan Black Friday · jij legt de interactieve rollout uit. |
 
 **Waarom dit werkt:** we eindigen vlák vóór Black Friday. De uitkomst (~€2M?) wordt deel 2 → kijkers blijven hangen en komen terug.
-
-> Alle details (shot-by-shot storyboard, gear, planning en publicatie) staan in de rest van dit pakket.
