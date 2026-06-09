@@ -55,7 +55,7 @@ def md_html(path):
 
 def storyboard_html():
     out = ['<section class="doc sb"><h1>Visueel storyboard</h1>',
-           '<p>Zo ziet het eruit. Een reeks beelden in volgorde, zodat je de film al voor je ziet. '
+           '<p class="lead">Zo ziet het eruit. Een reeks beelden in volgorde, zodat je de film al voor je ziet. '
            'Warm in Dubai, koeler in Amsterdam: dat contrast draagt het verhaal.</p>']
     for beat, frames in SB_FRAMES:
         out.append(f'<h2>{beat}</h2><div class="sbgrid">')
@@ -67,44 +67,74 @@ def storyboard_html():
     return "".join(out)
 
 CSS = """
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@500&display=swap');
+:root{--accent:#F97316;--accent2:#C2410C;--ink:#17150f;--muted:#6f6a62;--line:#ece9e4;--bg:#fbfaf8}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#1c1c1c;line-height:1.6;background:#fff}
-.wrap{max-width:860px;margin:0 auto;padding:40px 28px 80px}
-.cover{text-align:center;padding:120px 0 80px;border-bottom:3px solid #F97316;margin-bottom:8px}
-.cover .tag{font-family:ui-monospace,Menlo,monospace;letter-spacing:4px;color:#C2410C;font-size:13px}
-.cover h1{font-size:52px;margin:14px 0 6px;letter-spacing:-1px}
-.cover .sub{font-size:18px;color:#555}
-.cover .meta{color:#888;font-size:13px;margin-top:18px}
-section.doc{padding-top:34px}
-section.doc h1{font-size:26px;border-bottom:2.5px solid #F97316;padding-bottom:7px;margin:10px 0 16px}
-h2{font-size:18px;border-left:4px solid #F97316;padding-left:10px;margin:26px 0 10px}
-h3{font-size:15px;color:#C2410C;margin:18px 0 6px}
-h4{font-size:13.5px;margin:12px 0 4px}
-p{margin:8px 0}
-ul,ol{margin:8px 0 8px 22px}
-li{margin:4px 0}
-a{color:#C2410C;text-decoration:none}
-strong{color:#0a0a0a}
-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px}
-th{background:#F97316;color:#fff;text-align:left;padding:7px 9px;font-size:12px;letter-spacing:.5px;text-transform:uppercase}
-td{padding:7px 9px;border-bottom:1px solid #eee;vertical-align:top}
-tr:nth-child(even) td{background:#fafafa}
-code{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:#f3f3f3;color:#9A3412;padding:1px 4px;border-radius:3px}
-pre{background:#f6f6f4;border-left:3px solid #F97316;padding:12px;overflow:auto;margin:10px 0}
-pre code{background:none;color:#222}
-blockquote{border-left:3px solid #ccc;background:#fafafa;padding:8px 14px;color:#444;margin:10px 0}
-hr{border:0;border-top:1px solid #ddd;margin:20px 0}
-.sbgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:10px 0}
-.sbcard{border:1px solid #e4e4e4;border-radius:10px;overflow:hidden}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;color:var(--ink);background:var(--bg);line-height:1.65;font-size:15px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:840px;margin:0 auto;padding:0 34px 100px}
+
+/* cover */
+.cover{min-height:90vh;display:flex;flex-direction:column;justify-content:center;padding:64px 0}
+.cover .tag{font-family:'JetBrains Mono',monospace;letter-spacing:.34em;font-size:12px;color:var(--accent);text-transform:uppercase}
+.cover h1{font-family:'Syne',sans-serif;font-weight:800;font-size:92px;line-height:.92;letter-spacing:-2.5px;margin:20px 0 12px;color:#100f0b}
+.cover .sub{font-size:21px;color:var(--muted);font-weight:500}
+.cover .rule{width:68px;height:5px;background:var(--accent);border-radius:3px;margin:36px 0}
+.cover .meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);letter-spacing:.05em;line-height:1.9}
+
+/* secties */
+section.doc{padding-top:62px}
+section.doc>h1{font-family:'Syne',sans-serif;font-weight:800;font-size:31px;letter-spacing:-.5px;color:#100f0b;padding-top:18px;margin-bottom:18px;border-top:3px solid var(--accent);display:inline-block}
+h2{font-family:'Syne',sans-serif;font-weight:700;font-size:20px;letter-spacing:-.2px;margin:30px 0 10px;color:#100f0b}
+h3{font-weight:700;font-size:15.5px;color:var(--accent2);margin:20px 0 6px}
+h4{font-weight:700;font-size:14px;margin:14px 0 4px}
+p{margin:10px 0}
+.lead{font-size:18px;line-height:1.6;color:var(--muted);font-weight:500}
+strong{font-weight:700;color:#100f0b}
+ul,ol{margin:10px 0 10px 22px}
+li{margin:6px 0}
+a{color:var(--accent2);text-decoration:none}
+em{color:var(--muted)}
+
+/* callout (de Menno-intro's) */
+blockquote{background:#fff5ec;border-left:3px solid var(--accent);padding:15px 20px;margin:18px 0;border-radius:0 10px 10px 0;color:#6b3d1f}
+blockquote p{margin:0;font-size:15.5px}
+
+/* tabellen */
+table{width:100%;border-collapse:collapse;margin:18px 0;font-size:13.5px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th{background:var(--accent);color:#fff;text-align:left;padding:10px 13px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+td{padding:10px 13px;border-top:1px solid var(--line);vertical-align:top}
+tr:nth-child(even) td{background:#faf8f5}
+
+/* code / beschrijving-template */
+code{font-family:'JetBrains Mono',monospace;font-size:12.5px;background:#f1efea;padding:2px 6px;border-radius:5px;color:#9A3412}
+pre{background:#141310;color:#ece9e4;border-radius:12px;padding:20px 22px;overflow:auto;margin:16px 0;font-size:12.5px;line-height:1.6}
+pre code{background:none;color:#ece9e4;padding:0;font-size:12.5px}
+hr{display:none}
+
+/* storyboard */
+.sbgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin:20px 0}
+.sbcard{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 1px 4px rgba(20,15,5,.06)}
 .sbcard img{width:100%;display:block;aspect-ratio:16/9;object-fit:cover;background:#eee}
-figcaption{padding:9px 11px;font-size:13px;color:#333}
-.sbsc{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#C2410C;font-weight:700;margin-right:4px}
-@media print{ section.doc{break-before:page} .cover{break-after:page} .sbcard{break-inside:avoid} a{color:#1c1c1c} }
+figcaption{padding:12px 14px;font-size:13px;color:#3a3631;line-height:1.45}
+.sbsc{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:10px;color:#fff;background:var(--accent);padding:2px 8px;border-radius:20px;margin-right:7px;letter-spacing:.04em;vertical-align:middle}
+
+@media print{
+  body{background:#fff}
+  .cover{min-height:auto;padding:30px 0 56px;break-after:page}
+  .cover h1{font-size:74px}
+  section.doc{break-before:page;padding-top:20px}
+  .sbcard{break-inside:avoid;box-shadow:none}
+  .sbgrid{gap:12px}
+  a{color:inherit}
+}
+@media(max-width:680px){.sbgrid{grid-template-columns:1fr}.cover h1{font-size:58px}.wrap{padding:0 20px 64px}}
 """
 
-cover = ('<div class="cover"><div class="tag">FOUNDER VLOG &middot; PRODUCTIEPAKKET</div>'
+cover = ('<div class="cover"><div class="tag">Founder vlog &middot; Productiepakket</div>'
          '<h1>Flaneur</h1><div class="sub">Vlog #01 &middot; Dubai &rarr; Black Friday</div>'
-         '<div class="meta">Voor: Regi (Flaneur) &middot; Versie: definitief &middot; juni 2026</div></div>')
+         '<div class="rule"></div>'
+         '<div class="meta">Voor: Regi (Flaneur)<br>Versie: definitief &middot; juni 2026</div></div>')
 
 sections = "".join(f'<section class="doc">{md_html(p)}</section>' for p in DOCS)
 html = (f'<!doctype html><html lang="nl"><head><meta charset="utf-8">'
