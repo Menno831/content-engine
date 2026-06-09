@@ -6,11 +6,11 @@
 
 Een POV founder-vlog die je verhuizing naar Dubai en de aanloop naar de grootste Black Friday van Flaneur (~€2M) door elkaar weeft. Authentiek, niet gescript: wij waarborgen alleen de verhaallijn zodat het altijd klopt. Jij hoeft alleen voor de camera te staan. De video wordt Engels.
 
-## De video in 5 beats
+## De video in 4 beats
 
-| Cold open | Beweging 1 | Beweging 2 | Beweging 3 | Outro |
-|---|---|---|---|---|
-| **De inzet** (~0:30) | **Dubai, de basis** (~3,5 min) | **Amsterdam, de machine** (~3,5 min) | **De gok** (~2 min) | **Cliffhanger** (~1 min) |
+| Beweging 1 | Beweging 2 | Beweging 3 | Outro |
+|---|---|---|---|
+| **Dubai, de basis** (~4 min) | **Amsterdam, de machine** (~3,5 min) | **De gok** (~2 min) | **Cliffhanger** (~1 min) |
 
 > Rust & controle (Dubai) → energie & inzet (Amsterdam) → spanning (Black Friday) → cliffhanger naar deel 2.
 

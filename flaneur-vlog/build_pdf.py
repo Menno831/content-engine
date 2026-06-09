@@ -13,7 +13,6 @@ DOCS = [
     ("04-draaischema.md", "Draaischema, logistiek & gear"),
     ("05-interview.md", "Het interview (vooraf klaar)"),
     ("06-publicatie.md", "Publicatieplan"),
-    ("07-illustratie-prompts.md", "Storyboard-illustratie prompts"),
     ("08-strategie.md", "Content- & distributiestrategie"),
 ]
 
@@ -144,11 +143,10 @@ regi_brief = """
 Black Friday van Flaneur (~&euro;2M) door elkaar weeft. Authentiek, niet gescript,
 wij waarborgen alleen de verhaallijn zodat het altijd klopt. Jij hoeft alleen voor de camera te staan.</p>
 
-<div class="regi-h2">De video in 5 beats</div>
+<div class="regi-h2">De video in 4 beats</div>
 <table class="tl">
   <tr>
-    <td class="tl-cold"><span class="lab">COLD OPEN</span><br><span class="big">De inzet</span><br>~0:30</td>
-    <td class="tl-1"><span class="lab">BEWEGING 1</span><br><span class="big">Dubai, de basis</span><br>~3,5 min</td>
+    <td class="tl-1"><span class="lab">BEWEGING 1</span><br><span class="big">Dubai, de basis</span><br>~4 min</td>
     <td class="tl-2"><span class="lab">BEWEGING 2</span><br><span class="big">Amsterdam, de machine</span><br>~3,5 min</td>
     <td class="tl-3"><span class="lab">BEWEGING 3</span><br><span class="big">De gok</span><br>~2 min</td>
     <td class="tl-out"><span class="lab">OUTRO</span><br><span class="big">Cliffhanger</span><br>~1 min</td>
@@ -183,11 +181,6 @@ De uitkomst (~&euro;2M?) wordt deel 2 &rarr; kijkers blijven hangen en komen ter
 
 # ---- Visueel storyboard: embed lokale frames indien aanwezig in ./storyboard/ ----
 SB_FRAMES = [
-    ("COLD OPEN: de inzet", [
-        ("0.1", "Montage: de inzet (Dubai, laptop, kantoor, &euro;2M)", "hf_20260608_132843_6d785931-656c-4094-be33-204d8ec4ed82.png"),
-        ("0.2", "Founder kijkt uit het raam, Dubai bij zonsopkomst", "hf_20260608_132512_c4aec70d-7f73-4e8a-971f-0d93ea0997a7.png"),
-        ("0.3", "Titelkaart-moment, penthouse bij dageraad", "hf_20260608_132845_7d1a26dc-d4e1-498e-a5cb-05d7c397b520.png"),
-    ]),
     ("BEWEGING 1: Dubai, de nieuwe basis", [
         ("1.1a", "Establishing: de woning vanuit de lucht", "hf_20260608_132846_82ceffe7-3581-4a45-a5d2-d2dc610870f0.png"),
         ("1.1b", "Rondleiding door de woning (gimbal)", "hf_20260608_132846_f8c62273-486a-4673-be32-c4c7a9d66b67.png"),
@@ -239,8 +232,7 @@ def build_storyboard():
     if not any_img:
         return "", False
     head = ('<pdf:nextpage /><h1>Visueel storyboard</h1>'
-            '<p>Cinematische moodframes in volgorde, zodat je de hele film voor je ziet voordat we draaien. '
-            'Het zijn AI-gegenereerde sfeerbeelden met een stand-in, niet de uiteindelijke opnames. '
+            '<p>Referentiebeelden in volgorde die de look en de opbouw van de film laten zien. '
             'Warme grade in Dubai, koelere grade in Amsterdam.</p>')
     return head + "".join(sections), True
 

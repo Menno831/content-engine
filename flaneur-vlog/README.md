@@ -16,8 +16,8 @@ Dit is het complete productiepakket. Alles is opgesplitst zodat Regi zelf niets 
 | [`04-draaischema.md`](./04-draaischema.md) | Draaidagen, logistiek, gear, planning | Productie |
 | [`05-interview.md`](./05-interview.md) | Het interviewblok (vooraf klaar): de vragen die Regi's voice-over opleveren | Regi + crew |
 | [`06-publicatie.md`](./06-publicatie.md) | Titel, thumbnail, beschrijving, uitrol | Editing / publicatie |
-| [`07-illustratie-prompts.md`](./07-illustratie-prompts.md) | Cinematische beeldprompts per shot voor het visuele storyboard | Pre-productie / visualisatie |
-| [`08-strategie.md`](./08-strategie.md) | Content- & distributiestrategie: cutdowns, trailer, A/B-testen, research, engine-cadans | Post-productie / strategie |
+| [`08-strategie.md`](./08-strategie.md) | Content- & distributiestrategie: cutdowns, trailer, A/B-testen, engine-cadans | Post-productie / strategie |
+| `Flaneur-Storyboard.html` | Visueel storyboard: cinematische frames in volgorde | Regi |
 
 ## In één zin
 
@@ -31,7 +31,7 @@ Dit is het complete productiepakket. Alles is opgesplitst zodat Regi zelf niets 
 - [x] Draaischema & logistiek
 - [x] Interviewblok (vragen vooraf klaar)
 - [x] Publicatieplan
-- [x] Cinematische beeldprompts voor het storyboard
+- [x] Visueel storyboard (cinematische frames)
 - [x] Content- & distributiestrategie (cutdowns, trailer, A/B-testen, engine-cadans)
 - [ ] Crew/videograaf bevestigd per draaidag
 - [ ] Definitieve draaidatums geprikt (richtlijn: eerste helft november)

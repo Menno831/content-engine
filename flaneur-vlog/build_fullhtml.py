@@ -9,17 +9,11 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 DOCS = [
     "00-regi-brief.md", "01-concept.md", "02-storyboard.md", "03-shotlist.md",
-    "04-draaischema.md", "05-interview.md", "06-publicatie.md",
-    "07-illustratie-prompts.md", "08-strategie.md",
+    "04-draaischema.md", "05-interview.md", "06-publicatie.md", "08-strategie.md",
 ]
 
 BASE = "https://d8j0ntlcm91z4.cloudfront.net/user_2zm0bcmvhYtqhUNIemq9z5Hr7Ai/"
 SB_FRAMES = [
-    ("COLD OPEN: de inzet", [
-        ("0.1", "Montage: de inzet (Dubai, laptop, kantoor, €2M)", "hf_20260608_132843_6d785931-656c-4094-be33-204d8ec4ed82.png"),
-        ("0.2", "Founder kijkt uit het raam, Dubai bij zonsopkomst", "hf_20260608_132512_c4aec70d-7f73-4e8a-971f-0d93ea0997a7.png"),
-        ("0.3", "Titelkaart-moment, penthouse bij dageraad", "hf_20260608_132845_7d1a26dc-d4e1-498e-a5cb-05d7c397b520.png"),
-    ]),
     ("BEWEGING 1: Dubai, de nieuwe basis", [
         ("1.1a", "Establishing: de woning vanuit de lucht", "hf_20260608_132846_82ceffe7-3581-4a45-a5d2-d2dc610870f0.png"),
         ("1.1b", "Rondleiding door de woning (gimbal)", "hf_20260608_132846_f8c62273-486a-4673-be32-c4c7a9d66b67.png"),
@@ -58,8 +52,7 @@ def md_html(path):
 
 def storyboard_html():
     out = ['<section class="doc sb"><h1>Visueel storyboard</h1>',
-           '<p>Cinematische moodframes in volgorde, zodat je de hele film voor je ziet voordat we draaien. '
-           'Het zijn AI-gegenereerde sfeerbeelden met een stand-in, niet de uiteindelijke opnames. '
+           '<p>Referentiebeelden in volgorde die de look en de opbouw van de film laten zien. '
            'Warme grade in Dubai, koelere grade in Amsterdam.</p>']
     for beat, frames in SB_FRAMES:
         out.append(f'<h2>{beat}</h2><div class="sbgrid">')

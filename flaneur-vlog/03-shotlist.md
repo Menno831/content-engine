@@ -63,7 +63,6 @@ Camerabewegingen: **Static** (statief) · **Gimbal** (lopend) · **Handheld** (r
 ## OVERAL: Founder anker-momenten (de ruggengraat)
 
 Deze "praat tegen de lens"-momenten dragen het verhaal. Minimaal draaien:
-- [ ] **Must**, Cold open statement (de inzet), *kan in Dubai-office*
 - [ ] **Must**, Persoonlijke reflectie (waarom dit jaar / waarom Dubai), *Dubai*
 - [ ] **Must**, Rollout-uitleg, *Amsterdam*
 - [ ] **Must**, Climax/spanning ("nu is het wachten"), *Dubai/avond*

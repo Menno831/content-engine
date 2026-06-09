@@ -3,7 +3,7 @@
 > Regi, dit is de **structuur** van de film, niet het script. Jij praat vrij (je stem komt uit het interviewblok op Dag 1), deze indeling zorgt alleen dat het verhaal altijd klopt. De video wordt Engels, dus de gesproken regels hieronder staan tussen aanhalingstekens in het Engels: dat is wat er daadwerkelijk in beeld terugkomt.
 
 **Geschatte totale duur:** ~10 tot 12 min
-**Structuur (5 beats):** Cold open → Beweging 1 (Dubai) → Beweging 2 (Amsterdam) → Beweging 3 (rollout/climax) → Outro/cliffhanger
+**Structuur (4 beats):** Beweging 1 (Dubai) → Beweging 2 (Amsterdam) → Beweging 3 (rollout/climax) → Outro/cliffhanger
 
 Legenda: **VO** = voice-over · **OTF** = on-camera tegen de lens · **B-roll** = beeld zonder directe spraak
 
@@ -13,26 +13,13 @@ Legenda: **VO** = voice-over · **OTF** = on-camera tegen de lens · **B-roll** 
 
 Even kort waaróm we het zo bouwen, zodat je ziet dat elke beat een functie heeft:
 
-1. **Cold open (de inzet).** De eerste 30 seconden bepalen of mensen blijven kijken. Daarom openen we niet met een begroeting maar met de spanning: het bedrag, de deadline, de afstand. Dit is precies wat de best presterende founder-vlogs (Heaton, Nijhof) doen.
-2. **Beweging 1 → 2 → 3 (contrast).** Rust en controle in Dubai, dan de energie van het team in Amsterdam, dan de spanning van de rollout. Dat ritme van laag → hoog → spanning houdt de kijker vast; een vlakke video verliest mensen.
-3. **De persoonlijke inzet (waarom het ertoe doet).** Mensen kijken niet voor een bedrijf, ze kijken voor jou. Daarom hangt elk hoofdstuk aan jouw perspectief en niet aan Flaneur-promo.
-4. **De cliffhanger (de reden om terug te komen).** We eindigen vóór de uitkomst. Dat maakt deel 2 onvermijdelijk en levert abonnees op, en het is meteen de natuurlijke aanleiding om door te gaan.
+1. **Beweging 1 → 2 → 3 (contrast).** Rust en controle in Dubai, dan de energie van het team in Amsterdam, dan de spanning van de rollout. Dat ritme van laag → hoog → spanning houdt de kijker vast; een vlakke video verliest mensen.
+2. **De persoonlijke inzet (waarom het ertoe doet).** Mensen kijken niet voor een bedrijf, ze kijken voor jou. Daarom hangt elk hoofdstuk aan jouw perspectief en niet aan Flaneur-promo.
+3. **De cliffhanger (de reden om terug te komen).** We eindigen vóór de uitkomst. Dat maakt deel 2 onvermijdelijk en levert abonnees op, en het is meteen de natuurlijke aanleiding om door te gaan.
 
 ---
 
-## COLD OPEN: de inzet (0:00 tot 0:30)
-
-Doel: in 30 seconden vastpinnen waaróm je moet blijven kijken. We openen op de spanning, niet op de begroeting.
-
-| # | Beeld | Audio / tekst | Notities |
-|---|---|---|---|
-| 0.1 | Snelle montage: Dubai skyline ochtend → handen op laptop → Amsterdam kantoor vol mensen → "2.000.000" in beeld | VO (uit interview): *"In a few weeks we're doing the biggest day in Flaneur's history. I'm sitting here in Dubai. My team of 30 is over there."* | Strakke cuts op de beat. Het bedrag kort, niet opschepperig, puur als inzet |
-| 0.2 | Jij kijkt uit het raam van de Dubai-woning, rug naar camera | VO: *"This is how we prepare for it."* | Beat, dan → titel/intro |
-| 0.3 | Titelkaart / kanaalnaam (kort) | Muziek swell | Hou het kort, geen lange intro-leader |
-
----
-
-## BEWEGING 1: Dubai, de nieuwe basis (0:30 tot 4:00)
+## BEWEGING 1: Dubai, de nieuwe basis (0:00 tot 4:00)
 
 Doel: setting + persoonlijk verhaal. Rust, controle, ambitie. Hier leren mensen jou kennen.
 

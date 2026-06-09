@@ -31,7 +31,7 @@ Halve tot hele dag. Beste licht: ochtend (woning/uitzicht) + namiddag (office).
 |---|---|---|
 | Ochtend | Gouden ochtendlicht | Establishing woning, uitzicht, Regi rondloopt (Scène 1.1) |
 | Late ochtend | | Home office, over-the-shoulder, call met Amsterdam (1.2) |
-| Middag | | Anker-momenten: cold open + reflectie (1.3) |
+| Middag | | Anker-moment: reflectie (1.3) |
 | Optie | Avondlicht | Climax-moment "nu is het wachten" (3.1) |
 
 ### Dag 2: Amsterdam (kantoor)
@@ -58,35 +58,3 @@ Draaien op een dag dat het team vol aan Black Friday werkt.
 | Editor | **Must** | Bekend met founder-vlog pacing + VO-gedreven montage |
 
 > Uit de WhatsApp: er kan iemand geregeld worden die "exact die kwaliteit kan nabootsen". Bevestig wie de videograaf in Dubai is en wie evt. Amsterdam draait.
-
----
-
-## Gear-checklist
-
-### Camera & beeld
-- [ ] Hoofdcamera (full-frame, mooie low-light) + 2 lenzen (wide + 35/50mm)
-- [ ] Gimbal
-- [ ] Drone (Dubai establishing + evt. fulfillment), *⚠️ check droneregels Dubai/locatie*
-- [ ] Extra accu's + geheugenkaarten (dubbel wat je denkt nodig te hebben)
-- [ ] ND-filters (fel Dubai-licht)
-
-### Geluid
-- [ ] Draadloze lavalier (2x)
-- [ ] Audiorecorder als backup
-- [ ] Dode kat / windkap (buiten-shots)
-
-### Overig
-- [ ] Statief + evt. slider
-- [ ] Powerbanks / laders
-- [ ] Externe SSD voor offload op locatie (backup vóór je de set verlaat)
-- [ ] Shotlist geprint/op telefoon ([`03-shotlist.md`](./03-shotlist.md))
-
----
-
-## Logistiek & toestemmingen
-- [ ] Toestemming filmen op Amsterdam-kantoor (privacy team, wie wil niet in beeld?)
-- [ ] Toestemming fulfillment center (indien van toepassing)
-- [ ] Droneregels / vergunning Dubai-locatie gecheckt
-- [ ] Reis/verblijf videograaf geregeld (Dubai + evt. NL)
-- [ ] Concurrentiegevoelige schermen/cijfers in de edit blurren (default: terughoudend)
-- [ ] Backup van alle footage gemaakt vóór einde draaidag
