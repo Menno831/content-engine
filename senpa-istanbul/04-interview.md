@@ -10,10 +10,15 @@
 5. *"What do you want people to understand about how Flaneur is made?"*
 6. *"Most brands hide this. Why show it?"* (outro)
 
-## Eigenaar / manager (optioneel, alleen wat zij willen zeggen)
+## Eigenaar / manager (komt ook in beeld)
 > Respecteer hun grenzen: laat ze zelf bepalen of/welke namen ze noemen. Forceer niks op camera.
 1. *"How long have you been making clothing here, and what makes this place different?"*
 2. *"What does real quality look like on the floor?"*
 3. *"What do you look for in a brand you choose to work with?"*
+
+## De makers (werknemers, met toestemming)
+Korte, menselijke momenten. Hoeft geen formeel interview, één of twee zinnen plus hun handen aan het werk is genoeg.
+1. *"How long have you been doing this?"*
+2. *"What's the part of the work you're most proud of?"*
 
 > Tip: het mooiste materiaal komt vaak niet uit de antwoorden maar uit de stiltes en de handen. Draai ruim B-roll terwijl ze praten.

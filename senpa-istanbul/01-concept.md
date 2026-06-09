@@ -4,7 +4,7 @@
 
 ## De kernvraag
 
-> "What does it actually take to make clothing at the level of the biggest names in fashion, and why is Flaneur made in exactly that place?"
+> "What does it actually take to make clothing at the very highest level, and why is Flaneur made in exactly that place?"
 
 Dit is geen fabrieks-rondleiding. Het is een **founder die je meeneemt naar de plek waar zijn merk gemaakt wordt**, een plek waar ook een paar van de grootste namen ter wereld worden gemaakt. Dat geeft Flaneur in één video een enorme geloofwaardigheid.
 
@@ -17,12 +17,12 @@ Dit is geen fabrieks-rondleiding. Het is een **founder die je meeneemt naar de p
 
 ## De vertrouwelijkheids-lijn (belangrijk)
 
-De fabriek maakt voor andere grote merken. Die merken en hun producten brengen we **niet** in beeld; dat ligt gevoelig en juridisch vast. De kracht zit in:
+De fabriek maakt voor andere grote merken. Die merken en hun producten brengen we **sowieso niet** in beeld; dat ligt gevoelig en juridisch vast. Twee niveaus:
 
-- We **noemen** de associatie (verbaal, tasteful): "this is the factory trusted by some of the biggest names in fashion."
-- We **filmen** de Flaneur-productie en het pure vakmanschap: handen, stoffen, machines, processen, schaal. Niks dat andermans designs verraadt.
+- **Default (veilig, waar we vanuit gaan):** we claimen geen namen. De kracht zit in de toegang, de schaal en het vakmanschap zelf, plus dat Flaneur hier gemaakt wordt. Dat staat als een huis, ook zonder één merk te noemen.
+- **[Optioneel, TBC met de fabriek]:** mógen we de grote namen verbaal noemen, dan voegen we één tasteful verwijzing toe ("the factory trusted by some of the biggest names in fashion"). We gaan er niet vanuit dat het mag, we houden het open tot de fabriek het bevestigt.
 
-Zo hou je alle credibility, zonder dat we iemand in de problemen brengen. Dit bevestigen we vooraf met de fabriek (zie logistiek).
+In beide gevallen filmen we de Flaneur-productie en het pure ambacht: handen, stoffen, machines, processen, schaal. Niks dat andermans designs verraadt.
 
 ## Toon & stijl
 
@@ -30,6 +30,6 @@ Cinematisch en premium, met respect voor het ambacht. Weinig woorden, veel beeld
 
 ## Wat het oplevert
 
-- 1x premium merk-documentaire (de fabriek + Flaneur), tijdloos in te zetten
+- 1x losse premium merk-documentaire (de fabriek + Flaneur), tijdloos in te zetten
 - Een berg verticale clips uit hetzelfde materiaal (vakmanschap-shots gaan hard op social)
 - Positionering die je nergens kunt kopen

@@ -26,7 +26,10 @@
 - [ ] Lavalier + recorder, en losse opname van de fabrieksambient (cruciaal)
 - [ ] Drone alleen indien toegestaan, extra accu's, SSD voor offload op locatie
 
-## Open punten voor Regi / de fabriek
-- [ ] Wie staat er on-camera: alleen jij, of ook de eigenaar/manager?
-- [ ] Is dit een losse merkfilm, of valt het onder de doorlopende content?
-- [ ] Datum en hoeveel draaitijd we binnen krijgen (halve / hele dag).
+## Vastgelegd
+- **On-camera:** Regi + de eigenaar van SENPA + werknemers (met toestemming).
+- **Scope:** één losse documentaire.
+
+## Nog open
+- [ ] Mogen we de grote namen **verbaal** noemen? (TBC met de fabriek; default = niet)
+- [ ] Datum en draaitijd (onder voorbehoud, prikken zodra de fabriek kan).

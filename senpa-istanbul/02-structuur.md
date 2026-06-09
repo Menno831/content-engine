@@ -11,7 +11,8 @@ De buitenkant zegt niks. Geen logo's, geen glamour. Juist dat is de hook.
 
 ## Beweging 2: de schaal
 De floor opent zich: de omvang, de machines, de mensen, het ritme.
-- VO: *"This is one of the places the biggest names in fashion trust to make their clothing."*
+- VO (default): *"This is one of the places the best clothing in the world is actually made."*
+- VO [optioneel, alleen als de fabriek het toestaat]: *"...the kind of place the biggest names in fashion trust."*
 - Beeld: brede establishing van de werkvloer, rijen machines, beweging, geluid.
 
 ## Beweging 3: het ambacht
@@ -25,9 +26,9 @@ Hier komt het samen: jouw eigen stukken in productie, op precies deze plek.
 - Beeld: Flaneur-pieces op de lijn, jij die het materiaal voelt, met het team praat.
 
 ## Beweging 5: de standaard en de relatie
-Waarom jij hiervoor koos, wat je eist, de band met de makers.
-- VO (anker, uit interview): *de keuze, de kwaliteit, wat het je waard is.*
-- Beeld: jij in gesprek, de eigenaar/manager, een handdruk-moment.
+Waarom jij hiervoor koos, wat je eist, de band met de makers. Hier komen ook de **eigenaar** en de **werknemers** in beeld: zij maken het echt.
+- VO (anker, uit interview): *jouw keuze en de kwaliteit, plus een paar woorden van de eigenaar en de makers zelf.*
+- Beeld: jij in gesprek met de eigenaar, werknemers aan het woord/aan het werk, een handdruk-moment.
 
 ## Outro: wat het betekent
 De punchline, rustig.
