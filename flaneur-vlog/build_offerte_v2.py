@@ -65,6 +65,8 @@ strong{font-weight:700;color:#100f0b}
 .pc.reco p{font-size:13.5px;color:#c7c1b8;margin:8px 0}
 .pc.reco .addon{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #2a2823;font-size:13.5px}
 .pc.reco .addon .amt{font-weight:800;color:#FB923C;white-space:nowrap}
+.pc.reco .bonus{margin-top:14px;background:rgba(249,115,22,.14);border:1px solid rgba(249,115,22,.45);border-radius:10px;padding:12px 14px;font-size:13.5px;color:#f3ede4}
+.pc.reco .bonus strong{color:#FB923C}
 .sum{background:#fff5ec;border-left:3px solid var(--accent);padding:16px 20px;margin:20px 0;border-radius:0 10px 10px 0;color:#6b3d1f;font-size:14.5px}
 .sum strong{color:#7C2D12}
 .flow{background:#141310;color:#ece9e4;border-radius:14px;padding:20px 24px;margin:20px 0;font-size:15px}
@@ -217,6 +219,7 @@ HTML = """<!doctype html><html lang="nl"><head><meta charset="utf-8">
       vervangt die maand de Nederlandse draaidag.</p>
       <div class="addon"><span>Dubai-productie, afroep</span><span class="amt">+ &euro;5.000</span></div>
       <div class="addon"><span>Istanbul-productie, afroep</span><span class="amt">+ &euro;3.000</span></div>
+      <div class="bonus"><strong>En kies je hiervoor, dan strepen we je openstaande factuur weg.</strong> Schone lei, we beginnen vooruit.</div>
     </div>
   </div>
 
@@ -230,9 +233,6 @@ HTML = """<!doctype html><html lang="nl"><head><meta charset="utf-8">
   verplichting. Maar de engine is waar het echt gebeurt. Van nu tot Black Friday is precies de aanloop waarin een
   founder-kanaal momentum opbouwt, en met de fabriekstoegang die nu openligt wil je niet wachten. Daarom die zes
   maanden: zo word ik je vaste contentteam en bouwen we iets dat blijft staan.</p>
-  <p>En die openstaande factuur? Kies je voor de engine, dan strepen we die gewoon weg en beginnen we met een
-  schone lei.</p>
-
   <div class="flow"><strong>Volgende stap:</strong> laat me weten welke kant je op wil, dan prikken we meteen de
   draaidagen. Istanbul kan al snel, Dubai zetten we vast voor de eerste helft van november. Dan zijn we ruim op
   tijd voor Black Friday.</div>
