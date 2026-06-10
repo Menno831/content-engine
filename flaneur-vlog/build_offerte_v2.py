@@ -221,10 +221,10 @@ HTML = """<!doctype html><html lang="nl"><head><meta charset="utf-8">
   </div>
 
   <div class="sum"><strong>De rekensom, even simpel:</strong> los zijn twee video's &euro;17.500. In de engine
-  krijg je over zes maanden zes volledige video's (inclusief b&eacute;ide documentaires) plus tot 180 verticale
-  clips, voor &euro;32.000. Per video reken je dan ruim &euro;5.300 in plaats van &euro;8.750. En per maand betaal
-  je minder dan je eerder kwijt was aan alleen short-form, terwijl wij nu &aacute;lles overnemen: van strategie tot
-  en met upload.</div>
+  krijg je over zes maanden zes volledige video's (inclusief b&eacute;ide documentaires) plus minimaal 180
+  kwalitatieve verticale clips, en meer als er meer uit te halen valt, voor &euro;32.000. Per video reken je dan
+  ruim &euro;5.300 in plaats van &euro;8.750, terwijl wij &aacute;lles overnemen: van strategie tot en met
+  upload.</div>
 
   <p><strong>Mijn advies:</strong> wil je het klein houden, begin dan los met de founder-documentaire, geen
   verplichting. Maar de engine is waar het echt gebeurt. Van nu tot Black Friday is precies de aanloop waarin een
