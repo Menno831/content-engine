@@ -41,3 +41,9 @@ yarn-error.log*
 next-env.d.ts
 
 .vercel
+
+# PDF build artifacts
+flaneur-vlog/*.pdf
+
+# Persoonlijk voice profile (lokaal, niet pushen tenzij gewenst)
+voice-profile.md

@@ -1,0 +1,244 @@
+<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Flaneur Vlog #01 - Productiepakket</title><style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500&display=swap');
+/* Displayfont op een plek: vervang var(--display) door jouw font zodra de naam bekend is */
+:root{--display:'Inter',system-ui,sans-serif;--accent:#F97316;--accent2:#C2410C;--ink:#17150f;--muted:#6f6a62;--line:#ece9e4;--bg:#fbfaf8}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;color:var(--ink);background:var(--bg);line-height:1.65;font-size:15px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:840px;margin:0 auto;padding:0 34px 100px}
+
+/* cover */
+.cover{min-height:90vh;display:flex;flex-direction:column;justify-content:center;padding:64px 0}
+.cover .tag{font-family:'JetBrains Mono',monospace;letter-spacing:.34em;font-size:12px;color:var(--accent);text-transform:uppercase}
+.cover h1{font-family:var(--display);font-weight:900;font-size:88px;line-height:.92;letter-spacing:-3px;margin:20px 0 12px;color:#100f0b}
+.cover .sub{font-size:21px;color:var(--muted);font-weight:500}
+.cover .rule{width:68px;height:5px;background:var(--accent);border-radius:3px;margin:36px 0}
+.cover .meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);letter-spacing:.05em;line-height:1.9}
+
+/* secties */
+section.doc{padding-top:62px}
+section.doc>h1{font-family:var(--display);font-weight:800;font-size:31px;letter-spacing:-.5px;color:#100f0b;padding-top:18px;margin-bottom:18px;border-top:3px solid var(--accent);display:inline-block}
+h2{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.2px;margin:30px 0 10px;color:#100f0b}
+h3{font-weight:700;font-size:15.5px;color:var(--accent2);margin:20px 0 6px}
+h4{font-weight:700;font-size:14px;margin:14px 0 4px}
+p{margin:10px 0}
+.lead{font-size:18px;line-height:1.6;color:var(--muted);font-weight:500}
+strong{font-weight:700;color:#100f0b}
+ul,ol{margin:10px 0 10px 22px}
+li{margin:6px 0}
+a{color:var(--accent2);text-decoration:none}
+em{color:var(--muted)}
+
+/* callout (de Menno-intro's) */
+blockquote{background:#fff5ec;border-left:3px solid var(--accent);padding:15px 20px;margin:18px 0;border-radius:0 10px 10px 0;color:#6b3d1f}
+blockquote p{margin:0;font-size:15.5px}
+
+/* tabellen */
+table{width:100%;border-collapse:collapse;margin:18px 0;font-size:13.5px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th{background:var(--accent);color:#fff;text-align:left;padding:10px 13px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+td{padding:10px 13px;border-top:1px solid var(--line);vertical-align:top}
+tr:nth-child(even) td{background:#faf8f5}
+
+/* code / beschrijving-template */
+code{font-family:'JetBrains Mono',monospace;font-size:12.5px;background:#f1efea;padding:2px 6px;border-radius:5px;color:#9A3412}
+pre{background:#141310;color:#ece9e4;border-radius:12px;padding:20px 22px;overflow:auto;margin:16px 0;font-size:12.5px;line-height:1.6}
+pre code{background:none;color:#ece9e4;padding:0;font-size:12.5px}
+hr{display:none}
+
+/* storyboard */
+.sbgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin:20px 0}
+.sbcard{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 1px 4px rgba(20,15,5,.06)}
+.sbcard img{width:100%;display:block;aspect-ratio:16/9;object-fit:cover;background:#eee}
+figcaption{padding:12px 14px;font-size:13px;color:#3a3631;line-height:1.45}
+.sbsc{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:10px;color:#fff;background:var(--accent);padding:2px 8px;border-radius:20px;margin-right:7px;letter-spacing:.04em;vertical-align:middle}
+
+@media print{
+  body{background:#fff}
+  .cover{min-height:auto;padding:30px 0 56px;break-after:page}
+  .cover h1{font-size:74px}
+  section.doc{break-before:page;padding-top:20px}
+  .sbcard{break-inside:avoid;box-shadow:none}
+  .sbgrid{gap:12px}
+  a{color:inherit}
+}
+@media(max-width:680px){.sbgrid{grid-template-columns:1fr}.cover h1{font-size:58px}.wrap{padding:0 20px 64px}}
+</style></head><body><div class="wrap"><div class="cover"><div class="tag">Founder vlog &middot; Productiepakket</div><h1>Flaneur</h1><div class="sub">Vlog #01 &middot; Dubai &rarr; Black Friday</div><div class="rule"></div><div class="meta">Voor: Regi (Flaneur)<br>Versie: definitief &middot; juni 2026</div></div><section class="doc"><h1>Voor Regi, in 2 minuten</h1>
+<blockquote>
+<p>Regi, in het kort: wat we maken, wat het je oplevert, en wat we van jou nodig hebben. Meer hoef je niet te lezen.</p>
+</blockquote>
+<h2>Jouw eerste vlog, in het kort</h2>
+<p>Een POV founder-vlog die je verhuizing naar Dubai en de aanloop naar de grootste Black Friday van Flaneur (~€2M) door elkaar weeft. Authentiek, niet gescript: wij waarborgen alleen de verhaallijn zodat het altijd klopt. Jij hoeft alleen voor de camera te staan. De video wordt Engels.</p>
+<h2>De video in 4 beats</h2>
+<table>
+<thead>
+<tr>
+<th>Beweging 1</th>
+<th>Beweging 2</th>
+<th>Beweging 3</th>
+<th>Outro</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Dubai, de basis</strong> (~4 min)</td>
+<td><strong>Amsterdam, de machine</strong> (~3,5 min)</td>
+<td><strong>De gok</strong> (~2 min)</td>
+<td><strong>Cliffhanger</strong> (~1 min)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Rust &amp; controle (Dubai) → energie &amp; inzet (Amsterdam) → spanning (Black Friday) → cliffhanger naar deel 2.</p>
+</blockquote>
+<h2>Wat we van jou nodig hebben: 3 dingen</h2>
+<ol>
+<li><strong>Interviewblok:</strong> 10 tot 15 min op Dag 1. Jij praat vrij (in het Engels), wij stellen 6 vragen. Hieruit knippen we de hele voice-over.</li>
+<li><strong>Twee draaidagen:</strong> Dubai (woning + home office) en Amsterdam (kantoor vol Black Friday-team). Richtlijn: eerste helft november.</li>
+<li><strong>Toestemmingen:</strong> filmen op kantoor regelen, en laten weten welke schermen/cijfers níét in beeld mogen.</li>
+</ol>
+<h2>De twee draaidagen</h2>
+<table>
+<thead>
+<tr>
+<th>Dag 1: Dubai</th>
+<th>Dag 2: Amsterdam</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Woning + uitzicht in ochtendlicht · home office · interviewblok · rustig reflectie-moment.</td>
+<td>Kantoor in vol bedrijf · team aan Black Friday · jij legt de interactieve rollout uit.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Waarom dit werkt:</strong> we eindigen vlák vóór Black Friday. De uitkomst (~€2M?) wordt deel 2 → kijkers blijven hangen en komen terug.</p></section><section class="doc"><h1>Concept &amp; narratief</h1>
+<blockquote>
+<p>Regi, dit is hoe ik je eerste vlog voor me zie. Geen merkvideo van Flaneur, maar jouw <strong>founder-vlog</strong>. Flaneur is het decor, jij bent het onderwerp. Dat ene onderscheid bepaalt elke keuze hieronder. De video wordt Engels; de teksten die je hieronder tussen aanhalingstekens ziet zijn dus voorbeelden van wat er in de video terugkomt.</p>
+</blockquote>
+<h2>De kernvraag die we beantwoorden</h2>
+<blockquote>
+<p>"What does it really look like to run a brand like Flaneur in the run-up to the biggest sales day of the year, from inside your head?"</p>
+</blockquote>
+<p>Dit is geen merkvideo van Flaneur, het is een founder-vlog van jou. Flaneur is het decor, niet het onderwerp.</p>
+<hr />
+<h2>Positionering</h2>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Founder-vlog (wat we maken)</th>
+<th>Merk-vlog (wat we vermijden)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Perspectief</td>
+<td>POV van jou, eerste persoon</td>
+<td>Het bedrijf van buitenaf</td>
+</tr>
+<tr>
+<td>Held</td>
+<td>Jij</td>
+<td>Het product / Flaneur</td>
+</tr>
+<tr>
+<td>Toon</td>
+<td>Persoonlijk, eerlijk, hoge inzet</td>
+<td>Gepolijst, promotioneel</td>
+</tr>
+<tr>
+<td>Wat we tonen</td>
+<td>Beslissingen, druk, twijfel, ambitie</td>
+<td>Mooie productshots</td>
+</tr>
+<tr>
+<td>Referentie</td>
+<td>Vince Nijhof, George Heaton</td>
+<td>Een reclamespot</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Let op (jouw eigen punt):</strong> het fulfillment center en het kantoor zijn risicovol, want daar ben jij zelf niet, dus het kan snel "te Flaneur" worden in plaats van founder. Oplossing: die locaties tonen we alleen <strong>door jouw ogen en jouw relatie ertoe</strong> (zie narratief hieronder). Geen losse bedrijfs-B-roll zonder jouw stem erover.</p>
+<hr />
+<h2>Het narratief: de drie bewegingen</h2>
+<p>De vlog draait om één spanningsboog: <strong>van rust en controle (Dubai) naar gecontroleerde chaos en de gok van het jaar (Black Friday).</strong></p>
+<h3>Beweging 1: Dubai, de nieuwe basis (rust / controle)</h3>
+<p>Je bent net terug verhuisd naar Dubai. Indrukwekkende woning, home office. Dit is waar je <strong>denkt, plant en beslist</strong>. We openen hier: kalm, ruimtelijk, ochtendlicht. Dit is "het hoofdkantoor van jouw hoofd".</p>
+<ul>
+<li>Subtekst (VO): <em>"This is where I prepare the biggest month of the year. On my own, with a team of 30 people 5,000 km away."</em></li>
+</ul>
+<h3>Beweging 2: Amsterdam, de machine draait (energie / inzet)</h3>
+<p>Knip naar Amsterdam. 30 man werkt aan Black Friday. Tempo omhoog, meer mensen, meer geluid. Jij loopt hier rond als de founder die terugkomt naar waar het gebeurt.</p>
+<ul>
+<li>Subtekst (VO): <em>"This is the team that makes it happen. My role has changed, I don't build everything myself anymore."</em></li>
+<li>Fulfillment center (optioneel, zie storyboard): alleen via jouw eigen verhaal, <em>"this is where tens of thousands of orders are about to go through."</em></li>
+</ul>
+<h3>Beweging 3: De rollout, de gok (climax / vooruitblik)</h3>
+<p>De Black Friday-rollout zelf: bijna een maand lang gaat de website <strong>interactief</strong> open via interactie met het publiek. Dit is de inzet. We sluiten af op de drempel, vlak vóór of op het moment van lanceren.</p>
+<ul>
+<li>Subtekst (VO): <em>"~€2M on the line. This is how we do it. Follow along."</em></li>
+<li>Dit is ook de natuurlijke <strong>cliffhanger</strong> voor vlog #02 (de uitkomst), en meteen de reden dat we daarna door kunnen.</li>
+</ul>
+<hr />
+<h2>Toon &amp; stijl</h2>
+<ul>
+<li><strong>Niet gescript, wel gestructureerd.</strong> Jij praat vrij; wij zorgen dat elke beweging zijn verhaalfunctie vervult (zie storyboard).</li>
+<li><strong>Cinematic maar echt.</strong> Look van Heaton en Nijhof: ondiepe scherptediepte, natuurlijk licht waar mogelijk, rustige camerabewegingen (gimbal), geen overproductie.</li>
+<li><strong>Jouw stem draagt de video.</strong> Voice-over (uit het interviewblok op Dag 1) bovenop B-roll is de ruggengraat. On-camera momenten zijn de ankers.</li>
+<li><strong>Eerlijkheid wint van perfectie.</strong> Eén moment van echte twijfel of druk is meer waard dan tien mooie shots.</li>
+</ul>
+<hr />
+<h2>Doel &amp; KPI's</h2>
+<ul>
+<li><strong>Primair doel:</strong> lancering van jouw persoonlijke YouTube-kanaal met een vlog die de founder-positionering neerzet.</li>
+<li><strong>Lengte:</strong> richtlijn 8 tot 14 min (founder-vlog standaard à la Heaton en Nijhof).</li>
+<li><strong>Succes is:</strong> retentie &gt; 45% op 30 sec, kijkers die commenten met "deel 2 wanneer", en een duidelijke setup voor de Black Friday-uitkomstvideo.</li>
+</ul>
+<hr />
+<blockquote>
+<p><strong>Jouw stem</strong> komt uit een kort <strong>interviewblok op Dag 1</strong> (10 tot 15 min): jij praat vrij, ik stel een paar vragen, en daaruit knipt de editor de hele voice-over. Verder hoef je niks voor te bereiden.</p>
+</blockquote></section><section class="doc"><h1>Publicatie &amp; uitrol</h1>
+<blockquote>
+<p>Regi, kort: titel, thumbnail, beschrijving en uitrol. De video is Engels, dus de publieke teksten staan in het Engels. Dit zijn voorstellen, jij kiest.</p>
+</blockquote>
+<h2>Timing</h2>
+<p>Publiceer <strong>vóór of aan het begin van de Black Friday-rollout</strong>, niet erna: de vlog is de aanloop, de uitkomst wordt deel 2.</p>
+<h2>Titel (opties, Engels)</h2>
+<ol>
+<li><em>"How I'm preparing for my company's biggest month, from Dubai"</em></li>
+<li><em>"€2,000,000 in one month: this is the plan"</em> (alleen als je het bedrag publiek wil)</li>
+<li><em>"Running a company from 5,000 km away"</em></li>
+</ol>
+<blockquote>
+<p>Vuistregel: één concrete inzet + één persoonlijk element. Geen clickbait.</p>
+</blockquote>
+<h2>Thumbnail</h2>
+<p>Jouw gezicht (of POV) + één sterk anker (Dubai-uitzicht of het drukke kantoor). Hoog contrast, max 2 tot 3 woorden. We maken er drie compleet verschillende en testen welke wint.</p>
+<h2>Beschrijving (template, Engels)</h2>
+<pre><code>In this first vlog I take you into the run-up to the biggest Black Friday
+in Flaneur's history. From my new base in Dubai, I prepare the biggest
+month of the year together with a 30-person team in Amsterdam.
+
+This is what it really looks like: the planning, the pressure, and the gamble.
+
+Part 2 (the outcome) is coming. Subscribe to follow along.
+
+, Regi
+</code></pre>
+<h2>Uitrol</h2>
+<ul>
+<li>Korte teaser/trailer op je persoonlijke kanaal in de dagen ervoor.</li>
+<li>Cliffhanger-moment los knippen als reel.</li>
+<li>Plan vlog #02 (de uitkomst) nu al in, zodat de cliffhanger snel betaalt.</li>
+</ul></section><section class="doc"><h1>Content- &amp; distributiestrategie</h1>
+<blockquote>
+<p>Kort: het filmen is het halve werk. Dit is hoe ik zorg dat de video ook echt gezien wordt door de juiste mensen.</p>
+</blockquote>
+<h2>Eén shoot, maximale output</h2>
+<p>Uit twee draaidagen halen we de documentaire (8 tot 14 min), tot 30 verticale clips voor je clip-accounts, en een trailer voor je eigen kanaal. Ik stuur niet op kale views, maar op de juiste mensen: talent dat bij je wil werken, partners die aanhaken, en klanten die je merk echt snappen.</p>
+<h2>We laten niks aan toeval over</h2>
+<p>Ik gok niet op een titel of een thumbnail, ik test. Voor elke video maken we <strong>drie compleet verschillende thumbnails en drie compleet verschillende titels</strong>, telkens op elkaar afgestemd, en die zetten we via A/B-testen tegen elkaar. De winnaar blijft staan. Zo komt het beste resultaat boven, niet wat ik mooi vind, maar wat aantoonbaar werkt.</p>
+<h2>We laten YouTube voor ons werken</h2>
+<p>We pakken de SEO en de tags goed aan en zetten elke video zo neer dat YouTube 'm oppikt en gaat aanraden. Daar zijn we gewoon goed in. Daar zit het verschil tussen een video die wegzakt en een video die maandenlang de juiste mensen blijft binnenhalen.</p>
+<h2>Van losse video naar motor</h2>
+<p>We draaien in batches: één draaidag levert meerdere maanden content, dus lage kosten en bijna geen tijd voor jou. Elke maand een nieuwe video plus clips, en elke maand leren we van de cijfers. De documentaire is het vlaggenschip, getimed op Black Friday; deel 2 (de uitkomst) betaalt de cliffhanger uit.</p></section><section class="doc sb"><h1>Visueel storyboard</h1><p class="lead">Zo ziet het eruit. Een reeks beelden in volgorde, zodat je de film al voor je ziet. Warm in Dubai, koeler in Amsterdam: dat contrast draagt het verhaal.</p><h2>BEWEGING 1: Dubai, de nieuwe basis</h2><div class="sbgrid"><figure class="sbcard"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zm0bcmvhYtqhUNIemq9z5Hr7Ai/hf_20260608_132846_82ceffe7-3581-4a45-a5d2-d2dc610870f0.png" alt="SC 1.1a"><figcaption><span class="sbsc">SC 1.1a</span> Establishing: de woning vanuit de lucht</figcaption></figure><figure class="sbcard"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zm0bcmvhYtqhUNIemq9z5Hr7Ai/hf_20260608_132846_f8c62273-486a-4673-be32-c4c7a9d66b67.png" alt="SC 1.1b"><figcaption><span class="sbsc">SC 1.1b</span> Rondleiding door de woning (gimbal)</figcaption></figure><figure class="sbcard"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zm0bcmvhYtqhUNIemq9z5Hr7Ai/hf_20260608_132848_4f9cb773-16e7-4af7-a5e7-53bd39afd60d.png" alt="SC 1.1c"><figcaption><span class="sbsc">SC 1.1c</span> Detailshots: ochtendroutine</figcaption></figure><figure class="sbcard"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zm0bcmvhYtqhUNIemq9z5Hr7Ai/hf_20260608_132850_a8bed041-fec1-485f-8a9a-4b9f24247f45.png" alt="SC 1.2a"><figcaption><span class="sbsc">SC 1.2a</span> Aan het bureau, het commandocentrum</figcaption></figure><figure class="sbcard"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zm0bcmvhYtqhUNIemq9z5Hr7Ai/hf_20260608_132852_dd578769-b5d7-4442-b563-035954bb18e0.png" alt="SC 1.2b"><figcaption><span class="sbsc">SC 1.2b</span> Over-the-shoulder: dashboards & Black Friday-planning</figcaption></figure><figure class="sbcard"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zm0bcmvhYtqhUNIemq9z5Hr7Ai/hf_20260608_132853_e38e2ed0-18cc-48c9-acb8-1fb0df2d9284.png" alt="SC 1.2c"><figcaption><span class="sbsc">SC 1.2c</span> Videocall met het Amsterdam-team</figcaption></figure><figure class="sbcard"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zm0bcmvhYtqhUNIemq9z5Hr7Ai/hf_20260608_132855_7bda6278-b8b8-4454-be3e-1982b2d10679.png" alt="SC 1.3a"><figcaption><span class="sbsc">SC 1.3a</span> Anker-moment: founder reflecteert in de lens</figcaption></figure><figure class="sbcard"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zm0bcmvhYtqhUNIemq9z5Hr7Ai/hf_20260608_132857_f67607b4-571d-4da9-8bc2-30a6e25ffb68.png" alt="SC 1.3b"><figcaption><span class="sbsc">SC 1.3b</span> Stilte-beeld: nadenken bij de skyline</figcaption></figure></div><h2>BEWEGING 2: Amsterdam, de machine draait</h2><div class="sbgrid"><figure class="sbcard"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zm0bcmvhYtqhUNIemq9z5Hr7Ai/hf_20260608_132859_dd0923a7-96ea-4b73-a24a-112ff7564ab9.png" alt="SC 2.1a"><figcaption><span class="sbsc">SC 2.1a</span> Harde cut naar Amsterdam (kantoorgevel)</figcaption></figure><figure class="sbcard"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zm0bcmvhYtqhUNIemq9z5Hr7Ai/hf_20260608_132900_cd1e7bf5-cbe4-4a45-a0a0-6078bda85dc1.png" alt="SC 2.1b"><figcaption><span class="sbsc">SC 2.1b</span> Establishing kantoor, drukte zichtbaar</figcaption></figure><figure class="sbcard"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zm0bcmvhYtqhUNIemq9z5Hr7Ai/hf_20260608_132923_2122a1a3-5d80-4485-bed7-ecd6d15ea612.png" alt="SC 2.2a"><figcaption><span class="sbsc">SC 2.2a</span> Founder loopt binnen, wordt begroet</figcaption></figure><figure class="sbcard"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zm0bcmvhYtqhUNIemq9z5Hr7Ai/hf_20260608_132924_30cefca3-2241-4305-9919-afc29725ba39.png" alt="SC 2.2b"><figcaption><span class="sbsc">SC 2.2b</span> B-roll: team aan het werk</figcaption></figure><figure class="sbcard"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zm0bcmvhYtqhUNIemq9z5Hr7Ai/hf_20260608_132925_c86f7ff4-d80e-4453-beab-3fd86cbf6e54.png" alt="SC 2.2c"><figcaption><span class="sbsc">SC 2.2c</span> Korte interactie met teamleden</figcaption></figure><figure class="sbcard"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zm0bcmvhYtqhUNIemq9z5Hr7Ai/hf_20260608_132926_d0da2706-4936-4a12-b4d4-98a990d45dd1.png" alt="SC 2.3a"><figcaption><span class="sbsc">SC 2.3a</span> Rollout uitgelegd bij het scherm/whiteboard</figcaption></figure><figure class="sbcard"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zm0bcmvhYtqhUNIemq9z5Hr7Ai/hf_20260608_132927_420a7aea-4c5d-4ec3-87c4-5ddc7aad5300.png" alt="SC 2.3b"><figcaption><span class="sbsc">SC 2.3b</span> Teaser: schermen/proces (niet onthuld)</figcaption></figure><figure class="sbcard"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zm0bcmvhYtqhUNIemq9z5Hr7Ai/hf_20260608_132930_40f75307-1134-4988-94c0-7dc4d5eb3c1c.png" alt="SC 2.4a"><figcaption><span class="sbsc">SC 2.4a</span> Fulfillment center (optioneel): de schaal</figcaption></figure></div><h2>BEWEGING 3: de gok / climax</h2><div class="sbgrid"><figure class="sbcard"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zm0bcmvhYtqhUNIemq9z5Hr7Ai/hf_20260608_132931_6dc5729b-2aa3-465d-9c19-c552a7a0fab8.png" alt="SC 3.1"><figcaption><span class="sbsc">SC 3.1</span> Toon-omslag, avond: nu is het wachten</figcaption></figure><figure class="sbcard"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zm0bcmvhYtqhUNIemq9z5Hr7Ai/hf_20260608_132932_91e88e21-d483-42d1-b3bd-f08631b2b7a5.png" alt="SC 3.2"><figcaption><span class="sbsc">SC 3.2</span> Spanningsmontage / countdown</figcaption></figure><figure class="sbcard"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zm0bcmvhYtqhUNIemq9z5Hr7Ai/hf_20260608_132933_272db8c6-b3ea-4dd9-8997-5765ef201036.png" alt="SC 3.3"><figcaption><span class="sbsc">SC 3.3</span> De drempel: klaar om live te gaan (cliffhanger)</figcaption></figure></div><h2>OUTRO: de cliffhanger</h2><div class="sbgrid"><figure class="sbcard"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zm0bcmvhYtqhUNIemq9z5Hr7Ai/hf_20260608_132934_5e6fdd1e-8e63-4b5b-a058-b5cd8bb6640e.png" alt="SC 4.1"><figcaption><span class="sbsc">SC 4.1</span> Recht in de lens: de belofte</figcaption></figure><figure class="sbcard"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_2zm0bcmvhYtqhUNIemq9z5Hr7Ai/hf_20260608_132935_0a0dbe5e-1c71-4540-ab7e-f4c33254ff3b.png" alt="SC 4.2"><figcaption><span class="sbsc">SC 4.2</span> Laatste beeld: skyline bij schemer</figcaption></figure></div></section></div></body></html>
