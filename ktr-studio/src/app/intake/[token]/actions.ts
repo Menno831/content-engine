@@ -24,7 +24,7 @@ export async function submitIntakeAction(_prev: IntakeResult, formData: FormData
     .from("clients")
     .select("id, name, ig_handle")
     .eq("intake_token", token)
-    .single();
+    .maybeSingle();
   if (!client) return { error: "Deze intake-link is niet (meer) geldig." };
 
   const answers: Record<string, string> = {};

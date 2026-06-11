@@ -74,19 +74,22 @@ export async function signUp(_prev: AuthResult, formData: FormData): Promise<Aut
         await admin.auth.admin.updateUserById(userId, { email_confirm: true });
 
         // Bootstrap: agency + owner-profiel (service-role, want RLS blokkeert dit anders).
-        const { data: agency } = await admin
+        const { data: agency, error: agencyErr } = await admin
           .from("agencies")
           .insert({ name: agencyName, owner_id: userId, brand_name: agencyName })
           .select("id")
           .single();
-        if (agency) {
-          await admin.from("profiles").insert({
-            user_id: userId,
-            agency_id: agency.id,
-            role: "owner",
-            full_name: fullName,
-          });
+        if (agencyErr || !agency) {
+          // Agency-aanmaak mislukt -> ruim de losse auth-user op, geen orphan.
+          await admin.auth.admin.deleteUser(userId).catch(() => {});
+          return { error: "Account aanmaken mislukt — probeer het opnieuw." };
         }
+        await admin.from("profiles").insert({
+          user_id: userId,
+          agency_id: agency.id,
+          role: "owner",
+          full_name: fullName,
+        });
       }
 
       // Geen sessie uit signUp (bevestiging stond aan)? Log nu direct in.

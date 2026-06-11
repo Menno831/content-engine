@@ -13,7 +13,7 @@ export default async function IntakePage({ params }: { params: Promise<{ token: 
   const admin = createAdminClient();
 
   const { data: client } = admin
-    ? await admin.from("clients").select("id, name, intake_answers").eq("intake_token", token).single()
+    ? await admin.from("clients").select("id, name, intake_answers").eq("intake_token", token).maybeSingle()
     : { data: null };
 
   if (!client) {

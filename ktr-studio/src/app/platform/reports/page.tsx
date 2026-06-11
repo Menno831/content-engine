@@ -5,7 +5,7 @@ import { NotConnected } from "../_states";
 
 export default async function Reports() {
   const { clients, topContent } = await getWorkspaceData();
-  const client = clients[2] ?? clients[0];
+  const client = clients[0];
 
   if (!client) {
     return (
