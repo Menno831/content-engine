@@ -123,6 +123,35 @@ export function BrandDocs({
           </div>
         ))}
 
+        {/* Brand-kleuren: sturen carousels/stories/thumbnails aan */}
+        <div>
+          <label className="block text-[12px] font-mono uppercase tracking-wider text-muted mb-1.5">
+            Brand-kleuren <span className="normal-case tracking-normal">— gebruikt in gegenereerde visuals</span>
+          </label>
+          <div className="flex flex-wrap items-center gap-4">
+            <label className="flex items-center gap-2 text-[13px] text-muted">
+              <input
+                type="color"
+                name="brand_primary"
+                value={vals.brand_primary || "#F97316"}
+                onChange={(e) => setVals((v) => ({ ...v, brand_primary: e.target.value }))}
+                className="w-9 h-9 rounded-lg border border-white/[0.1] bg-transparent cursor-pointer"
+              />
+              Hoofdkleur
+            </label>
+            <label className="flex items-center gap-2 text-[13px] text-muted">
+              <input
+                type="color"
+                name="brand_secondary"
+                value={vals.brand_secondary || "#0C0C0C"}
+                onChange={(e) => setVals((v) => ({ ...v, brand_secondary: e.target.value }))}
+                className="w-9 h-9 rounded-lg border border-white/[0.1] bg-transparent cursor-pointer"
+              />
+              Secundair
+            </label>
+          </div>
+        </div>
+
         <div>
           <label className="block text-[12px] font-mono uppercase tracking-wider text-muted mb-1.5">Interne notities</label>
           <textarea

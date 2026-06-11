@@ -445,3 +445,7 @@ create policy "team all transcripts" on transcripts
 -- ── Opdrachten: factuurmaand + referentie (migratie 012) ────────
 alter table orders add column if not exists invoice_month date;
 alter table orders add column if not exists invoice_ref   text;
+
+-- ── Brand-kleuren per klant (migratie 013) ──────────────────────
+alter table clients add column if not exists brand_primary   text;
+alter table clients add column if not exists brand_secondary text;

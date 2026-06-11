@@ -40,6 +40,9 @@ export interface Client {
   brandStrategy?: string | null;
   brandVoice?: string | null;
   notes?: string | null;
+  // Brand-kleuren (sturen carousels/stories/thumbnails aan)
+  brandPrimary?: string | null;
+  brandSecondary?: string | null;
 }
 
 export const clients: Client[] = [

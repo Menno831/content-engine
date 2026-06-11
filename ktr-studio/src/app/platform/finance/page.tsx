@@ -1,12 +1,15 @@
 import { PageHeader, Card, Stat, Avatar, Badge, Eyebrow, icons } from "../_components";
 import { getWorkspaceData } from "@/lib/data";
+import { getSessionContext } from "@/lib/auth";
 import { fmtEur } from "../_data";
 import { PaymentStatusControl } from "./PaymentStatusControl";
 import { ExportButton } from "../ExportButton";
 
 export default async function FinancePage() {
   const { clients, demo } = await getWorkspaceData();
+  const { agency } = await getSessionContext();
   const billable = clients.filter((c) => c.status !== "gepauzeerd");
+  const target = Number(agency?.monthly_target ?? 0);
 
   const mrr = billable.reduce((s, c) => s + c.monthlyValue, 0);
   const editorCosts = billable.reduce((s, c) => s + c.editorCost, 0);
@@ -48,12 +51,41 @@ export default async function FinancePage() {
         }
       />
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <Stat label="MRR (retainers)" value={fmtEur(mrr)} delta={demo ? "+€2.200 deze maand" : undefined} icon={icons.money} />
         <Stat label="Editor-kosten" value={fmtEur(editorCosts)} icon={icons.studio} />
         <Stat label="Netto marge" value={fmtEur(margin)} delta={`${marginPct}% marge`} icon={icons.analytics} />
         <Stat label="Nieuw deze maand" value={String(newThisMonth)} icon={icons.clients} />
       </div>
+
+      {/* Maanddoel: hoeveel nog te gaan (doel instellen via Instellingen) */}
+      {target > 0 && (
+        <Card className="p-5 mb-8">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+            <div className="flex items-center gap-2">
+              <span className="text-accent">{icons.target}</span>
+              <span className="font-display font-bold">Maanddoel {fmtEur(target)}</span>
+            </div>
+            <span className="text-[13px]">
+              {mrr >= target ? (
+                <span className="text-emerald-400 font-bold">Doel gehaald 🎉 (+{fmtEur(mrr - target)})</span>
+              ) : (
+                <>
+                  <span className="text-muted">nog </span>
+                  <strong className="text-accent">{fmtEur(target - mrr)}</strong>
+                  <span className="text-muted"> te gaan · ≈ {Math.ceil((target - mrr) / Math.max(1, mrr / Math.max(1, billable.length)))} klant(en) bij je huidige gem. retainer</span>
+                </>
+              )}
+            </span>
+          </div>
+          <div className="h-2 rounded-full bg-white/[0.05] overflow-hidden">
+            <div
+              className={`h-full rounded-full ${mrr >= target ? "bg-emerald-400" : "bg-accent"}`}
+              style={{ width: `${Math.min(100, target ? (mrr / target) * 100 : 0)}%` }}
+            />
+          </div>
+        </Card>
+      )}
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Per klant */}

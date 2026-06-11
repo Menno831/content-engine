@@ -2,6 +2,7 @@ import Link from "next/link";
 import { PageHeader, Card, icons } from "../_components";
 import { getWorkspaceData } from "@/lib/data";
 import { stageMeta, type PipelineStage } from "../_data";
+import { ClientFilter } from "../ClientFilter";
 
 const stageColor: Record<string, string> = {
   ideation: "#F97316",
@@ -21,7 +22,7 @@ function ym(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 
-export default async function CalendarPage({ searchParams }: { searchParams: Promise<{ m?: string }> }) {
+export default async function CalendarPage({ searchParams }: { searchParams: Promise<{ m?: string; client?: string }> }) {
   const sp = await searchParams;
   const now = new Date();
   let year = now.getFullYear();
@@ -32,7 +33,10 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
     month = mo - 1;
   }
 
-  const { content, demo } = await getWorkspaceData();
+  const { content: allContent, clients, demo } = await getWorkspaceData();
+  const activeClient = clients.find((c) => c.id === sp.client);
+  const content = activeClient ? allContent.filter((c) => c.client === activeClient.name) : allContent;
+  const clientQS = sp.client ? `&client=${sp.client}` : "";
 
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDay = (new Date(year, month, 1).getDay() + 6) % 7; // ma = 0
@@ -68,12 +72,14 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
         subtitle="Alle geplande en gepubliceerde content in één maandoverzicht, gekleurd per fase."
         action={
           <div className="flex items-center gap-2">
-            <Link href={`/platform/calendar?m=${ym(prev)}`} className="grid place-items-center w-9 h-9 rounded-xl border border-white/[0.08] hover:border-accent/30 text-muted hover:text-foreground transition-all">‹</Link>
+            <Link href={`/platform/calendar?m=${ym(prev)}${clientQS}`} className="grid place-items-center w-9 h-9 rounded-xl border border-white/[0.08] hover:border-accent/30 text-muted hover:text-foreground transition-all">‹</Link>
             <span className="font-display font-bold text-sm w-32 text-center capitalize">{MONTHS[month]} {year}</span>
-            <Link href={`/platform/calendar?m=${ym(next)}`} className="grid place-items-center w-9 h-9 rounded-xl border border-white/[0.08] hover:border-accent/30 text-muted hover:text-foreground transition-all">›</Link>
+            <Link href={`/platform/calendar?m=${ym(next)}${clientQS}`} className="grid place-items-center w-9 h-9 rounded-xl border border-white/[0.08] hover:border-accent/30 text-muted hover:text-foreground transition-all">›</Link>
           </div>
         }
       />
+
+      <ClientFilter clients={clients.map((c) => ({ id: c.id, name: c.name }))} />
 
       <Card className="p-4">
         <div className="grid grid-cols-7 gap-1 mb-1">

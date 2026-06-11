@@ -5,13 +5,18 @@ import { getSessionContext } from "@/lib/auth";
 import { TodoToggle } from "./TodoToggle";
 import { AddTodoDialog } from "./AddTodoDialog";
 import { NoData } from "../_states";
+import { ClientFilter } from "../ClientFilter";
 
-export default async function TodosPage() {
+export default async function TodosPage({ searchParams }: { searchParams: Promise<{ client?: string }> }) {
+  const sp = await searchParams;
   const ctx = await getSessionContext();
   const isClient = ctx.profile?.role === "client";
-  const todos = await getTodos();
+  const allTodos = await getTodos();
   const { clients } = await getWorkspaceData();
   const clientOptions = clients.map((c) => ({ id: c.id, label: c.name }));
+
+  const activeClient = clients.find((c) => c.id === sp.client);
+  const todos = activeClient ? allTodos.filter((t) => t.client === activeClient.name) : allTodos;
 
   const open = todos.filter((t) => !t.done);
   const done = todos.filter((t) => t.done);
@@ -28,6 +33,8 @@ export default async function TodosPage() {
         }
         action={isClient ? undefined : <AddTodoDialog clients={clientOptions} />}
       />
+
+      {!isClient && <ClientFilter clients={clients.map((c) => ({ id: c.id, name: c.name }))} />}
 
       {todos.length === 0 ? (
         <NoData label="Nog geen taken" />

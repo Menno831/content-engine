@@ -169,6 +169,8 @@ export async function saveBrandDocsAction(_prev: ActionResult, formData: FormDat
       brand_strategy: String(formData.get("brand_strategy") ?? "").trim() || null,
       brand_voice: String(formData.get("brand_voice") ?? "").trim() || null,
       notes: String(formData.get("notes") ?? "").trim() || null,
+      brand_primary: String(formData.get("brand_primary") ?? "").trim() || null,
+      brand_secondary: String(formData.get("brand_secondary") ?? "").trim() || null,
     })
     .eq("id", clientId);
   if (error) return { error: error.message };

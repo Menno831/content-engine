@@ -208,7 +208,7 @@ export async function getClient(id: string): Promise<Client | null> {
   const { data: c } = await supabase
     .from("clients")
     .select(
-      "id,name,ig_handle,status,monthly_value,package,videos_per_month,editor_cost,payment_status,soul_character_id,reference_image_url,brand_prompt,brand_identity,brand_story,brand_strategy,brand_voice,notes"
+      "id,name,ig_handle,status,monthly_value,package,videos_per_month,editor_cost,payment_status,soul_character_id,reference_image_url,brand_prompt,brand_identity,brand_story,brand_strategy,brand_voice,notes,brand_primary,brand_secondary"
     )
     .eq("id", id)
     .single();
@@ -236,6 +236,8 @@ export async function getClient(id: string): Promise<Client | null> {
     brandStrategy: c.brand_strategy ?? null,
     brandVoice: c.brand_voice ?? null,
     notes: c.notes ?? null,
+    brandPrimary: c.brand_primary ?? null,
+    brandSecondary: c.brand_secondary ?? null,
   };
 }
 // ── Opdrachten per klant (prijs/kosten -> marge) ────────────────

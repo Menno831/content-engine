@@ -4,6 +4,7 @@ import { getWorkspaceData } from "@/lib/data";
 import { getEditors } from "@/lib/editors";
 import { AddContentDialog } from "./AddContentDialog";
 import { ContentStageControl } from "./ContentStageControl";
+import { ClientFilter } from "../ClientFilter";
 
 const stageOrder: PipelineStage[] = [
   "ideation",
@@ -23,11 +24,16 @@ const formatColor: Record<string, string> = {
   Short: "#34D399",
 };
 
-export default async function Pipeline() {
-  const { content: contentCards, clients, demo } = await getWorkspaceData();
+export default async function Pipeline({ searchParams }: { searchParams: Promise<{ client?: string }> }) {
+  const sp = await searchParams;
+  const { content: allContent, clients, demo } = await getWorkspaceData();
   const editors = await getEditors();
   const clientOptions = clients.map((c) => ({ id: c.id, label: c.name }));
   const editorOptions = editors.map((e) => ({ id: e.id, label: e.name }));
+
+  // Klantfilter via ?client=<id> (kaarten dragen de klantnaam).
+  const activeClient = clients.find((c) => c.id === sp.client);
+  const contentCards = activeClient ? allContent.filter((c) => c.client === activeClient.name) : allContent;
 
   return (
     <>
@@ -37,6 +43,8 @@ export default async function Pipeline() {
         subtitle="Van idee tot live — alle content over je klanten in één board. Vervangt je losse Monday."
         action={<AddContentDialog clients={clientOptions} editors={editorOptions} />}
       />
+
+      <ClientFilter clients={clients.map((c) => ({ id: c.id, name: c.name }))} />
 
       <div className="flex gap-4 overflow-x-auto pb-4 -mx-1 px-1">
         {stageOrder.map((stage) => {

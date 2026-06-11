@@ -98,6 +98,8 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
               brand_strategy: c.brandStrategy ?? "",
               brand_voice: c.brandVoice ?? "",
               notes: c.notes ?? "",
+              brand_primary: c.brandPrimary ?? "",
+              brand_secondary: c.brandSecondary ?? "",
             }}
           />
         </div>

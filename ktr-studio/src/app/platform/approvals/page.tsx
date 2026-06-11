@@ -3,6 +3,7 @@ import { getWorkspaceData } from "@/lib/data";
 import { getSessionContext } from "@/lib/auth";
 import { NoData } from "../_states";
 import { ApprovalActions } from "./ApprovalActions";
+import { ClientFilter } from "../ClientFilter";
 
 const formatColor: Record<string, string> = {
   Reel: "#F97316",
@@ -11,11 +12,15 @@ const formatColor: Record<string, string> = {
   Short: "#34D399",
 };
 
-export default async function ApprovalsPage() {
+export default async function ApprovalsPage({ searchParams }: { searchParams: Promise<{ client?: string }> }) {
+  const sp = await searchParams;
   const ctx = await getSessionContext();
   const isClient = ctx.profile?.role === "client";
-  const { content } = await getWorkspaceData();
-  const waiting = content.filter((c) => c.stage === "client_approval");
+  const { content, clients } = await getWorkspaceData();
+  const activeClient = clients.find((c) => c.id === sp.client);
+  const waiting = content.filter(
+    (c) => c.stage === "client_approval" && (!activeClient || c.client === activeClient.name)
+  );
 
   return (
     <>
@@ -28,6 +33,8 @@ export default async function ApprovalsPage() {
             : "Content die bij klanten ligt voor goedkeuring. Je krijgt een melding zodra ze reageren."
         }
       />
+
+      {!isClient && <ClientFilter clients={clients.map((c) => ({ id: c.id, name: c.name }))} />}
 
       {waiting.length === 0 ? (
         <NoData label="Niets wacht op goedkeuring 🎉" />
