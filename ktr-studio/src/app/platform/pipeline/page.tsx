@@ -5,6 +5,8 @@ import { getEditors } from "@/lib/editors";
 import { AddContentDialog } from "./AddContentDialog";
 import { ContentStageControl } from "./ContentStageControl";
 import { ClientFilter } from "../ClientFilter";
+import { ClientBoard } from "./ClientBoard";
+import { getSessionContext } from "@/lib/auth";
 
 const stageOrder: PipelineStage[] = [
   "ideation",
@@ -27,6 +29,23 @@ const formatColor: Record<string, string> = {
 export default async function Pipeline({ searchParams }: { searchParams: Promise<{ client?: string }> }) {
   const sp = await searchParams;
   const { content: allContent, clients, demo } = await getWorkspaceData();
+  const ctx = await getSessionContext();
+  const isClient = ctx.profile?.role === "client";
+
+  // Klant-login: vereenvoudigd, alleen-lezen board (RLS levert al alleen z'n eigen content).
+  if (isClient) {
+    return (
+      <>
+        <PageHeader
+          eyebrow="Mijn content"
+          title="Wat we voor je maken"
+          subtitle="Van idee tot live — en wat er nog op jouw akkoord wacht."
+        />
+        <ClientBoard content={allContent} />
+      </>
+    );
+  }
+
   const editors = await getEditors();
   const clientOptions = clients.map((c) => ({ id: c.id, label: c.name }));
   const editorOptions = editors.map((e) => ({ id: e.id, label: e.name }));

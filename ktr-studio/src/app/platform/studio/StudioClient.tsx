@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { PageHeader, Card, Badge, Eyebrow, icons } from "../_components";
+import { scriptToBoardAction } from "../pipeline/actions";
 
 export interface StudioClientInfo {
   id: string;
@@ -336,23 +337,51 @@ Output: eerst 3 HOOK-VARIANTEN (één per regel), dan het SCRIPT met regie-aanwi
           )}
 
           {scripts.map(({ idea, text }, i) => (
-            <Card key={i} className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-display font-extrabold text-lg">{idea.title}</h2>
-                <button
-                  onClick={() => navigator.clipboard?.writeText(text)}
-                  className="rounded-lg border border-white/[0.08] hover:border-accent/30 px-3 py-1.5 text-[12px] transition-all"
-                >
-                  Kopieer
-                </button>
-              </div>
-              <pre className="whitespace-pre-wrap font-mono text-[12.5px] leading-relaxed text-foreground/85 bg-black/30 rounded-xl p-5 border border-white/[0.05]">
-                {text}
-              </pre>
-            </Card>
+            <ScriptCard key={i} clientId={clientId} idea={idea} text={text} />
           ))}
         </div>
       </div>
     </>
+  );
+}
+
+function ScriptCard({ clientId, idea, text }: { clientId: string; idea: Idea; text: string }) {
+  const [pending, start] = useTransition();
+  const [saved, setSaved] = useState<{ ok: boolean; msg: string } | null>(null);
+
+  function toBoard() {
+    setSaved(null);
+    start(async () => {
+      const r = await scriptToBoardAction({ clientId, title: idea.title, hook: idea.hook, script: text });
+      setSaved({ ok: Boolean(r.ok), msg: r.ok ?? r.error ?? "" });
+    });
+  }
+
+  return (
+    <Card className="p-6">
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <h2 className="font-display font-extrabold text-lg min-w-0 truncate">{idea.title}</h2>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => navigator.clipboard?.writeText(text)}
+            className="rounded-lg border border-white/[0.08] hover:border-accent/30 px-3 py-1.5 text-[12px] transition-all"
+          >
+            Kopieer
+          </button>
+          <button
+            onClick={toBoard}
+            disabled={pending || saved?.ok}
+            className="flex items-center gap-1.5 rounded-lg bg-accent hover:bg-accent-hover disabled:opacity-60 text-background font-bold px-3 py-1.5 text-[12px] transition-colors"
+          >
+            {saved?.ok ? "Op board ✓" : pending ? "…" : <>{icons.arrowRight} Op productieboard</>}
+          </button>
+        </div>
+      </div>
+      {saved && !saved.ok && <p className="mb-3 text-[12px] text-red-400">{saved.msg}</p>}
+      {saved?.ok && <p className="mb-3 text-[12px] text-emerald-400">{saved.msg}</p>}
+      <pre className="whitespace-pre-wrap font-mono text-[12.5px] leading-relaxed text-foreground/85 bg-black/30 rounded-xl p-5 border border-white/[0.05]">
+        {text}
+      </pre>
+    </Card>
   );
 }

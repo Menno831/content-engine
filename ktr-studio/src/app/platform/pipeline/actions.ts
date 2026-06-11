@@ -82,6 +82,37 @@ export async function createContentAction(
   return { ok: "Kaart toegevoegd." };
 }
 
+// Vanuit de Studio: een gegenereerde hook + script direct op het
+// productieboard zetten (start in 'ideation', klaar voor de editor).
+export async function scriptToBoardAction(input: {
+  clientId: string;
+  title: string;
+  hook: string;
+  script: string;
+}): Promise<ContentActionResult> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { error: "Supabase niet geconfigureerd." };
+
+  const { agency } = await getSessionContext();
+  if (!agency) return { error: "Geen agency gevonden — log opnieuw in." };
+  if (!input.clientId) return { error: "Kies een klant." };
+
+  const title = input.title.trim().slice(0, 120) || "Nieuw script";
+  const { error } = await supabase.from("content").insert({
+    client_id: input.clientId,
+    title,
+    hook: input.hook.trim().slice(0, 300) || null,
+    script: input.script.trim() || null,
+    format: "Reel",
+    stage: "ideation",
+  });
+  if (error) return { error: error.message };
+
+  revalidatePath("/platform/pipeline");
+  revalidatePath("/platform");
+  return { ok: `"${title}" staat op het productieboard.` };
+}
+
 export async function updateContentStageAction(contentId: string, stage: string): Promise<ContentActionResult> {
   const supabase = await supabaseServer();
   if (!supabase) return { error: "Supabase niet geconfigureerd." };
