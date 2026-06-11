@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export interface SessionContext {
   user: { id: string; email?: string } | null;
@@ -21,11 +22,43 @@ export async function getSessionContext(): Promise<SessionContext> {
   } = await supabase.auth.getUser();
   if (!user) return empty;
 
-  const { data: profile } = await supabase
+  let { data: profile } = await supabase
     .from("profiles")
     .select("role, full_name, client_id, agencies(id, name, brand_name, accent, monthly_target)")
     .eq("user_id", user.id)
-    .single();
+    .maybeSingle();
+
+  // Self-heal: ingelogde gebruiker zonder profiel (bijv. database opnieuw
+  // opgezet terwijl het auth-account bleef bestaan) -> maak agency + owner-
+  // profiel automatisch aan, zodat het account weer gewoon werkt.
+  if (!profile) {
+    const admin = createAdminClient();
+    if (admin) {
+      const fallbackName =
+        (user.user_metadata?.full_name as string | undefined) ||
+        user.email?.split("@")[0] ||
+        "Mijn agency";
+      const { data: agencyRow } = await admin
+        .from("agencies")
+        .insert({ name: fallbackName, owner_id: user.id, brand_name: fallbackName })
+        .select("id")
+        .single();
+      if (agencyRow) {
+        await admin.from("profiles").insert({
+          user_id: user.id,
+          agency_id: agencyRow.id,
+          role: "owner",
+          full_name: fallbackName,
+        });
+        const { data: healed } = await supabase
+          .from("profiles")
+          .select("role, full_name, client_id, agencies(id, name, brand_name, accent, monthly_target)")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        profile = healed;
+      }
+    }
+  }
 
   // Supabase typeert de join als array; pak het eerste element.
   const agencyRaw = profile?.agencies as unknown;
