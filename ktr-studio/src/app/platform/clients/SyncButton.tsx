@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { syncClientAction } from "./actions";
 
 const errorLabels: Record<string, string> = {
-  geen_bron: "Geen IG-handle of koppeling",
+  geen_bron: "Geen IG-handle of YouTube-kanaal",
   geen_serverkey: "Serverkey ontbreekt",
   not_configured: "Bron niet geconfigureerd",
   not_found: "Profiel niet gevonden",

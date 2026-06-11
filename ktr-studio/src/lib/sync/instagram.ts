@@ -6,6 +6,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { fetchInstagram, type InstagramResult } from "@/lib/integrations/instagram";
 import { fetchGraphInstagram } from "@/lib/integrations/instagram-graph";
+import { persistMedia } from "./persist";
 
 export interface SyncResult {
   ok: boolean;
@@ -61,49 +62,7 @@ export async function syncClientInstagram(clientId: string): Promise<SyncResult>
     return { ok: false, error: msg };
   }
 
-  let count = 0;
-  for (const m of result.media) {
-    // Content opzoeken of aanmaken (uniek per klant + external_id).
-    const { data: existing } = await admin
-      .from("content")
-      .select("id")
-      .eq("client_id", clientId)
-      .eq("external_id", m.externalId)
-      .maybeSingle();
-
-    let contentId = existing?.id as string | undefined;
-    if (!contentId) {
-      const { data: inserted } = await admin
-        .from("content")
-        .insert({
-          client_id: clientId,
-          title: m.caption.slice(0, 80) || "(zonder bijschrift)",
-          hook: m.caption.slice(0, 140),
-          format: m.type,
-          stage: "posted",
-          source,
-          external_id: m.externalId,
-          permalink: m.permalink,
-          published_at: m.timestamp ? new Date(m.timestamp * 1000).toISOString() : null,
-        })
-        .select("id")
-        .single();
-      contentId = inserted?.id as string | undefined;
-    }
-    if (!contentId) continue;
-
-    // Nieuwe metric-snapshot (bron + tijdstempel).
-    await admin.from("content_metrics").insert({
-      content_id: contentId,
-      source,
-      views: m.views,
-      reach: m.reach,
-      likes: m.likes,
-      comments: m.comments,
-      fetched_at: result.fetchedAt,
-    });
-    count++;
-  }
+  const count = await persistMedia(admin, clientId, source, result);
 
   await admin
     .from("integrations")

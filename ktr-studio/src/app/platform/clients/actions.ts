@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { createClient as supabaseServer } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionContext } from "@/lib/auth";
-import { syncClientInstagram, type SyncResult } from "@/lib/sync/instagram";
+import { syncClientAll, type ClientSyncResult } from "@/lib/sync/client";
 import { INTAKE_QUESTIONS, synthesizeBrandDocs } from "@/lib/intake";
 
 export interface ActionResult {
@@ -99,6 +99,7 @@ export async function createClientAction(
     agency_id: agency.id,
     name,
     ig_handle: String(formData.get("ig_handle") ?? "").trim() || null,
+    yt_channel_id: String(formData.get("yt_channel_id") ?? "").trim() || null,
     contact_email: String(formData.get("contact_email") ?? "").trim() || null,
     monthly_value: Number(formData.get("monthly_value") ?? 0) || 0,
     status: "onboarding",
@@ -121,7 +122,7 @@ export async function syncAllClientsAction(): Promise<{ ok: boolean; synced?: nu
   const { data: clients } = await supabase.from("clients").select("id");
   let synced = 0;
   for (const c of clients ?? []) {
-    const r = await syncClientInstagram(c.id);
+    const r = await syncClientAll(c.id);
     if (r.ok) synced++;
   }
   revalidatePath("/platform/clients");
@@ -129,20 +130,20 @@ export async function syncAllClientsAction(): Promise<{ ok: boolean; synced?: nu
   return { ok: true, synced, total: clients?.length ?? 0 };
 }
 
-export async function syncClientAction(clientId: string): Promise<SyncResult> {
+export async function syncClientAction(clientId: string): Promise<ClientSyncResult> {
   const supabase = await supabaseServer();
-  if (!supabase) return { ok: false, error: "Supabase niet geconfigureerd." };
+  if (!supabase) return { ok: false, items: 0, error: "Supabase niet geconfigureerd." };
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "auth vereist" };
+  if (!user) return { ok: false, items: 0, error: "auth vereist" };
 
   // Eigenaarschap via RLS.
   const { data: client } = await supabase.from("clients").select("id").eq("id", clientId).single();
-  if (!client) return { ok: false, error: "onbekende klant" };
+  if (!client) return { ok: false, items: 0, error: "onbekende klant" };
 
-  const result = await syncClientInstagram(clientId);
+  const result = await syncClientAll(clientId);
   revalidatePath("/platform/clients");
   revalidatePath("/platform");
   return result;

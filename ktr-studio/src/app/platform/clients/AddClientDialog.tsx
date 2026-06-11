@@ -44,6 +44,7 @@ export function AddClientDialog() {
             <form action={action} className="space-y-3.5">
               <Field name="name" label="Naam" placeholder="Lars Vermeer" required />
               <Field name="ig_handle" label="Instagram-handle" placeholder="@larsbuilds" />
+              <Field name="yt_channel_id" label="YouTube (kanaal-id of @handle)" placeholder="@larsbuilds of UC…" />
               <Field name="contact_email" label="Contact-e-mail (voor meldingen)" type="email" placeholder="lars@bedrijf.nl" />
               <Field name="monthly_value" label="Retainer per maand (€)" type="number" placeholder="2500" />
 
