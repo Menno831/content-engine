@@ -3,6 +3,7 @@
 // Second brain verkenner: zoek door alles wat je ooit bewaarde
 // (titels + inhoud), filter op type, gegroepeerd per board.
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card, Badge, icons } from "../_components";
 import type { Capture } from "../_data";
 
@@ -15,8 +16,19 @@ const kindMeta: Record<string, { label: string; color: string }> = {
 };
 
 export function BoardsExplorer({ captures }: { captures: Capture[] }) {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [kind, setKind] = useState("");
+
+  // Bewaard item -> Boost: tekst meegeven via sessionStorage, dan navigeren.
+  function boost(c: Capture) {
+    try {
+      sessionStorage.setItem("boost:core", c.body || c.title);
+    } catch {
+      /* private mode — geen probleem, gebruiker plakt zelf */
+    }
+    router.push("/platform/boost");
+  }
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -86,11 +98,16 @@ export function BoardsExplorer({ captures }: { captures: Capture[] }) {
                         </div>
                         <h3 className="font-medium text-sm leading-snug mb-1.5">{c.title}</h3>
                         {c.body && <p className="text-[12px] text-muted leading-relaxed line-clamp-3">{c.body}</p>}
-                        {c.url && (
-                          <a href={c.url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1 text-[12px] text-accent hover:text-accent-hover">
-                            Open ↗
-                          </a>
-                        )}
+                        <div className="mt-2.5 flex items-center gap-3">
+                          <button onClick={() => boost(c)} className="inline-flex items-center gap-1 text-[12px] text-accent hover:text-accent-hover font-medium">
+                            {icons.rocket} Boost
+                          </button>
+                          {c.url && (
+                            <a href={c.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[12px] text-muted hover:text-foreground">
+                              Open ↗
+                            </a>
+                          )}
+                        </div>
                       </Card>
                     );
                   })}

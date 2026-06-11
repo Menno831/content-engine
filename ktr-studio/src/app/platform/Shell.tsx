@@ -40,6 +40,7 @@ const agencyGroups: NavGroup[] = [
     title: "Maken (AI)",
     items: [
       { href: "/platform/studio", label: "Studio (AI)", icon: icons.studio },
+      { href: "/platform/boost", label: "Boost", icon: icons.rocket },
       { href: "/platform/prompts", label: "Prompts", icon: icons.spark },
       { href: "/platform/visuals", label: "AI Visuals", icon: icons.spark },
       { href: "/platform/brand-studio", label: "Brand Studio", icon: icons.thumb },
