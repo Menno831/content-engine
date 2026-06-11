@@ -41,7 +41,7 @@ export function AddLeadDialog({ clients, content }: { clients: Option[]; content
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="font-display font-extrabold text-xl mb-1">Nieuwe lead</h3>
-            <p className="text-muted text-sm mb-5">Koppel een lead aan een klant en (optioneel) aan de content die 'm opleverde.</p>
+            <p className="text-muted text-sm mb-5">Koppel een lead aan een klant en (optioneel) aan de content die &rsquo;m opleverde.</p>
 
             {clients.length === 0 ? (
               <p className="text-[13px] text-amber-300">Voeg eerst een klant toe op de Klanten-pagina.</p>

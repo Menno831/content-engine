@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PageHeader, Card, Badge, Avatar, icons } from "../../_components";
+import { PageHeader, Card, Badge, Avatar } from "../../_components";
 import { getClient, getClientOrders, getIntakeAnswers, getClientTranscripts } from "@/lib/data";
 import { fmtEur } from "../../_data";
 import { BrandDocs } from "../BrandDocs";

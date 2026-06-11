@@ -54,6 +54,10 @@ export default async function Dashboard() {
   const monthClosed = revenueByMonth[revenueByMonth.length - 1]?.v ?? 0;
   const targetPct = monthlyTarget > 0 ? Math.min(100, Math.round((monthClosed / monthlyTarget) * 100)) : 0;
 
+  // Datums voor de 'Vandaag'-actierij (server-side, één keer per request).
+  const today = new Date().toISOString().slice(0, 10);
+  const in3days = new Date(Date.now() + 3 * 86_400_000).toISOString().slice(0, 10);
+
   return (
     <>
       <PageHeader
@@ -63,7 +67,16 @@ export default async function Dashboard() {
       />
 
       {/* Vandaag: wat moet er NU gebeuren (commandopost) */}
-      <ActionRow contentCards={contentCards} leads={leads} todosOpen={todos.filter((t) => !t.done).length} />
+      <ActionRow
+        followupsDue={
+          leads.filter((l) => l.nextFollowup && l.nextFollowup <= today && l.stage !== "closed" && l.stage !== "verloren").length
+        }
+        deadlinesSoon={
+          contentCards.filter((c) => c.stage !== "posted" && c.dateISO && c.dateISO.slice(0, 10) <= in3days).length
+        }
+        waitingApproval={contentCards.filter((c) => c.stage === "client_approval").length}
+        todosOpen={todos.filter((t) => !t.done).length}
+      />
 
       {/* KPI's */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -201,26 +214,18 @@ export default async function Dashboard() {
 
 // Commandopost-rij: de vier dingen die vandaag aandacht vragen,
 // elk met een directe link naar de juiste pagina. Urgent = rood.
+// Puur: telt zelf niets, krijgt de getallen kant-en-klaar binnen.
 function ActionRow({
-  contentCards,
-  leads,
+  followupsDue,
+  deadlinesSoon,
+  waitingApproval,
   todosOpen,
 }: {
-  contentCards: ContentCard[];
-  leads: { stage: string; nextFollowup?: string | null }[];
+  followupsDue: number;
+  deadlinesSoon: number;
+  waitingApproval: number;
   todosOpen: number;
 }) {
-  const today = new Date().toISOString().slice(0, 10);
-  const in3days = new Date(Date.now() + 3 * 86_400_000).toISOString().slice(0, 10);
-
-  const followupsDue = leads.filter(
-    (l) => l.nextFollowup && l.nextFollowup <= today && l.stage !== "closed" && l.stage !== "verloren"
-  ).length;
-  const deadlinesSoon = contentCards.filter(
-    (c) => c.stage !== "posted" && c.dateISO && c.dateISO.slice(0, 10) <= in3days
-  ).length;
-  const waitingApproval = contentCards.filter((c) => c.stage === "client_approval").length;
-
   const items = [
     { label: "Vandaag opvolgen", count: followupsDue, href: "/platform/leads", urgent: followupsDue > 0 },
     { label: "Deadline ≤ 3 dagen", count: deadlinesSoon, href: "/platform/pipeline", urgent: deadlinesSoon > 0 },

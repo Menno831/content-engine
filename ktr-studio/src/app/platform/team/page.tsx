@@ -70,7 +70,7 @@ export default async function TeamPage() {
         </Card>
         <Card className="p-5">
           <div className="font-display font-bold mb-1">Klant</div>
-          <p className="text-[13px] text-muted">Eigen portaal met alleen z'n content, prestaties, taken en rapporten (via de Klanten-pagina).</p>
+          <p className="text-[13px] text-muted">Eigen portaal met alleen z&rsquo;n content, prestaties, taken en rapporten (via de Klanten-pagina).</p>
         </Card>
       </div>
     </>

@@ -8,7 +8,6 @@ import type { InstagramResult } from "@/lib/integrations/instagram";
 
 export type SyncSource = "instagram_graph" | "instagram_scrape" | "youtube";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 export async function persistMedia(
   admin: SupabaseClient,
   clientId: string,
@@ -58,4 +57,3 @@ export async function persistMedia(
   }
   return count;
 }
-/* eslint-enable @typescript-eslint/no-explicit-any */
