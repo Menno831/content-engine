@@ -16,7 +16,8 @@ async function callAI(template: string, input: string, clientId: string): Promis
     const res = await fetch("/api/ai/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ template, input, client_id: clientId }),
+      // fast: hooks/scripts draaien op Haiku (5x goedkoper, ruim snel genoeg).
+      body: JSON.stringify({ template, input, client_id: clientId, fast: true }),
     });
     const data = await res.json();
     if (!data.ok) return { text: "", mock: false, error: data.error ?? "Er ging iets mis." };

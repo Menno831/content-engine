@@ -8,6 +8,9 @@ export async function POST(request: NextRequest) {
   const template = String(body.template ?? "").trim();
   const input = String(body.input ?? "").trim();
   const clientId = String(body.client_id ?? "").trim();
+  // Snelle/goedkope generaties (hooks, scripts) draaien op Haiku;
+  // standaard (brand-context, prompts) op Opus.
+  const model = body.fast ? "fast" : "smart";
   if (!template) {
     return NextResponse.json({ ok: false, error: "template is verplicht" }, { status: 400 });
   }
@@ -38,7 +41,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { text, mock } = await generateText({ template: finalTemplate, input });
+    const { text, mock } = await generateText({ template: finalTemplate, input, model });
     return NextResponse.json({ ok: true, text, mock });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "onbekende fout";
