@@ -2,10 +2,12 @@ import Link from "next/link";
 import { stageMeta, fmtEur, fmtNum, type PipelineStage, type ContentCard } from "./_data";
 import { Card, Stat, PageHeader, Avatar, Badge, icons, Eyebrow } from "./_components";
 import { getWorkspaceData } from "@/lib/data";
+import { getTodos } from "@/lib/notifications";
 import { getSessionContext } from "@/lib/auth";
 
 export default async function Dashboard() {
   const { clients, content: contentCards, leads, revenueByMonth, demo } = await getWorkspaceData();
+  const todos = await getTodos();
   const ctx = await getSessionContext();
 
   // Klant-login: eigen overzicht i.p.v. agency-cijfers.
@@ -59,6 +61,9 @@ export default async function Dashboard() {
         title="Dashboard"
         subtitle="Wat er speelt over al je klanten — content, leads en omzet op één plek."
       />
+
+      {/* Vandaag: wat moet er NU gebeuren (commandopost) */}
+      <ActionRow contentCards={contentCards} leads={leads} todosOpen={todos.filter((t) => !t.done).length} />
 
       {/* KPI's */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -191,6 +196,62 @@ export default async function Dashboard() {
         </Card>
       </div>
     </>
+  );
+}
+
+// Commandopost-rij: de vier dingen die vandaag aandacht vragen,
+// elk met een directe link naar de juiste pagina. Urgent = rood.
+function ActionRow({
+  contentCards,
+  leads,
+  todosOpen,
+}: {
+  contentCards: ContentCard[];
+  leads: { stage: string; nextFollowup?: string | null }[];
+  todosOpen: number;
+}) {
+  const today = new Date().toISOString().slice(0, 10);
+  const in3days = new Date(Date.now() + 3 * 86_400_000).toISOString().slice(0, 10);
+
+  const followupsDue = leads.filter(
+    (l) => l.nextFollowup && l.nextFollowup <= today && l.stage !== "closed" && l.stage !== "verloren"
+  ).length;
+  const deadlinesSoon = contentCards.filter(
+    (c) => c.stage !== "posted" && c.dateISO && c.dateISO.slice(0, 10) <= in3days
+  ).length;
+  const waitingApproval = contentCards.filter((c) => c.stage === "client_approval").length;
+
+  const items = [
+    { label: "Vandaag opvolgen", count: followupsDue, href: "/platform/leads", urgent: followupsDue > 0 },
+    { label: "Deadline ≤ 3 dagen", count: deadlinesSoon, href: "/platform/pipeline", urgent: deadlinesSoon > 0 },
+    { label: "Wacht op klant-akkoord", count: waitingApproval, href: "/platform/approvals", urgent: false },
+    { label: "Open taken", count: todosOpen, href: "/platform/todos", urgent: false },
+  ];
+
+  return (
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+      {items.map((it) => (
+        <Link
+          key={it.label}
+          href={it.href}
+          className={`group rounded-2xl border p-4 transition-all ${
+            it.urgent
+              ? "border-red-400/30 bg-red-400/[0.05] hover:border-red-400/50"
+              : it.count > 0
+                ? "border-white/[0.08] bg-white/[0.015] hover:border-accent/30"
+                : "border-white/[0.05] bg-white/[0.01] opacity-70 hover:opacity-100"
+          }`}
+        >
+          <div className={`font-display font-extrabold text-2xl mb-0.5 ${it.urgent ? "text-red-300" : it.count > 0 ? "" : "text-muted"}`}>
+            {it.count}
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-[12px] text-muted leading-tight">{it.label}</span>
+            <span className="text-muted group-hover:text-accent transition-colors">{icons.arrowRight}</span>
+          </div>
+        </Link>
+      ))}
+    </div>
   );
 }
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { syncClientAll } from "@/lib/sync/client";
+import { syncCompetitorCore } from "@/lib/sync/competitors";
 
 // Nachtelijke sync van alle klanten (Vercel Cron). Beveiligd met CRON_SECRET.
 export async function GET(request: NextRequest) {
@@ -23,5 +24,18 @@ export async function GET(request: NextRequest) {
     results.push({ client: c.id, ok: r.ok, items: r.items, error: r.error });
   }
 
-  return NextResponse.json({ ranAt: new Date().toISOString(), synced: results.length, results });
+  // Ook gevolgde competitors verversen (Discover outlier-detectie blijft actueel).
+  const { data: comps } = await admin.from("competitors").select("id");
+  let competitorsSynced = 0;
+  for (const c of comps ?? []) {
+    const r = await syncCompetitorCore(c.id);
+    if (r.ok) competitorsSynced++;
+  }
+
+  return NextResponse.json({
+    ranAt: new Date().toISOString(),
+    synced: results.length,
+    competitors: competitorsSynced,
+    results,
+  });
 }

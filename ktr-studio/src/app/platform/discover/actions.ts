@@ -2,9 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient as supabaseServer } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionContext } from "@/lib/auth";
-import { fetchInstagram } from "@/lib/integrations/instagram";
+import { syncCompetitorCore } from "@/lib/sync/competitors";
 
 export interface ActionResult {
   error?: string;
@@ -63,50 +62,17 @@ export async function syncCompetitorAction(competitorId: string): Promise<Action
   } = await supabase.auth.getUser();
   if (!user) return { error: "auth vereist" };
 
-  // Eigenaarschap via RLS.
+  // Eigenaarschap via RLS; de kern draait daarna via de service-role.
   const { data: comp } = await supabase
     .from("competitors")
-    .select("id, handle, agency_id")
+    .select("id, handle")
     .eq("id", competitorId)
     .maybeSingle();
   if (!comp) return { error: "Onbekende competitor." };
 
-  const admin = createAdminClient();
-  if (!admin) return { error: "Serverkey ontbreekt." };
+  const result = await syncCompetitorCore(comp.id);
+  if (!result.ok) return { error: result.error ?? "sync mislukt" };
 
-  try {
-    const result = await fetchInstagram(comp.handle as string);
-    for (const m of result.media) {
-      await admin.from("competitor_posts").upsert(
-        {
-          competitor_id: comp.id,
-          agency_id: comp.agency_id,
-          external_id: m.externalId,
-          caption: m.caption.slice(0, 300),
-          format: m.type,
-          permalink: m.permalink,
-          views: m.views,
-          likes: m.likes,
-          comments: m.comments,
-          posted_at: m.timestamp ? new Date(m.timestamp * 1000).toISOString() : null,
-          fetched_at: result.fetchedAt,
-        },
-        { onConflict: "competitor_id,external_id" }
-      );
-    }
-    await admin
-      .from("competitors")
-      .update({
-        name: result.profile.fullName || null,
-        followers: result.profile.followers || null,
-        last_synced_at: result.fetchedAt,
-      })
-      .eq("id", comp.id);
-
-    revalidatePath("/platform/discover");
-    return { ok: `${comp.handle}: ${result.media.length} posts gesynct.` };
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : "sync mislukt";
-    return { error: msg === "not_configured" ? "RAPIDAPI_KEY ontbreekt (Instagram-bron)." : msg };
-  }
+  revalidatePath("/platform/discover");
+  return { ok: `${comp.handle}: ${result.items} posts gesynct.` };
 }
