@@ -82,6 +82,67 @@ export async function grantPortalAccessAction(
   };
 }
 
+// Onboarding-wizard: klant + kanalen + kleuren + (optioneel) brand voice
+// intake in één keer. Geeft het nieuwe klant-id terug zodat de wizard
+// door kan sturen naar het profiel.
+export async function onboardClientAction(
+  _prev: ActionResult & { clientId?: string },
+  formData: FormData
+): Promise<ActionResult & { clientId?: string }> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { error: "Supabase is nog niet geconfigureerd." };
+
+  const { agency } = await getSessionContext();
+  if (!agency) return { error: "Geen agency gevonden — log opnieuw in." };
+
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) return { error: "Naam is verplicht." };
+
+  // Intake-antwoorden verzamelen (mogen leeg zijn — stap is optioneel).
+  const answers: Record<string, string> = {};
+  for (const q of INTAKE_QUESTIONS) {
+    const v = String(formData.get(`q_${q.key}`) ?? "").trim();
+    if (v) answers[q.key] = v;
+  }
+  const hasIntake = Object.keys(answers).length > 0;
+
+  const { data: inserted, error } = await supabase
+    .from("clients")
+    .insert({
+      agency_id: agency.id,
+      name,
+      ig_handle: String(formData.get("ig_handle") ?? "").trim() || null,
+      yt_channel_id: String(formData.get("yt_channel_id") ?? "").trim() || null,
+      contact_email: String(formData.get("contact_email") ?? "").trim() || null,
+      monthly_value: Number(formData.get("monthly_value") ?? 0) || 0,
+      package: String(formData.get("package") ?? "").trim() || null,
+      brand_primary: String(formData.get("brand_primary") ?? "").trim() || null,
+      brand_secondary: String(formData.get("brand_secondary") ?? "").trim() || null,
+      intake_answers: hasIntake ? answers : null,
+      status: "onboarding",
+    })
+    .select("id")
+    .single();
+  if (error || !inserted) return { error: error?.message ?? "Aanmaken mislukt." };
+
+  // Brand voice meteen genereren als er intake-antwoorden zijn (en een key staat).
+  if (hasIntake) {
+    const docs = await synthesizeBrandDocs(name, String(formData.get("ig_handle") ?? ""), answers).catch(() => null);
+    if (docs) {
+      const update: Record<string, unknown> = {};
+      if (docs.identity) update.brand_identity = docs.identity;
+      if (docs.story) update.brand_story = docs.story;
+      if (docs.strategy) update.brand_strategy = docs.strategy;
+      if (docs.voice) update.brand_voice = docs.voice;
+      if (Object.keys(update).length) await supabase.from("clients").update(update).eq("id", inserted.id);
+    }
+  }
+
+  revalidatePath("/platform/clients");
+  revalidatePath("/platform");
+  return { ok: `Klant "${name}" aangemaakt.`, clientId: inserted.id };
+}
+
 export async function createClientAction(
   _prev: ActionResult,
   formData: FormData

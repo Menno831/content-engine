@@ -28,6 +28,12 @@ export default async function Clients() {
           <div className="flex items-center gap-2">
             <SyncAllButton />
             <AddClientDialog />
+            <Link
+              href="/platform/clients/new"
+              className="flex items-center gap-2 rounded-xl bg-accent hover:bg-accent-hover text-background font-bold text-sm px-4 py-2.5 transition-colors"
+            >
+              {icons.plus} Onboarden
+            </Link>
           </div>
         }
       />
