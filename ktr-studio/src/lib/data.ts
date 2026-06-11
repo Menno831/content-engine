@@ -278,6 +278,31 @@ export async function getClientOrders(clientId: string): Promise<Order[]> {
   }));
 }
 
+// ── Transcripten per klant (brand voice bron) ───────────────────
+export interface TranscriptMeta {
+  id: string;
+  title: string;
+  chars: number;
+  createdAt: string | null;
+}
+
+export async function getClientTranscripts(clientId: string): Promise<TranscriptMeta[]> {
+  if (DEMO_MODE || !isSupabaseConfigured) return [];
+  const supabase = await createClient();
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from("transcripts")
+    .select("id,title,content,created_at")
+    .eq("client_id", clientId)
+    .order("created_at", { ascending: false });
+  return (data ?? []).map((t) => ({
+    id: t.id,
+    title: t.title,
+    chars: (t.content as string | null)?.length ?? 0,
+    createdAt: t.created_at ?? null,
+  }));
+}
+
 // Intake-antwoorden van een klant (voor de wizard, prefill).
 export async function getIntakeAnswers(clientId: string): Promise<Record<string, string>> {
   if (DEMO_MODE || !isSupabaseConfigured) return {};

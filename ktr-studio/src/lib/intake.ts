@@ -17,6 +17,27 @@ export interface BrandDocsResult {
   mock: boolean;
 }
 
+export interface TranscriptInput {
+  title: string;
+  content: string;
+}
+
+// Ruwe spraak is de beste voice-bron, maar we bewaken de contextgrootte:
+// max ~15k tekens per transcript, ~60k totaal (nieuwste eerst).
+function transcriptsBlock(transcripts: TranscriptInput[]): string {
+  const MAX_PER = 15_000;
+  const MAX_TOTAL = 60_000;
+  let total = 0;
+  const parts: string[] = [];
+  for (const t of transcripts) {
+    if (total >= MAX_TOTAL) break;
+    const chunk = t.content.slice(0, Math.min(MAX_PER, MAX_TOTAL - total));
+    total += chunk.length;
+    parts.push(`--- TRANSCRIPT: ${t.title} ---\n${chunk}`);
+  }
+  return parts.join("\n\n");
+}
+
 function answersBlock(answers: Record<string, string>): string {
   return INTAKE_QUESTIONS.map((q) => {
     const a = (answers[q.key] ?? "").trim();
@@ -37,11 +58,21 @@ function parseSection(text: string, name: string): string {
 export async function synthesizeBrandDocs(
   clientName: string,
   handle: string,
-  answers: Record<string, string>
+  answers: Record<string, string>,
+  transcripts: TranscriptInput[] = []
 ): Promise<BrandDocsResult | null> {
   if (!isClaudeConfigured()) return null;
 
-  const template = `Hieronder staan intake-antwoorden van ${clientName} (${handle || "geen handle"}), een founder waarvoor we Reels maken. Zet dit om in vier branddocumenten. Gebruik EXACT dit formaat met deze vier kopjes en niets eromheen:
+  const hasAnswers = Object.values(answers).some((a) => (a ?? "").trim());
+
+  const sources = [
+    hasAnswers ? `INTAKE-ANTWOORDEN:\n\n${answersBlock(answers)}` : null,
+    transcripts.length
+      ? `TRANSCRIPTEN — ruwe spraak. Dit is de BELANGRIJKSTE bron voor de VOICE: zo praat ${clientName} écht. Let op: een transcript kan meerdere sprekers bevatten (interviews, podcasts, calls). Identificeer eerst wie ${clientName} is (de spreker over wie de intake gaat / die het meest vanuit de ik-vorm over dit vak praat) en baseer de voice UITSLUITEND op de uitspraken van die spreker. Negeer interviewers en gasten volledig.\n\n${transcriptsBlock(transcripts)}`
+      : null,
+  ].filter(Boolean);
+
+  const template = `Hieronder staat bronmateriaal van ${clientName} (${handle || "geen handle"}), een founder waarvoor we Reels maken. Zet dit om in vier branddocumenten. Gebruik EXACT dit formaat met deze vier kopjes en niets eromheen:
 
 ### IDENTITY
 Beknopte brand identity: kernwaarden, positionering, doelgroep. Max ~120 woorden.
@@ -55,14 +86,14 @@ Content-strategie: 3 concrete content-pijlers (gebaseerd op hun meningen, verhaa
 ### VOICE
 De brand voice als INSTRUCTIE voor een AI-schrijver. Verplichte onderdelen:
 - Toon & energie (gebaseerd op hoe deze persoon écht praat)
-- Typische woorden/uitdrukkingen om te GEBRUIKEN (letterlijk uit de antwoorden)
-- Woorden/stijl die VERBODEN zijn (letterlijk uit de antwoorden)
-- Zinslengte en ritme
-- 3 voorbeeldzinnen die exact zo klinken als deze persoon
+- Typische woorden/uitdrukkingen om te GEBRUIKEN (letterlijk uit het bronmateriaal — citeer ze)
+- Woorden/stijl die VERBODEN zijn
+- Zinslengte en ritme (observeer dit in de transcripten als die er zijn)
+- 5 voorbeeldzinnen die exact zo klinken als deze persoon (bij voorkeur licht bewerkte échte uitspraken uit de transcripten)
 
-Baseer alles strikt op de antwoorden — verzin geen feiten, cijfers of resultaten die er niet staan.
+Baseer alles strikt op het bronmateriaal — verzin geen feiten, cijfers of resultaten die er niet staan.
 
-${answersBlock(answers)}`;
+${sources.join("\n\n══════════════\n\n")}`;
 
   const { text, mock } = await generateText({ template, input: clientName });
   if (mock) return null;

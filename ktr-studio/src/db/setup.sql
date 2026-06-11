@@ -9,7 +9,7 @@
 -- ════════════════════════════════════════════════════════════════
 
 drop table if exists
-  orders, captures, generations, prospects, content_metrics, leads, content,
+  transcripts, orders, captures, generations, prospects, content_metrics, leads, content,
   integrations, editors, todos, notifications, clients, profiles, agencies
   cascade;
 drop type if exists
@@ -426,3 +426,18 @@ create policy "team all orders" on orders
   with check (agency_id = current_agency_id() and current_client_id() is null);
 create policy "client read own orders" on orders
   for select using (agency_id = current_agency_id() and client_id = current_client_id());
+
+-- ── Transcripten per klant — brand voice bron (migratie 011) ────
+create table if not exists transcripts (
+  id          uuid primary key default gen_random_uuid(),
+  agency_id   uuid not null references agencies(id) on delete cascade,
+  client_id   uuid not null references clients(id) on delete cascade,
+  title       text not null default 'Transcript',
+  content     text not null,
+  created_at  timestamptz not null default now()
+);
+create index if not exists transcripts_client_idx on transcripts (client_id);
+alter table transcripts enable row level security;
+create policy "team all transcripts" on transcripts
+  for all using (agency_id = current_agency_id() and current_client_id() is null)
+  with check (agency_id = current_agency_id() and current_client_id() is null);

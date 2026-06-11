@@ -203,7 +203,14 @@ export async function runIntakeAction(_prev: ActionResult, formData: FormData): 
   }
   if (!Object.values(answers).some(Boolean)) return { error: "Beantwoord minimaal één vraag." };
 
-  const docs = await synthesizeBrandDocs(client.name, client.ig_handle ?? "", answers).catch(() => null);
+  // Transcripten (ruwe spraak) wegen het zwaarst voor de voice.
+  const { data: trans } = await supabase
+    .from("transcripts")
+    .select("title, content")
+    .eq("client_id", clientId)
+    .order("created_at", { ascending: false });
+
+  const docs = await synthesizeBrandDocs(client.name, client.ig_handle ?? "", answers, trans ?? []).catch(() => null);
 
   const update: Record<string, unknown> = { intake_answers: answers };
   if (docs) {
@@ -219,9 +226,95 @@ export async function runIntakeAction(_prev: ActionResult, formData: FormData): 
   revalidatePath(`/platform/clients/${clientId}`);
   return {
     ok: docs
-      ? "Intake verwerkt — branddocumenten gegenereerd. Lees ze na en stel bij waar nodig."
+      ? `Intake verwerkt${trans?.length ? ` (incl. ${trans.length} transcript${trans.length === 1 ? "" : "en"})` : ""} — branddocumenten gegenereerd. Lees ze na en stel bij waar nodig.`
       : "Antwoorden opgeslagen. Koppel ANTHROPIC_API_KEY om er automatisch branddocumenten van te maken.",
   };
+}
+
+// ── Transcripten (brand voice bron, bijv. uit Transkriptor) ─────
+
+export async function addTranscriptAction(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { error: "Supabase niet geconfigureerd." };
+
+  const { agency } = await getSessionContext();
+  if (!agency) return { error: "Geen agency gevonden — log opnieuw in." };
+
+  const clientId = String(formData.get("client_id") ?? "");
+  const content = String(formData.get("content") ?? "").trim().slice(0, 500_000);
+  if (!clientId) return { error: "Onbekende klant." };
+  if (content.length < 100) return { error: "Transcript is te kort (min. 100 tekens) — plak de volledige tekst." };
+
+  const title = String(formData.get("title") ?? "").trim() || `Transcript ${new Date().toLocaleDateString("nl-NL")}`;
+
+  const { error } = await supabase.from("transcripts").insert({
+    agency_id: agency.id,
+    client_id: clientId,
+    title,
+    content,
+  });
+  if (error) return { error: error.message };
+
+  revalidatePath(`/platform/clients/${clientId}`);
+  return { ok: `Transcript "${title}" toegevoegd (${content.length.toLocaleString("nl-NL")} tekens).` };
+}
+
+export async function deleteTranscriptAction(transcriptId: string, clientId: string): Promise<ActionResult> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { error: "Supabase niet geconfigureerd." };
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "auth vereist" };
+
+  const { error } = await supabase.from("transcripts").delete().eq("id", transcriptId);
+  if (error) return { error: error.message };
+  revalidatePath(`/platform/clients/${clientId}`);
+  return { ok: "Transcript verwijderd." };
+}
+
+// Branddocs (her)genereren uit alles wat er ligt: intake + transcripten.
+export async function regenerateBrandDocsAction(clientId: string): Promise<ActionResult> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { error: "Supabase niet geconfigureerd." };
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "auth vereist" };
+
+  const { data: client } = await supabase
+    .from("clients")
+    .select("id, name, ig_handle, intake_answers")
+    .eq("id", clientId)
+    .single();
+  if (!client) return { error: "Onbekende klant." };
+
+  const { data: trans } = await supabase
+    .from("transcripts")
+    .select("title, content")
+    .eq("client_id", clientId)
+    .order("created_at", { ascending: false });
+
+  const answers = (client.intake_answers as Record<string, string> | null) ?? {};
+  const hasAnswers = Object.values(answers).some(Boolean);
+  if (!hasAnswers && !(trans?.length)) {
+    return { error: "Nog geen bronmateriaal — vul de intake in of voeg een transcript toe." };
+  }
+
+  const docs = await synthesizeBrandDocs(client.name, client.ig_handle ?? "", answers, trans ?? []).catch(() => null);
+  if (!docs) return { error: "Genereren mislukt — is ANTHROPIC_API_KEY gekoppeld?" };
+
+  const update: Record<string, unknown> = {};
+  if (docs.identity) update.brand_identity = docs.identity;
+  if (docs.story) update.brand_story = docs.story;
+  if (docs.strategy) update.brand_strategy = docs.strategy;
+  if (docs.voice) update.brand_voice = docs.voice;
+
+  const { error } = await supabase.from("clients").update(update).eq("id", clientId);
+  if (error) return { error: error.message };
+
+  revalidatePath(`/platform/clients/${clientId}`);
+  return { ok: `Branddocumenten opnieuw gegenereerd uit ${trans?.length ?? 0} transcript(en)${hasAnswers ? " + intake" : ""}.` };
 }
 
 // Deelbare intake-link aanmaken zodat de klant de vragen zelf invult.

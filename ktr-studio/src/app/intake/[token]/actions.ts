@@ -33,7 +33,14 @@ export async function submitIntakeAction(_prev: IntakeResult, formData: FormData
   }
   if (!Object.values(answers).some(Boolean)) return { error: "Beantwoord minimaal één vraag." };
 
-  const docs = await synthesizeBrandDocs(client.name, client.ig_handle ?? "", answers).catch(() => null);
+  // Eventueel al geüploade transcripten meenemen in de synthese.
+  const { data: trans } = await admin
+    .from("transcripts")
+    .select("title, content")
+    .eq("client_id", client.id)
+    .order("created_at", { ascending: false });
+
+  const docs = await synthesizeBrandDocs(client.name, client.ig_handle ?? "", answers, trans ?? []).catch(() => null);
 
   const update: Record<string, unknown> = { intake_answers: answers };
   if (docs) {

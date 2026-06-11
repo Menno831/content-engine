@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { PageHeader, Card, Badge, Avatar, icons } from "../../_components";
-import { getClient, getClientOrders, getIntakeAnswers } from "@/lib/data";
+import { getClient, getClientOrders, getIntakeAnswers, getClientTranscripts } from "@/lib/data";
 import { fmtEur } from "../../_data";
 import { BrandDocs } from "../BrandDocs";
 import { IntakeWizard } from "../IntakeWizard";
+import { TranscriptsCard } from "../TranscriptsCard";
 import { OrdersCard } from "../OrdersCard";
 import { DeleteClientButton } from "../DeleteClientButton";
 import { SyncButton } from "../SyncButton";
@@ -17,10 +18,11 @@ const statusColor: Record<string, string> = {
 
 export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [c, orders, intakeAnswers] = await Promise.all([
+  const [c, orders, intakeAnswers, transcripts] = await Promise.all([
     getClient(id),
     getClientOrders(id),
     getIntakeAnswers(id),
+    getClientTranscripts(id),
   ]);
 
   if (!c) {
@@ -85,6 +87,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
         {/* Brand-context */}
         <div className="lg:col-span-2">
           <IntakeWizard clientId={c.id} answers={intakeAnswers} />
+          <TranscriptsCard clientId={c.id} transcripts={transcripts} />
           <BrandDocs
             clientId={c.id}
             clientName={c.name}
