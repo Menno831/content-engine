@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { PageHeader, Card, Badge, Avatar, icons } from "../../_components";
-import { getClient } from "@/lib/data";
+import { getClient, getClientOrders, getIntakeAnswers } from "@/lib/data";
 import { fmtEur } from "../../_data";
 import { BrandDocs } from "../BrandDocs";
+import { IntakeWizard } from "../IntakeWizard";
+import { OrdersCard } from "../OrdersCard";
 import { DeleteClientButton } from "../DeleteClientButton";
 import { SyncButton } from "../SyncButton";
 import { PortalAccessButton } from "../PortalAccessButton";
@@ -15,7 +17,11 @@ const statusColor: Record<string, string> = {
 
 export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const c = await getClient(id);
+  const [c, orders, intakeAnswers] = await Promise.all([
+    getClient(id),
+    getClientOrders(id),
+    getIntakeAnswers(id),
+  ]);
 
   if (!c) {
     return (
@@ -46,7 +52,8 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
       />
 
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Info */}
+        {/* Info + opdrachten */}
+        <div className="space-y-6">
         <Card className="p-6 h-fit">
           <div className="flex items-center gap-3 mb-5">
             <Avatar initials={c.initials} size={48} />
@@ -72,8 +79,12 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
           )}
         </Card>
 
+        <OrdersCard clientId={c.id} orders={orders} />
+        </div>
+
         {/* Brand-context */}
         <div className="lg:col-span-2">
+          <IntakeWizard clientId={c.id} answers={intakeAnswers} />
           <BrandDocs
             clientId={c.id}
             clientName={c.name}

@@ -238,4 +238,52 @@ export async function getClient(id: string): Promise<Client | null> {
     notes: c.notes ?? null,
   };
 }
+// ── Opdrachten per klant (prijs/kosten -> marge) ────────────────
+export interface Order {
+  id: string;
+  title: string;
+  deliverables: string | null;
+  price: number;
+  editorCost: number;
+  otherCost: number;
+  status: string; // open | bezig | review | klaar | gefactureerd
+  deadline: string | null; // ISO date
+  createdAt: string | null;
+}
+
+export async function getClientOrders(clientId: string): Promise<Order[]> {
+  if (DEMO_MODE || !isSupabaseConfigured) {
+    return [
+      { id: "o1", title: "12 Reels — juni", deliverables: "12 reels: 4 per pijler. Scripts + edit + posten.", price: 2500, editorCost: 720, otherCost: 50, status: "bezig", deadline: null, createdAt: null },
+      { id: "o2", title: "Founder-shoot Q3", deliverables: "Halve dag filmen, 30 ruwe clips.", price: 950, editorCost: 0, otherCost: 180, status: "open", deadline: null, createdAt: null },
+    ];
+  }
+  const supabase = await createClient();
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from("orders")
+    .select("id,title,deliverables,price,editor_cost,other_cost,status,deadline,created_at")
+    .eq("client_id", clientId)
+    .order("created_at", { ascending: false });
+  return (data ?? []).map((o) => ({
+    id: o.id,
+    title: o.title,
+    deliverables: o.deliverables ?? null,
+    price: Number(o.price ?? 0),
+    editorCost: Number(o.editor_cost ?? 0),
+    otherCost: Number(o.other_cost ?? 0),
+    status: o.status ?? "open",
+    deadline: o.deadline ?? null,
+    createdAt: o.created_at ?? null,
+  }));
+}
+
+// Intake-antwoorden van een klant (voor de wizard, prefill).
+export async function getIntakeAnswers(clientId: string): Promise<Record<string, string>> {
+  if (DEMO_MODE || !isSupabaseConfigured) return {};
+  const supabase = await createClient();
+  if (!supabase) return {};
+  const { data } = await supabase.from("clients").select("intake_answers").eq("id", clientId).single();
+  return (data?.intake_answers as Record<string, string> | null) ?? {};
+}
 /* eslint-enable @typescript-eslint/no-explicit-any */

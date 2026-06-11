@@ -7,6 +7,7 @@ import { createClient as supabaseServer } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionContext } from "@/lib/auth";
 import { syncClientInstagram, type SyncResult } from "@/lib/sync/instagram";
+import { INTAKE_QUESTIONS, synthesizeBrandDocs } from "@/lib/intake";
 
 export interface ActionResult {
   error?: string;
@@ -173,6 +174,138 @@ export async function saveBrandDocsAction(_prev: ActionResult, formData: FormDat
 
   revalidatePath(`/platform/clients/${clientId}`);
   return { ok: "Brand-context opgeslagen." };
+}
+
+// ── Brand voice intake ──────────────────────────────────────────
+
+// Intake-antwoorden opslaan en (met API-key) omzetten in branddocs.
+export async function runIntakeAction(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { error: "Supabase niet geconfigureerd." };
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "auth vereist" };
+
+  const clientId = String(formData.get("client_id") ?? "");
+  if (!clientId) return { error: "Onbekende klant." };
+
+  const { data: client } = await supabase
+    .from("clients")
+    .select("id, name, ig_handle")
+    .eq("id", clientId)
+    .single();
+  if (!client) return { error: "Onbekende klant." };
+
+  const answers: Record<string, string> = {};
+  for (const q of INTAKE_QUESTIONS) {
+    answers[q.key] = String(formData.get(`q_${q.key}`) ?? "").trim();
+  }
+  if (!Object.values(answers).some(Boolean)) return { error: "Beantwoord minimaal één vraag." };
+
+  const docs = await synthesizeBrandDocs(client.name, client.ig_handle ?? "", answers).catch(() => null);
+
+  const update: Record<string, unknown> = { intake_answers: answers };
+  if (docs) {
+    if (docs.identity) update.brand_identity = docs.identity;
+    if (docs.story) update.brand_story = docs.story;
+    if (docs.strategy) update.brand_strategy = docs.strategy;
+    if (docs.voice) update.brand_voice = docs.voice;
+  }
+
+  const { error } = await supabase.from("clients").update(update).eq("id", clientId);
+  if (error) return { error: error.message };
+
+  revalidatePath(`/platform/clients/${clientId}`);
+  return {
+    ok: docs
+      ? "Intake verwerkt — branddocumenten gegenereerd. Lees ze na en stel bij waar nodig."
+      : "Antwoorden opgeslagen. Koppel ANTHROPIC_API_KEY om er automatisch branddocumenten van te maken.",
+  };
+}
+
+// Deelbare intake-link aanmaken zodat de klant de vragen zelf invult.
+export async function createIntakeLinkAction(clientId: string): Promise<{ error?: string; url?: string }> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { error: "Supabase niet geconfigureerd." };
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "auth vereist" };
+
+  // Bestaande token hergebruiken zodat een eerder gedeelde link blijft werken.
+  const { data: client } = await supabase
+    .from("clients")
+    .select("id, intake_token")
+    .eq("id", clientId)
+    .single();
+  if (!client) return { error: "Onbekende klant." };
+
+  let token = client.intake_token as string | null;
+  if (!token) {
+    token = randomBytes(18).toString("base64url");
+    const { error } = await supabase.from("clients").update({ intake_token: token }).eq("id", clientId);
+    if (error) return { error: error.message };
+  }
+  return { url: `/intake/${token}` };
+}
+
+// ── Opdrachten (per klant, met automatische marge) ──────────────
+
+export async function createOrderAction(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { error: "Supabase niet geconfigureerd." };
+
+  const { agency } = await getSessionContext();
+  if (!agency) return { error: "Geen agency gevonden — log opnieuw in." };
+
+  const clientId = String(formData.get("client_id") ?? "");
+  const title = String(formData.get("title") ?? "").trim();
+  if (!clientId) return { error: "Onbekende klant." };
+  if (!title) return { error: "Titel is verplicht." };
+
+  const { error } = await supabase.from("orders").insert({
+    agency_id: agency.id,
+    client_id: clientId,
+    title,
+    deliverables: String(formData.get("deliverables") ?? "").trim() || null,
+    price: Number(formData.get("price") ?? 0) || 0,
+    editor_cost: Number(formData.get("editor_cost") ?? 0) || 0,
+    other_cost: Number(formData.get("other_cost") ?? 0) || 0,
+    deadline: String(formData.get("deadline") ?? "") || null,
+  });
+  if (error) return { error: error.message };
+
+  revalidatePath(`/platform/clients/${clientId}`);
+  return { ok: `Opdracht "${title}" toegevoegd.` };
+}
+
+export async function updateOrderStatusAction(orderId: string, clientId: string, status: string): Promise<ActionResult> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { error: "Supabase niet geconfigureerd." };
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "auth vereist" };
+
+  const { error } = await supabase.from("orders").update({ status }).eq("id", orderId);
+  if (error) return { error: error.message };
+  revalidatePath(`/platform/clients/${clientId}`);
+  return { ok: "Status bijgewerkt." };
+}
+
+export async function deleteOrderAction(orderId: string, clientId: string): Promise<ActionResult> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { error: "Supabase niet geconfigureerd." };
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "auth vereist" };
+
+  const { error } = await supabase.from("orders").delete().eq("id", orderId);
+  if (error) return { error: error.message };
+  revalidatePath(`/platform/clients/${clientId}`);
+  return { ok: "Opdracht verwijderd." };
 }
 
 // Klant verwijderen (alleen owner/team; content/leads/etc. cascaden mee).

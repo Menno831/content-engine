@@ -9,7 +9,7 @@
 -- ════════════════════════════════════════════════════════════════
 
 drop table if exists
-  captures, generations, prospects, content_metrics, leads, content,
+  orders, captures, generations, prospects, content_metrics, leads, content,
   integrations, editors, todos, notifications, clients, profiles, agencies
   cascade;
 drop type if exists
@@ -400,3 +400,29 @@ create policy "read generations" on generations
   for select using (agency_id = current_agency_id() and current_client_id() is null);
 create policy "team insert generations" on generations
   for insert with check (agency_id = current_agency_id() and current_client_id() is null);
+
+-- ── Intake (brand voice) + opdrachten per klant (migratie 010) ──
+alter table clients add column if not exists intake_token   text unique;
+alter table clients add column if not exists intake_answers jsonb;
+
+create table if not exists orders (
+  id          uuid primary key default gen_random_uuid(),
+  agency_id   uuid not null references agencies(id) on delete cascade,
+  client_id   uuid not null references clients(id) on delete cascade,
+  title       text not null,
+  deliverables text,
+  price       numeric not null default 0,
+  editor_cost numeric not null default 0,
+  other_cost  numeric not null default 0,
+  status      text not null default 'open',
+  deadline    date,
+  created_at  timestamptz not null default now()
+);
+create index if not exists orders_agency_idx on orders (agency_id);
+create index if not exists orders_client_idx on orders (client_id);
+alter table orders enable row level security;
+create policy "team all orders" on orders
+  for all using (agency_id = current_agency_id() and current_client_id() is null)
+  with check (agency_id = current_agency_id() and current_client_id() is null);
+create policy "client read own orders" on orders
+  for select using (agency_id = current_agency_id() and client_id = current_client_id());
