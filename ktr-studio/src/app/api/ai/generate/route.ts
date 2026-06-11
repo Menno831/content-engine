@@ -26,6 +26,36 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // Second brain meesturen: relevante kennisbank-items (boards) als
+  // context, gescoord op simpele keyword-overlap met de input.
+  let brainBlock = "";
+  if (body.use_brain) {
+    const supabase = await createClient();
+    if (supabase) {
+      const { data: items } = await supabase
+        .from("captures")
+        .select("title, body, url, kind")
+        .order("created_at", { ascending: false })
+        .limit(120);
+      if (items?.length) {
+        const q = `${input} ${template}`.toLowerCase();
+        const qWords = [...new Set(q.split(/\W+/).filter((w) => w.length > 3))];
+        const scored = items
+          .map((it) => {
+            const hay = `${it.title} ${it.body ?? ""}`.toLowerCase();
+            const score = qWords.reduce((s, w) => s + (hay.includes(w) ? 1 : 0), 0) + (it.body ? 0.5 : 0);
+            return { ...it, score };
+          })
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 8);
+        const lines = scored
+          .map((it) => `- [${it.kind}] ${it.title}${it.body ? `: ${String(it.body).slice(0, 1500)}` : ""}${it.url ? ` (${it.url})` : ""}`)
+          .join("\n");
+        brainBlock = `KENNISBANK (second brain van de agency — gebruik relevante inzichten, verhalen en bronnen hieruit waar het de output sterker maakt):\n${lines}\n\n`;
+      }
+    }
+  }
+
   // Brand voice van de gekozen klant meesturen, zodat de output in de
   // stem van die klant geschreven wordt (vastgelegd bij onboarding).
   let finalTemplate = template;
@@ -39,6 +69,7 @@ export async function POST(request: NextRequest) {
       finalTemplate = `${voiceParts.join("\n")}\n\n${template}`;
     }
   }
+  if (brainBlock) finalTemplate = `${brainBlock}${finalTemplate}`;
 
   try {
     const { text, mock } = await generateText({ template: finalTemplate, input, model });

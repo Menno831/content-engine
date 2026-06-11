@@ -59,7 +59,7 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
     supabase
       .from("clients")
       .select(
-        "id,name,ig_handle,status,monthly_value,package,videos_per_month,editor_cost,payment_status,created_at,soul_character_id,reference_image_url,brand_prompt"
+        "id,name,ig_handle,status,monthly_value,package,videos_per_month,editor_cost,payment_status,created_at,soul_character_id,reference_image_url,brand_prompt,brand_primary,brand_secondary"
       ),
     supabase
       .from("content")
@@ -119,6 +119,8 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
       soulCharacter: c.soul_character_id ?? null,
       referenceImage: c.reference_image_url ?? null,
       brandPrompt: c.brand_prompt ?? null,
+      brandPrimary: c.brand_primary ?? null,
+      brandSecondary: c.brand_secondary ?? null,
     };
   });
 
@@ -310,6 +312,115 @@ export async function getClientTranscripts(clientId: string): Promise<Transcript
     chars: (t.content as string | null)?.length ?? 0,
     createdAt: t.created_at ?? null,
   }));
+}
+
+// ── Rapportage: periode-vergelijking per klant ──────────────────
+// Op basis van publicatiedatum + laatste metric-snapshot per post.
+// Geen data in een periode = nul; delta's toont de UI alleen als de
+// vorige periode ook echt data had ("echte data of niets").
+export interface PeriodStats {
+  posts: number;
+  views: number;
+  likes: number;
+  comments: number;
+}
+
+export interface ClientReport {
+  week: PeriodStats;
+  prevWeek: PeriodStats;
+  month: PeriodStats;
+  prevMonth: PeriodStats;
+  bySource: { instagram: number; youtube: number }; // posts afgelopen 30 dagen
+}
+
+export async function getClientReport(clientId: string): Promise<ClientReport | null> {
+  if (DEMO_MODE || !isSupabaseConfigured) return null;
+  const supabase = await createClient();
+  if (!supabase) return null;
+
+  const [{ data: contentRows }, { data: metricRows }] = await Promise.all([
+    supabase
+      .from("content")
+      .select("id,published_at,source")
+      .eq("client_id", clientId)
+      .not("published_at", "is", null),
+    supabase
+      .from("content_metrics")
+      .select("content_id,views,likes,comments,fetched_at")
+      .order("fetched_at", { ascending: false }),
+  ]);
+
+  const latest = new Map<string, { views: number; likes: number; comments: number }>();
+  for (const m of metricRows ?? []) {
+    if (!latest.has(m.content_id)) {
+      latest.set(m.content_id, {
+        views: Number(m.views ?? 0),
+        likes: Number(m.likes ?? 0),
+        comments: Number(m.comments ?? 0),
+      });
+    }
+  }
+
+  const now = Date.now();
+  const DAY = 86_400_000;
+  const empty = (): PeriodStats => ({ posts: 0, views: 0, likes: 0, comments: 0 });
+  const week = empty();
+  const prevWeek = empty();
+  const month = empty();
+  const prevMonth = empty();
+  const bySource = { instagram: 0, youtube: 0 };
+
+  for (const c of contentRows ?? []) {
+    const t = new Date(c.published_at as string).getTime();
+    const age = now - t;
+    if (age < 0) continue;
+    const m = latest.get(c.id) ?? { views: 0, likes: 0, comments: 0 };
+    const add = (p: PeriodStats) => {
+      p.posts += 1;
+      p.views += m.views;
+      p.likes += m.likes;
+      p.comments += m.comments;
+    };
+    if (age <= 7 * DAY) add(week);
+    else if (age <= 14 * DAY) add(prevWeek);
+    if (age <= 30 * DAY) {
+      add(month);
+      if (String(c.source ?? "").startsWith("instagram")) bySource.instagram += 1;
+      if (c.source === "youtube") bySource.youtube += 1;
+    } else if (age <= 60 * DAY) add(prevMonth);
+  }
+
+  return { week, prevWeek, month, prevMonth, bySource };
+}
+
+// ── Generatie-historie (AI Visuals / thumbnails) ────────────────
+export interface Generation {
+  id: string;
+  clientId: string | null;
+  prompt: string;
+  url: string;
+  createdAt: string | null;
+}
+
+export async function getGenerations(limit = 24): Promise<Generation[]> {
+  if (DEMO_MODE || !isSupabaseConfigured) return [];
+  const supabase = await createClient();
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from("generations")
+    .select("id,client_id,prompt,output_url,created_at")
+    .eq("kind", "image")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  return (data ?? [])
+    .filter((g) => g.output_url)
+    .map((g) => ({
+      id: g.id,
+      clientId: g.client_id ?? null,
+      prompt: g.prompt ?? "",
+      url: g.output_url as string,
+      createdAt: g.created_at ?? null,
+    }));
 }
 
 // Intake-antwoorden van een klant (voor de wizard, prefill).

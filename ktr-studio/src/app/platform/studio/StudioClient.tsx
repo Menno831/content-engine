@@ -17,13 +17,13 @@ interface Idea {
   hook: string;
 }
 
-async function callAI(template: string, input: string, clientId: string): Promise<{ text: string; mock: boolean; error?: string }> {
+async function callAI(template: string, input: string, clientId: string, useBrain = false): Promise<{ text: string; mock: boolean; error?: string }> {
   try {
     const res = await fetch("/api/ai/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       // fast: ideeën/scripts draaien op Haiku (5x goedkoper, ruim snel genoeg).
-      body: JSON.stringify({ template, input, client_id: clientId, fast: true }),
+      body: JSON.stringify({ template, input, client_id: clientId, fast: true, use_brain: useBrain }),
     });
     const data = await res.json();
     if (!data.ok) return { text: "", mock: false, error: data.error ?? "Er ging iets mis." };
@@ -63,6 +63,7 @@ export function StudioClient({ clients }: { clients: StudioClientInfo[] }) {
   const [topic, setTopic] = useState("");
   const [transcript, setTranscript] = useState("");
   const [tones, setTones] = useState<string[]>([]);
+  const [useBrain, setUseBrain] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [ideas, setIdeas] = useState<Idea[] | null>(null);
@@ -110,7 +111,7 @@ TITEL: korte werktitel
 INVALSHOEK: waarom dit werkt / welke snaar het raakt (1 zin)
 HOOK: de letterlijke openingszin (scroll-stopper, geen aanhalingstekens)`;
 
-    const { text, mock: isMock, error: err } = await callAI(template, sourceInput, clientId);
+    const { text, mock: isMock, error: err } = await callAI(template, sourceInput, clientId, useBrain);
     if (err) setError(err);
     else {
       const parsed = parseIdeas(text);
@@ -143,7 +144,7 @@ ${KILLER_RULES}
 ${context}
 
 Output: eerst 3 HOOK-VARIANTEN (één per regel), dan het SCRIPT met regie-aanwijzingen, dan de CTA.`;
-      const { text, error: err } = await callAI(template, sourceInput, clientId);
+      const { text, error: err } = await callAI(template, sourceInput, clientId, useBrain);
       setScripts((prev) => [...prev, { idea, text: err ?? text }]);
     }
     setScriptProgress(null);
@@ -209,6 +210,11 @@ Output: eerst 3 HOOK-VARIANTEN (één per regel), dan het SCRIPT met regie-aanwi
               className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-3.5 py-2.5 text-[12.5px] font-mono mb-4 outline-none focus:border-accent/40 resize-y leading-relaxed"
             />
           )}
+
+          <label className="flex items-center gap-2 text-[12.5px] text-muted mb-4 cursor-pointer">
+            <input type="checkbox" checked={useBrain} onChange={(e) => setUseBrain(e.target.checked)} className="accent-[#F97316]" />
+            Second brain meenemen (kennisbank van je boards als context)
+          </label>
 
           <div className="flex flex-wrap gap-2 mb-5">
             {TONES.map((t) => (

@@ -296,7 +296,7 @@ export const promptTemplates: PromptTemplate[] = [
 export interface Capture {
   id: string;
   board: string;
-  kind: "link" | "note" | "idea" | "swipe";
+  kind: "link" | "youtube" | "note" | "idea" | "swipe";
   title: string;
   url: string | null;
   body: string | null;

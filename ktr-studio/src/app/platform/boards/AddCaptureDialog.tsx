@@ -42,16 +42,17 @@ export function AddCaptureDialog({ boards }: { boards: string[] }) {
                   <span className="block text-[12px] font-mono uppercase tracking-wider text-muted mb-1.5">Type</span>
                   <select name="kind" defaultValue="link" className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-3.5 py-2.5 text-sm outline-none focus:border-accent/40">
                     <option value="link" className="bg-card">Link</option>
-                    <option value="note" className="bg-card">Notitie</option>
+                    <option value="youtube" className="bg-card">YouTube-video</option>
+                    <option value="note" className="bg-card">Notitie / document</option>
                     <option value="idea" className="bg-card">Idee</option>
                   </select>
                 </label>
               </div>
               <Field name="title" label="Titel" placeholder="Wat wil je onthouden?" required />
-              <Field name="url" label="Link (optioneel)" placeholder="https://…" />
+              <Field name="url" label="Link (optioneel)" placeholder="https://… of YouTube-URL" />
               <label className="block">
-                <span className="block text-[12px] font-mono uppercase tracking-wider text-muted mb-1.5">Notitie (optioneel)</span>
-                <textarea name="body" rows={2} className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-3.5 py-2.5 text-sm outline-none focus:border-accent/40 resize-none" />
+                <span className="block text-[12px] font-mono uppercase tracking-wider text-muted mb-1.5">Inhoud / notitie (optioneel — dit gebruikt de AI als context)</span>
+                <textarea name="body" rows={4} placeholder="Plak hier de kern, een samenvatting of het hele document — hoe meer, hoe slimmer de AI." className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-3.5 py-2.5 text-sm outline-none focus:border-accent/40 resize-y" />
               </label>
 
               {state.error && <p className="text-[13px] text-red-400">{state.error}</p>}
