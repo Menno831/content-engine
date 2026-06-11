@@ -249,21 +249,24 @@ export interface Order {
   status: string; // open | bezig | review | klaar | gefactureerd
   deadline: string | null; // ISO date
   createdAt: string | null;
+  invoiceMonth: string | null; // ISO date (1e v.d. maand)
+  invoiceRef: string | null; // factuurnummer/-referentie
 }
 
 export async function getClientOrders(clientId: string): Promise<Order[]> {
   if (DEMO_MODE || !isSupabaseConfigured) {
     return [
-      { id: "o1", title: "12 Reels — juni", deliverables: "12 reels: 4 per pijler. Scripts + edit + posten.", price: 2500, editorCost: 720, otherCost: 50, status: "bezig", deadline: null, createdAt: null },
-      { id: "o2", title: "Founder-shoot Q3", deliverables: "Halve dag filmen, 30 ruwe clips.", price: 950, editorCost: 0, otherCost: 180, status: "open", deadline: null, createdAt: null },
+      { id: "o1", title: "12 Reels — juni", deliverables: "12 reels: 4 per pijler. Scripts + edit + posten.", price: 2500, editorCost: 720, otherCost: 50, status: "bezig", deadline: null, createdAt: null, invoiceMonth: "2026-06-01", invoiceRef: "2026-014" },
+      { id: "o2", title: "Founder-shoot Q3", deliverables: "Halve dag filmen, 30 ruwe clips.", price: 950, editorCost: 0, otherCost: 180, status: "open", deadline: null, createdAt: null, invoiceMonth: "2026-07-01", invoiceRef: null },
     ];
   }
   const supabase = await createClient();
   if (!supabase) return [];
   const { data } = await supabase
     .from("orders")
-    .select("id,title,deliverables,price,editor_cost,other_cost,status,deadline,created_at")
+    .select("id,title,deliverables,price,editor_cost,other_cost,status,deadline,created_at,invoice_month,invoice_ref")
     .eq("client_id", clientId)
+    .order("invoice_month", { ascending: false })
     .order("created_at", { ascending: false });
   return (data ?? []).map((o) => ({
     id: o.id,
@@ -275,6 +278,8 @@ export async function getClientOrders(clientId: string): Promise<Order[]> {
     status: o.status ?? "open",
     deadline: o.deadline ?? null,
     createdAt: o.created_at ?? null,
+    invoiceMonth: o.invoice_month ?? null,
+    invoiceRef: o.invoice_ref ?? null,
   }));
 }
 

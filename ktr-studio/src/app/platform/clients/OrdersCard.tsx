@@ -21,6 +21,11 @@ const statusColor: Record<string, string> = {
  * Opdrachten per klant: prijs, kosten en deliverables per opdracht —
  * marge wordt direct uitgerekend, status is in één klik bij te werken.
  */
+function monthLabel(iso: string | null): string {
+  if (!iso) return "Zonder maand";
+  return new Date(iso).toLocaleDateString("nl-NL", { month: "long", year: "numeric" });
+}
+
 export function OrdersCard({ clientId, orders }: { clientId: string; orders: Order[] }) {
   const [adding, setAdding] = useState(false);
   const [state, action, pending] = useActionState(createOrderAction, initial);
@@ -28,6 +33,18 @@ export function OrdersCard({ clientId, orders }: { clientId: string; orders: Ord
 
   const open = orders.filter((o) => o.status !== "gefactureerd");
   const totalMarge = open.reduce((s, o) => s + (o.price - o.editorCost - o.otherCost), 0);
+
+  // Groeperen per factuurmaand (nieuwste eerst; data komt al gesorteerd binnen).
+  const byMonth: { key: string; label: string; items: Order[] }[] = [];
+  for (const o of orders) {
+    const key = o.invoiceMonth ?? "geen";
+    let group = byMonth.find((g) => g.key === key);
+    if (!group) {
+      group = { key, label: monthLabel(o.invoiceMonth), items: [] };
+      byMonth.push(group);
+    }
+    group.items.push(o);
+  }
 
   return (
     <Card className="p-6">
@@ -84,6 +101,22 @@ export function OrdersCard({ clientId, orders }: { clientId: string; orders: Ord
               <input name="deadline" type="date" className="w-full rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-sm outline-none focus:border-accent/40" />
             </label>
           </div>
+          <div className="grid grid-cols-2 gap-2">
+            <label className="block">
+              <span className="block text-[10px] font-mono uppercase tracking-wider text-muted mb-1">Factuurmaand *</span>
+              <input
+                name="invoice_month"
+                type="month"
+                required
+                defaultValue={new Date().toISOString().slice(0, 7)}
+                className="w-full rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-sm outline-none focus:border-accent/40"
+              />
+            </label>
+            <label className="block">
+              <span className="block text-[10px] font-mono uppercase tracking-wider text-muted mb-1">Factuurnr. / referentie</span>
+              <input name="invoice_ref" placeholder="bijv. 2026-014" className="w-full rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-sm outline-none focus:border-accent/40" />
+            </label>
+          </div>
           <button
             type="submit"
             disabled={pending}
@@ -99,8 +132,23 @@ export function OrdersCard({ clientId, orders }: { clientId: string; orders: Ord
           Nog geen opdrachten voor deze klant.
         </div>
       ) : (
-        <div className="space-y-3">
-          {orders.map((o) => {
+        <div className="space-y-5">
+          {byMonth.map((group) => {
+            const gMarge = group.items.reduce((s, o) => s + (o.price - o.editorCost - o.otherCost), 0);
+            const gPrijs = group.items.reduce((s, o) => s + o.price, 0);
+            return (
+              <div key={group.key}>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="h-px w-5 bg-accent/60" />
+                    <span className="font-mono text-[11px] uppercase tracking-[0.15em] text-accent">{group.label}</span>
+                  </div>
+                  <span className="text-[12px] text-muted">
+                    {fmtEur(gPrijs)} omzet · <span className="text-emerald-400">{fmtEur(gMarge)} marge</span>
+                  </span>
+                </div>
+                <div className="space-y-3">
+          {group.items.map((o) => {
             const marge = o.price - o.editorCost - o.otherCost;
             const margePct = o.price > 0 ? Math.round((marge / o.price) * 100) : 0;
             return (
@@ -108,11 +156,13 @@ export function OrdersCard({ clientId, orders }: { clientId: string; orders: Ord
                 <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
                   <div className="min-w-0">
                     <div className="font-medium">{o.title}</div>
-                    {o.deadline && (
-                      <div className="text-[12px] text-muted">
-                        Deadline: {new Date(o.deadline).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}
-                      </div>
-                    )}
+                    <div className="text-[12px] text-muted">
+                      {o.invoiceRef && <span className="text-foreground/70">Factuur {o.invoiceRef}</span>}
+                      {o.invoiceRef && o.deadline && " · "}
+                      {o.deadline && (
+                        <>Deadline: {new Date(o.deadline).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}</>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <select
@@ -159,6 +209,10 @@ export function OrdersCard({ clientId, orders }: { clientId: string; orders: Ord
                       marge {fmtEur(marge)} ({margePct}%)
                     </Badge>
                   </span>
+                </div>
+              </div>
+            );
+          })}
                 </div>
               </div>
             );

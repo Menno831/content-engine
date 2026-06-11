@@ -441,3 +441,7 @@ alter table transcripts enable row level security;
 create policy "team all transcripts" on transcripts
   for all using (agency_id = current_agency_id() and current_client_id() is null)
   with check (agency_id = current_agency_id() and current_client_id() is null);
+
+-- ── Opdrachten: factuurmaand + referentie (migratie 012) ────────
+alter table orders add column if not exists invoice_month date;
+alter table orders add column if not exists invoice_ref   text;

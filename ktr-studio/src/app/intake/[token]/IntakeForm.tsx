@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { submitIntakeAction, type IntakeResult } from "./actions";
 import { INTAKE_QUESTIONS } from "@/lib/intake-questions";
+import { SpeechTextarea } from "@/app/_shared/SpeechTextarea";
 
 const initial: IntakeResult = {};
 
@@ -32,7 +33,7 @@ export function IntakeForm({ token, answers }: { token: string; answers: Record<
             {q.label}
           </label>
           <p className="text-muted text-[13px] mb-2">{q.hint}</p>
-          <textarea
+          <SpeechTextarea
             name={`q_${q.key}`}
             defaultValue={answers[q.key] ?? ""}
             rows={3}
@@ -40,6 +41,10 @@ export function IntakeForm({ token, answers }: { token: string; answers: Record<
           />
         </div>
       ))}
+
+      <p className="text-[12px] text-muted -mt-2">
+        💡 Tip: klik op het microfoontje en spreek je antwoord gewoon in — praten werkt beter dan typen.
+      </p>
 
       {state.error && <p className="text-[13px] text-red-400">{state.error}</p>}
 

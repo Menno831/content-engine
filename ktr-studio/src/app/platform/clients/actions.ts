@@ -358,6 +358,10 @@ export async function createOrderAction(_prev: ActionResult, formData: FormData)
   if (!clientId) return { error: "Onbekende klant." };
   if (!title) return { error: "Titel is verplicht." };
 
+  // Factuurmaand: input type="month" geeft "2026-06" -> opslaan als 1e v.d. maand.
+  const month = String(formData.get("invoice_month") ?? "").trim();
+  const invoiceMonth = /^\d{4}-\d{2}$/.test(month) ? `${month}-01` : null;
+
   const { error } = await supabase.from("orders").insert({
     agency_id: agency.id,
     client_id: clientId,
@@ -367,6 +371,8 @@ export async function createOrderAction(_prev: ActionResult, formData: FormData)
     editor_cost: Number(formData.get("editor_cost") ?? 0) || 0,
     other_cost: Number(formData.get("other_cost") ?? 0) || 0,
     deadline: String(formData.get("deadline") ?? "") || null,
+    invoice_month: invoiceMonth,
+    invoice_ref: String(formData.get("invoice_ref") ?? "").trim() || null,
   });
   if (error) return { error: error.message };
 

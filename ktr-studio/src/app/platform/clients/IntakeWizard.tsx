@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { runIntakeAction, createIntakeLinkAction, type ActionResult } from "./actions";
 import { Card, icons } from "../_components";
 import { INTAKE_QUESTIONS } from "@/lib/intake-questions";
+import { SpeechTextarea } from "@/app/_shared/SpeechTextarea";
 
 const initial: ActionResult = {};
 
@@ -74,7 +75,7 @@ export function IntakeWizard({
               <label className="block text-[12px] font-mono uppercase tracking-wider text-muted mb-1.5">
                 {i + 1}. {q.label}
               </label>
-              <textarea
+              <SpeechTextarea
                 name={`q_${q.key}`}
                 defaultValue={answers[q.key] ?? ""}
                 rows={2}
