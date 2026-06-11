@@ -41,6 +41,27 @@ export async function createLeadAction(
   return { ok: "Lead toegevoegd." };
 }
 
+// Follow-up datum + notitie zetten (setter weet wie wanneer op te volgen).
+export async function setFollowupAction(leadId: string, date: string, note: string): Promise<LeadActionResult> {
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase niet geconfigureerd." };
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "auth vereist" };
+
+  const { error } = await supabase
+    .from("leads")
+    .update({
+      next_followup: /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : null,
+      followup_note: note.trim() || null,
+    })
+    .eq("id", leadId);
+  if (error) return { error: error.message };
+  revalidatePath("/platform/leads");
+  return { ok: "Follow-up gezet." };
+}
+
 export async function updateLeadStageAction(leadId: string, stage: string): Promise<LeadActionResult> {
   const supabase = await createClient();
   if (!supabase) return { error: "Supabase niet geconfigureerd." };

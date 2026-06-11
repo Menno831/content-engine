@@ -1,11 +1,15 @@
+import Link from "next/link";
 import { PageHeader, Card, Stat, Avatar, Badge, icons } from "../_components";
 import { getEditors } from "@/lib/editors";
 import { fmtEur, editorPayout, LATE_DEDUCTION } from "../_data";
 import { AddEditorDialog } from "./AddEditorDialog";
+import { EditorPool } from "./EditorPool";
 import { NoData } from "../_states";
 import { ExportButton } from "../ExportButton";
 
-export default async function EditorsPage() {
+export default async function EditorsPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+  const sp = await searchParams;
+  const tab = sp.tab === "pool" ? "pool" : "payouts";
   const editors = await getEditors();
   const active = editors.filter((e) => e.active);
 
@@ -44,6 +48,26 @@ export default async function EditorsPage() {
         }
       />
 
+      {/* Tabs */}
+      <div className="flex gap-1 rounded-xl border border-white/[0.08] p-1 mb-6 w-fit">
+        <Link
+          href="/platform/editors"
+          className={`rounded-lg px-4 py-1.5 text-[13px] transition-all ${tab === "payouts" ? "bg-accent text-background font-bold" : "text-muted hover:text-foreground"}`}
+        >
+          Uitbetalingen
+        </Link>
+        <Link
+          href="/platform/editors?tab=pool"
+          className={`rounded-lg px-4 py-1.5 text-[13px] transition-all ${tab === "pool" ? "bg-accent text-background font-bold" : "text-muted hover:text-foreground"}`}
+        >
+          Editor-pool
+        </Link>
+      </div>
+
+      {tab === "pool" ? (
+        editors.length === 0 ? <NoData label="Nog geen editors" /> : <EditorPool editors={editors} />
+      ) : (
+      <>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <Stat label="Video's deze maand" value={String(totalVideos)} icon={icons.pipeline} />
         <Stat label="Uit te betalen" value={fmtEur(totalNet)} icon={icons.money} />
@@ -94,6 +118,8 @@ export default async function EditorsPage() {
             );
           })}
         </div>
+      )}
+      </>
       )}
     </>
   );

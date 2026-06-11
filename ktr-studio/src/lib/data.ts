@@ -66,7 +66,7 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
       .select("id,client_id,title,hook,format,stage,published_at,permalink,posting_date,deadline"),
     supabase
       .from("leads")
-      .select("id,client_id,name,source_label,source_content_id,stage,value,setter,created_at,closed_at"),
+      .select("id,client_id,name,source_label,source_content_id,stage,value,setter,created_at,closed_at,next_followup,followup_note"),
     supabase
       .from("content_metrics")
       .select("content_id,views,reach,likes,comments,fetched_at")
@@ -154,6 +154,8 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
     date: l.created_at
       ? new Date(l.created_at).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })
       : "—",
+    nextFollowup: l.next_followup ?? null,
+    followupNote: l.followup_note ?? null,
   }));
 
   const revenueByMonth = Array.from({ length: 12 }).map((_, i) => {

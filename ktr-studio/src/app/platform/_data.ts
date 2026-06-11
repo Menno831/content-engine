@@ -124,6 +124,8 @@ export interface Lead {
   value: number;
   setter: string;
   date: string;
+  nextFollowup?: string | null; // ISO date — wanneer opvolgen
+  followupNote?: string | null;
 }
 
 export const leads: Lead[] = [
@@ -201,12 +203,18 @@ export interface Editor {
   active: boolean;
   videosThisMonth: number;
   lateVideos: number; // te laat aangeleverd t.o.v. deadline
+  // Editor-pool
+  specialty?: string | null;
+  poolStatus?: string; // actief | pool | gestopt
+  contact?: string | null;
+  portfolioUrl?: string | null;
+  notes?: string | null;
 }
 
 export const editors: Editor[] = [
-  { id: "e1", name: "Eva", payPerVideo: 60, active: true, videosThisMonth: 22, lateVideos: 1 },
-  { id: "e2", name: "Sam", payPerVideo: 55, active: true, videosThisMonth: 14, lateVideos: 3 },
-  { id: "e3", name: "Tom", payPerVideo: 65, active: false, videosThisMonth: 0, lateVideos: 0 },
+  { id: "e1", name: "Eva", payPerVideo: 60, active: true, videosThisMonth: 22, lateVideos: 1, specialty: "Talking head + captions", poolStatus: "actief", contact: "wa: +31 6…" },
+  { id: "e2", name: "Sam", payPerVideo: 55, active: true, videosThisMonth: 14, lateVideos: 3, specialty: "Motion design", poolStatus: "actief", contact: "sam@mail.nl" },
+  { id: "e3", name: "Tom", payPerVideo: 65, active: false, videosThisMonth: 0, lateVideos: 0, specialty: "Documentaire-stijl", poolStatus: "pool", contact: "Discord: tom#1234" },
 ];
 
 // ── Team (logins + rollen) ─────────────────────────────────────────

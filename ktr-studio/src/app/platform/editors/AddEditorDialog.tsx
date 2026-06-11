@@ -34,8 +34,18 @@ export function AddEditorDialog() {
 
             <form action={action} className="space-y-3.5">
               <Field name="name" label="Naam" placeholder="Eva" required />
-              <Field name="email" label="E-mail (optioneel)" type="email" placeholder="eva@editor.nl" />
+              <Field name="specialty" label="Specialiteit" placeholder="Talking head, motion design…" />
+              <Field name="contact" label="Contact (WhatsApp / e-mail / Discord)" placeholder="wa: +31 6… of eva@editor.nl" />
+              <Field name="portfolio_url" label="Portfolio (optioneel)" placeholder="https://…" />
               <Field name="pay_per_video" label="Bedrag per video (€)" type="number" placeholder="60" />
+              <label className="block">
+                <span className="block text-[12px] font-mono uppercase tracking-wider text-muted mb-1.5">Status</span>
+                <select name="pool_status" defaultValue="actief" className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-3.5 py-2.5 text-sm outline-none focus:border-accent/40">
+                  <option value="actief" className="bg-card">Actief — krijgt nu werk</option>
+                  <option value="pool" className="bg-card">Pool — achterhand/backup</option>
+                  <option value="gestopt" className="bg-card">Gestopt</option>
+                </select>
+              </label>
 
               {state.error && <p className="text-[13px] text-red-400">{state.error}</p>}
               {state.ok && <p className="text-[13px] text-emerald-400">{state.ok}</p>}

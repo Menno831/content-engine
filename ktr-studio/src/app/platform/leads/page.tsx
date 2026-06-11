@@ -3,6 +3,7 @@ import { PageHeader, Card, Stat, Avatar, icons } from "../_components";
 import { getWorkspaceData } from "@/lib/data";
 import { AddLeadDialog } from "./AddLeadDialog";
 import { LeadStageControl } from "./LeadStageControl";
+import { FollowupControl } from "./FollowupControl";
 import { ExportButton } from "../ExportButton";
 
 const stageOrder: LeadStage[] = ["nieuw", "gekwalificeerd", "call_gepland", "closed", "verloren"];
@@ -20,6 +21,12 @@ export default async function Leads() {
 
   const clientOptions = clients.map((c) => ({ id: c.id, label: c.name }));
   const contentOptions = content.map((c) => ({ id: c.id, label: c.title }));
+
+  // Vandaag-of-eerder opvolgen, open leads -> actielijst per setter.
+  const today = new Date().toISOString().slice(0, 10);
+  const dueFollowups = leads.filter(
+    (l) => l.nextFollowup && l.nextFollowup <= today && l.stage !== "closed" && l.stage !== "verloren"
+  );
 
   return (
     <>
@@ -52,6 +59,29 @@ export default async function Leads() {
         <Stat label="Close rate" value={`${closeRate}%`} delta={demo ? "+6pt vs. vorige maand" : undefined} icon={icons.check} />
         <Stat label="Nieuwe leads" value={String(leads.filter((l) => l.stage === "nieuw").length)} icon={icons.send} />
       </div>
+
+      {/* Vandaag opvolgen */}
+      {dueFollowups.length > 0 && (
+        <Card className="p-5 mb-6 border-red-400/30 bg-red-400/[0.04]">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-red-300">⏰</span>
+            <span className="font-display font-bold">Vandaag opvolgen ({dueFollowups.length})</span>
+          </div>
+          <div className="space-y-1.5">
+            {dueFollowups.map((l) => (
+              <div key={l.id} className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[13px]">
+                <span className="font-medium">{l.name}</span>
+                <span className="text-muted">{l.client}</span>
+                {l.setter !== "—" && <span className="text-accent">→ {l.setter}</span>}
+                {l.followupNote && <span className="text-muted italic">&ldquo;{l.followupNote}&rdquo;</span>}
+                <span className="ml-auto font-mono text-[11px] text-red-300">
+                  {new Date(l.nextFollowup!).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}
+                </span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
 
       {/* Sales board */}
       <div className="flex gap-4 overflow-x-auto pb-4 -mx-1 px-1">
@@ -91,6 +121,9 @@ export default async function Leads() {
                       </span>
                     </div>
                     {!demo && <LeadStageControl leadId={l.id} stage={l.stage} />}
+                    {!demo && l.stage !== "closed" && l.stage !== "verloren" && (
+                      <FollowupControl leadId={l.id} date={l.nextFollowup ?? null} note={l.followupNote ?? null} />
+                    )}
                   </Card>
                 ))}
                 {items.length === 0 && (
