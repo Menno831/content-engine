@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { stageMeta, fmtEur, fmtNum, type PipelineStage, type ContentCard } from "./_data";
 import { Card, Stat, PageHeader, Avatar, Badge, icons, Eyebrow } from "./_components";
-import { getWorkspaceData } from "@/lib/data";
+import { getWorkspaceData, getTodaysBrief } from "@/lib/data";
 import { getTodos } from "@/lib/notifications";
 import { getSessionContext } from "@/lib/auth";
 
@@ -15,6 +15,7 @@ export default async function Dashboard() {
     return <ClientOverview content={contentCards} clientName={ctx.clientName ?? "je merk"} leadsCount={leads.length} />;
   }
 
+  const brief = await getTodaysBrief();
   const activeClients = clients.filter((c) => c.status === "actief").length;
   const totalRevenue = clients.reduce((s, c) => s + c.revenueAttributed, 0);
   const totalLeads = clients.reduce((s, c) => s + c.leadsThisMonth, 0);
@@ -77,6 +78,33 @@ export default async function Dashboard() {
         waitingApproval={contentCards.filter((c) => c.stage === "client_approval").length}
         todosOpen={todos.filter((t) => !t.done).length}
       />
+
+      {/* Daily Brief teaser: vandaag's verse ideeën */}
+      {brief.length > 0 && (
+        <Card className="p-5 mb-6 border-accent/15 bg-accent/[0.03]">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2.5">
+              <span className="grid place-items-center w-9 h-9 rounded-xl bg-accent/15 text-accent">{icons.spark}</span>
+              <div>
+                <div className="font-display font-bold">Daily Brief</div>
+                <div className="text-[12px] text-muted">{brief.length} verse ideeën voor vandaag</div>
+              </div>
+            </div>
+            <Link href="/platform/brief" className="text-[13px] text-accent hover:text-accent-hover flex items-center gap-1 whitespace-nowrap">
+              Alles bekijken {icons.arrowRight}
+            </Link>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+            {brief.slice(0, 3).map((idea) => (
+              <Link key={idea.id} href="/platform/brief" className="rounded-xl border border-white/[0.06] bg-white/[0.01] p-3.5 hover:border-accent/25 transition-all">
+                <div className="text-[11px] font-mono uppercase tracking-wider text-accent mb-1 truncate">{idea.clientName}</div>
+                <div className="text-[13px] font-medium leading-snug mb-1">{idea.title}</div>
+                {idea.hook && <p className="text-[12px] text-muted leading-snug line-clamp-2">&ldquo;{idea.hook}&rdquo;</p>}
+              </Link>
+            ))}
+          </div>
+        </Card>
+      )}
 
       {/* KPI's */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

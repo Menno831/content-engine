@@ -9,7 +9,7 @@
 -- ════════════════════════════════════════════════════════════════
 
 drop table if exists
-  competitor_posts, competitors, transcripts, orders, captures, generations, prospects, content_metrics, leads, content,
+  brief_ideas, competitor_posts, competitors, transcripts, orders, captures, generations, prospects, content_metrics, leads, content,
   integrations, editors, todos, notifications, clients, profiles, agencies
   cascade;
 drop type if exists
@@ -503,3 +503,23 @@ alter table editors add column if not exists notes         text;
 -- ── 3. Lead follow-ups ──────────────────────────────────────────
 alter table leads add column if not exists next_followup  date;
 alter table leads add column if not exists followup_note  text;
+
+-- ── Daily Brief: dagelijkse content-ideeën per klant (migratie 015) ──
+create table if not exists brief_ideas (
+  id          uuid primary key default gen_random_uuid(),
+  agency_id   uuid not null references agencies(id) on delete cascade,
+  client_id   uuid not null references clients(id) on delete cascade,
+  brief_date  date not null default current_date,
+  title       text not null,
+  angle       text,
+  hook        text,
+  why         text,
+  status      text not null default 'nieuw',
+  created_at  timestamptz not null default now()
+);
+create index if not exists brief_ideas_idx on brief_ideas (agency_id, brief_date desc);
+create unique index if not exists brief_ideas_uniq on brief_ideas (client_id, brief_date, title);
+alter table brief_ideas enable row level security;
+create policy "team all brief_ideas" on brief_ideas
+  for all using (agency_id = current_agency_id() and current_client_id() is null)
+  with check (agency_id = current_agency_id() and current_client_id() is null);

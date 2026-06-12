@@ -393,6 +393,53 @@ export async function getClientReport(clientId: string): Promise<ClientReport | 
   return { week, prevWeek, month, prevMonth, bySource };
 }
 
+// ── Daily Brief: vandaag's ideeën per klant ─────────────────────
+export interface BriefIdeaRow {
+  id: string;
+  clientId: string;
+  clientName: string;
+  title: string;
+  angle: string | null;
+  hook: string | null;
+  why: string | null;
+  status: string;
+}
+
+export async function getTodaysBrief(): Promise<BriefIdeaRow[]> {
+  if (DEMO_MODE || !isSupabaseConfigured) {
+    return [
+      { id: "b1", clientId: "c1", clientName: "Lars Vermeer", title: "De €0-marketing leugen", angle: "Contrair op 'gratis bereik'", hook: "Iedereen roept 'organisch is gratis'. Het kostte mij 40 uur per week.", why: "Breekt een geloof af dat je doelgroep dagelijks hoort.", status: "nieuw" },
+      { id: "b2", clientId: "c1", clientName: "Lars Vermeer", title: "1 klant = 1 reel", angle: "Klant-case bewijs", hook: "Deze ene reel leverde een klant van €3.200 op. Hier is 'm.", why: "Concreet resultaat verslaat elke algemene tip.", status: "nieuw" },
+      { id: "b3", clientId: "c2", clientName: "Sophie de Wit", title: "Waarom consistent posten niet werkt", angle: "Mythe doorprikken", hook: "Je hoeft niet elke dag te posten. Je moet dit doen.", why: "Spreekt de frustratie van je doelgroep direct aan.", status: "nieuw" },
+    ];
+  }
+  const supabase = await createClient();
+  if (!supabase) return [];
+  const today = new Date().toISOString().slice(0, 10);
+  const [{ data: rows }, { data: clientRows }] = await Promise.all([
+    supabase
+      .from("brief_ideas")
+      .select("id,client_id,title,angle,hook,why,status")
+      .eq("brief_date", today)
+      .neq("status", "verborgen")
+      .order("created_at", { ascending: true }),
+    supabase.from("clients").select("id,name"),
+  ]);
+  const nameById = new Map((clientRows ?? []).map((c) => [c.id, c.name]));
+  return (rows ?? []).map((r) => ({
+    id: r.id,
+    clientId: r.client_id,
+    clientName: nameById.get(r.client_id) ?? "—",
+    title: r.title,
+    angle: r.angle ?? null,
+    hook: r.hook ?? null,
+    why: r.why ?? null,
+    status: r.status ?? "nieuw",
+  }));
+}
+
+// ── Daily Brief: vandaag's ideeën per klant ───────────────────── END
+
 // ── Generatie-historie (AI Visuals / thumbnails) ────────────────
 export interface Generation {
   id: string;
