@@ -6,10 +6,20 @@ import { syncClientAction } from "./actions";
 const errorLabels: Record<string, string> = {
   geen_bron: "Geen IG-handle of YouTube-kanaal",
   geen_serverkey: "Serverkey ontbreekt",
-  not_configured: "Bron niet geconfigureerd",
-  not_found: "Profiel niet gevonden",
+  not_configured: "RAPIDAPI_KEY ontbreekt — zet 'm in Vercel",
+  not_found: "Profiel niet gevonden of privé",
   "auth vereist": "Log opnieuw in",
 };
+
+// Vertaalt ook ruwe API-fouten (bv. "profile: 403") naar mensentaal.
+function labelFor(raw: string): string {
+  if (errorLabels[raw]) return errorLabels[raw];
+  if (/40[13]/.test(raw)) return "RapidAPI: geen toegang of abonnement (403)";
+  if (/429/.test(raw)) return "RapidAPI: limiet bereikt — wacht even (429)";
+  if (/5\d\d/.test(raw)) return "RapidAPI tijdelijk down — probeer zo opnieuw";
+  if (/not_found/i.test(raw)) return "Profiel niet gevonden of privé";
+  return raw;
+}
 
 export function SyncButton({ clientId }: { clientId: string }) {
   const [pending, startTransition] = useTransition();
@@ -22,8 +32,7 @@ export function SyncButton({ clientId }: { clientId: string }) {
       if (r.ok) {
         setMsg({ ok: true, text: `Gesynct · ${r.items ?? 0} items` });
       } else {
-        const e = r.error ?? "fout";
-        setMsg({ ok: false, text: errorLabels[e] ?? e });
+        setMsg({ ok: false, text: labelFor(r.error ?? "fout") });
       }
     });
   }
