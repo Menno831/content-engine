@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient as supabaseServer } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionContext } from "@/lib/auth";
 import { sendEmail } from "@/lib/email";
 
@@ -68,6 +69,7 @@ export async function createContentAction(
     content_type: String(formData.get("content_type") ?? "").trim() || null,
     deadline: String(formData.get("deadline") ?? "").trim() || null,
     editor_id: editorId || null,
+    brief_url: String(formData.get("brief_url") ?? "").trim() || null,
     stage,
   });
   if (error) return { error: error.message };
@@ -134,6 +136,42 @@ export async function updateContentStageAction(contentId: string, stage: string)
   // Klant-goedkeuring nodig -> melding naar klant.
   if (stage === "client_approval" && updated && agency) {
     await notifyClient(supabase, agency.id, updated.client_id, "approval", "Content wacht op je goedkeuring", `"${updated.title}" staat klaar voor je akkoord.`);
+  }
+
+  // Editor levert aan (-> Quality Control): melding + mail naar de eigenaar,
+  // en delivered_at vastleggen voor de on-time/te-laat-berekening.
+  if (stage === "quality_control" && updated && agency) {
+    await supabase.from("content").update({ delivered_at: new Date().toISOString() }).eq("id", contentId);
+
+    const { data: clientRow } = await supabase
+      .from("clients")
+      .select("name")
+      .eq("id", updated.client_id)
+      .maybeSingle();
+    const clientName = clientRow?.name ?? "een klant";
+
+    await supabase.from("notifications").insert({
+      agency_id: agency.id,
+      audience: "team",
+      type: "review",
+      title: "Video aangeleverd — klaar voor review",
+      body: `"${updated.title}" (${clientName}) staat in Quality Control.`,
+      link: "/platform/pipeline",
+    });
+
+    // E-mail naar de agency-eigenaar (best-effort; werkt zodra RESEND_API_KEY staat).
+    const admin = createAdminClient();
+    if (admin) {
+      const { data: agencyRow } = await admin.from("agencies").select("owner_id").eq("id", agency.id).maybeSingle();
+      if (agencyRow?.owner_id) {
+        const { data: ownerUser } = await admin.auth.admin.getUserById(agencyRow.owner_id as string);
+        await sendEmail({
+          to: ownerUser?.user?.email,
+          subject: `🎬 Klaar voor review: ${updated.title}`,
+          html: `<p>Er staat een video klaar voor review.</p><p><strong>${updated.title}</strong> · ${clientName}</p><p><a href="https://content-engine-kr5c.vercel.app/platform/pipeline">Open het productieboard</a></p>`,
+        });
+      }
+    }
   }
 
   revalidatePath("/platform/pipeline");

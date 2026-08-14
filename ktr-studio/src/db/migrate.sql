@@ -133,3 +133,7 @@ create policy "team all brief_ideas" on brief_ideas
 
 -- Klaar. Alle nieuwe functies (opdrachten, transcripten, intake, brand-kleuren,
 -- competitors, editor-pool, follow-ups, daily brief) zijn nu beschikbaar.
+
+-- ── 016 · Editor-werkflow: files-link per kaart ─────────────────
+alter table content  add column if not exists brief_url text;
+alter table profiles add column if not exists editor_id uuid references editors (id) on delete set null;

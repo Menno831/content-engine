@@ -89,6 +89,7 @@ export interface ContentCard {
   leads?: number;
   permalink?: string | null;
   dateISO?: string | null; // planningsdatum (posting_date of deadline) voor de kalender
+  briefUrl?: string | null; // files/brief-link (Frame.io, Drive) voor de editor
 }
 
 export const contentCards: ContentCard[] = [

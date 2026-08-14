@@ -93,6 +93,16 @@ export default async function Pipeline({ searchParams }: { searchParams: Promise
                     <p className="text-[12px] text-muted leading-relaxed mb-3 line-clamp-2">
                       &ldquo;{card.hook}&rdquo;
                     </p>
+                    {card.briefUrl && (
+                      <a
+                        href={card.briefUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mb-3 inline-flex items-center gap-1.5 rounded-lg border border-white/[0.08] hover:border-accent/40 hover:text-accent px-2.5 py-1 text-[11.5px] text-foreground/80 transition-all"
+                      >
+                        📁 Open files
+                      </a>
+                    )}
                     <div className="flex items-center justify-between pt-3 border-t border-white/[0.05]">
                       <span className="text-[11px] text-muted truncate max-w-[120px]">{card.client}</span>
                       {card.stage === "posted" ? (

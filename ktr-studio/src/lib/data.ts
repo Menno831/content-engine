@@ -63,7 +63,7 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
       ),
     supabase
       .from("content")
-      .select("id,client_id,title,hook,format,stage,published_at,permalink,posting_date,deadline"),
+      .select("id,client_id,title,hook,format,stage,published_at,permalink,posting_date,deadline,brief_url"),
     supabase
       .from("leads")
       .select("id,client_id,name,source_label,source_content_id,stage,value,setter,created_at,closed_at,next_followup,followup_note"),
@@ -134,14 +134,17 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
       format: (x.format ?? "Reel") as ContentCard["format"],
       hook: x.hook ?? "",
       assignee: "—",
-      due: x.published_at
-        ? new Date(x.published_at).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })
-        : "—",
+      // Editors plannen op posting_date/deadline; pas ná publicatie telt published_at.
+      due: (() => {
+        const d = x.posting_date ?? x.deadline ?? x.published_at;
+        return d ? new Date(d).toLocaleDateString("nl-NL", { day: "numeric", month: "short" }) : "—";
+      })(),
       views: metric?.views ?? undefined,
       reach: metric?.reach ?? undefined,
       leads: leadsPerContent.get(x.id) ?? undefined,
       permalink: x.permalink ?? null,
       dateISO: x.posting_date ?? x.deadline ?? x.published_at ?? null,
+      briefUrl: x.brief_url ?? null,
     };
   });
 

@@ -523,3 +523,6 @@ alter table brief_ideas enable row level security;
 create policy "team all brief_ideas" on brief_ideas
   for all using (agency_id = current_agency_id() and current_client_id() is null)
   with check (agency_id = current_agency_id() and current_client_id() is null);
+
+-- ── Editor-werkflow: files-link per kaart (migratie 016) ────────
+alter table content add column if not exists brief_url text;

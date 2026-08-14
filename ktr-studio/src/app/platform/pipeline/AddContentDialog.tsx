@@ -67,6 +67,7 @@ export function AddContentDialog({ clients, editors }: { clients: Option[]; edit
                   <Field name="deadline" label="Deadline" type="date" />
                   <Select name="editor_id" label="Editor" options={editors} placeholder="— geen —" />
                 </div>
+                <Field name="brief_url" label="Files-link (Frame.io / Drive)" placeholder="https://f.io/… — waar de editor het materiaal vindt" />
 
                 {state.error && <p className="text-[13px] text-red-400">{state.error}</p>}
                 {state.ok && <p className="text-[13px] text-emerald-400">{state.ok}</p>}
