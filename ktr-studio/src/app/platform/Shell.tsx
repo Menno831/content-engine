@@ -101,12 +101,13 @@ const clientGroups: NavGroup[] = [
   },
 ];
 
+// Editor-schermen zijn Engels (editors zijn vaak Engelstalig).
 const editorGroups: NavGroup[] = [
   {
-    title: "Werk",
+    title: "Work",
     items: [
-      { href: "/platform/pipeline", label: "Productieboard", icon: icons.pipeline },
-      { href: "/platform/todos", label: "Taken", icon: icons.check },
+      { href: "/platform/pipeline", label: "Production board", icon: icons.pipeline },
+      { href: "/platform/todos", label: "My tasks", icon: icons.check },
     ],
   },
 ];

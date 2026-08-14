@@ -54,16 +54,43 @@ export default async function Pipeline({ searchParams }: { searchParams: Promise
   const activeClient = clients.find((c) => c.id === sp.client);
   const contentCards = activeClient ? allContent.filter((c) => c.client === activeClient.name) : allContent;
 
+  // Editor-rol: Engelstalige schermteksten (editors zijn vaak Engelstalig).
+  const isEditor = ctx.profile?.role === "editor";
+  const t = isEditor
+    ? {
+        eyebrow: "Production",
+        title: "Production board",
+        subtitle: "Everything in production, per client. Open the files, edit, and drag the card to 'Quality Control' when you're done — Menno gets notified automatically.",
+        allLabel: "All clients",
+        hints: {
+          ideation: "Hooks & concepts",
+          ready_for_editing: "Ready for you to edit",
+          quality_control: "Delivered — in review",
+          revisions_needed: "Changes requested",
+          revisions_completed: "Changes done",
+          client_approval: "Waiting on client",
+          ready_for_posting: "Ready to schedule",
+          posted: "Published",
+        } as Record<string, string>,
+      }
+    : {
+        eyebrow: "Content pipeline",
+        title: "Productieboard",
+        subtitle: "Van idee tot live — alle content over je klanten in één board. Vervangt je losse Monday.",
+        allLabel: "Alle klanten",
+        hints: Object.fromEntries(stageOrder.map((s) => [s, stageMeta[s].hint])) as Record<string, string>,
+      };
+
   return (
     <>
       <PageHeader
-        eyebrow="Content pipeline"
-        title="Productieboard"
-        subtitle="Van idee tot live — alle content over je klanten in één board. Vervangt je losse Monday."
-        action={<AddContentDialog clients={clientOptions} editors={editorOptions} />}
+        eyebrow={t.eyebrow}
+        title={t.title}
+        subtitle={t.subtitle}
+        action={isEditor ? undefined : <AddContentDialog clients={clientOptions} editors={editorOptions} />}
       />
 
-      <ClientFilter clients={clients.map((c) => ({ id: c.id, name: c.name }))} />
+      <ClientFilter clients={clients.map((c) => ({ id: c.id, name: c.name }))} allLabel={t.allLabel} />
 
       <div className="flex gap-4 overflow-x-auto pb-4 -mx-1 px-1">
         {stageOrder.map((stage) => {
@@ -78,7 +105,7 @@ export default async function Pipeline({ searchParams }: { searchParams: Promise
                     {cards.length}
                   </span>
                 </div>
-                <span className="text-[11px] text-muted font-mono">{stageMeta[stage].hint}</span>
+                <span className="text-[11px] text-muted font-mono">{t.hints[stage]}</span>
               </div>
 
               {/* Kaarten */}

@@ -8,7 +8,7 @@
 // ════════════════════════════════════════════════════════════════
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
-export function ClientFilter({ clients }: { clients: { id: string; name: string }[] }) {
+export function ClientFilter({ clients, allLabel = "Alle klanten" }: { clients: { id: string; name: string }[]; allLabel?: string }) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -33,7 +33,7 @@ export function ClientFilter({ clients }: { clients: { id: string; name: string 
             : "border border-white/[0.08] text-muted hover:border-accent/30 hover:text-accent"
         }`}
       >
-        Alle klanten
+        {allLabel}
       </button>
       {clients.map((c) => (
         <button

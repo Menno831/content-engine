@@ -21,28 +21,30 @@ export default async function TodosPage({ searchParams }: { searchParams: Promis
   const open = todos.filter((t) => !t.done);
   const done = todos.filter((t) => t.done);
 
+  // Editor-rol: Engelstalige schermteksten.
+  const isEditor = ctx.profile?.role === "editor";
+  const t9n = isEditor
+    ? { eyebrow: "Tasks", title: "Your tasks", subtitle: "Check off what you've delivered or finished.", open: "Open", done: "Done", allDone: "All done 🎉", noneDone: "Nothing completed yet", deadline: "due", none: "No tasks yet" }
+    : { eyebrow: isClient ? "Jouw taken" : "Taken", title: isClient ? "Wat er van je nodig is" : "Content-taken per klant", subtitle: isClient ? "Vink af zodra je iets hebt aangeleverd of goedgekeurd." : "Wijs taken toe aan klanten — ze krijgen automatisch een melding.", open: "Open", done: "Afgerond", allDone: "Alles afgevinkt 🎉", noneDone: "Nog niks afgerond", deadline: "deadline", none: "Nog geen taken" };
+
   return (
     <>
       <PageHeader
-        eyebrow={isClient ? "Jouw taken" : "Taken"}
-        title={isClient ? "Wat er van je nodig is" : "Content-taken per klant"}
-        subtitle={
-          isClient
-            ? "Vink af zodra je iets hebt aangeleverd of goedgekeurd."
-            : "Wijs taken toe aan klanten — ze krijgen automatisch een melding."
-        }
-        action={isClient ? undefined : <AddTodoDialog clients={clientOptions} />}
+        eyebrow={t9n.eyebrow}
+        title={t9n.title}
+        subtitle={t9n.subtitle}
+        action={isClient || isEditor ? undefined : <AddTodoDialog clients={clientOptions} />}
       />
 
-      {!isClient && <ClientFilter clients={clients.map((c) => ({ id: c.id, name: c.name }))} />}
+      {!isClient && <ClientFilter clients={clients.map((c) => ({ id: c.id, name: c.name }))} allLabel={isEditor ? "All clients" : "Alle klanten"} />}
 
       {todos.length === 0 ? (
-        <NoData label="Nog geen taken" />
+        <NoData label={t9n.none} />
       ) : (
         <div className="grid lg:grid-cols-2 gap-6">
           <Card className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-display font-extrabold text-xl">Open</h2>
+              <h2 className="font-display font-extrabold text-xl">{t9n.open}</h2>
               <Badge color="#FBBF24">{open.length}</Badge>
             </div>
             <div className="space-y-2">
@@ -56,18 +58,18 @@ export default async function TodosPage({ searchParams }: { searchParams: Promis
                     <div className="text-[12px] text-muted">
                       {!isClient && <span>{t.client}</span>}
                       {!isClient && t.due && <span> · </span>}
-                      {t.due && <span>deadline {t.due}</span>}
+                      {t.due && <span>{t9n.deadline} {t.due}</span>}
                     </div>
                   </div>
                 </div>
               ))}
-              {open.length === 0 && <div className="text-sm text-muted py-4 text-center">Alles afgevinkt 🎉</div>}
+              {open.length === 0 && <div className="text-sm text-muted py-4 text-center">{t9n.allDone}</div>}
             </div>
           </Card>
 
           <Card className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-display font-extrabold text-xl">Afgerond</h2>
+              <h2 className="font-display font-extrabold text-xl">{t9n.done}</h2>
               <Badge color="#34D399">{done.length}</Badge>
             </div>
             <div className="space-y-2">
@@ -82,7 +84,7 @@ export default async function TodosPage({ searchParams }: { searchParams: Promis
                   </div>
                 </div>
               ))}
-              {done.length === 0 && <div className="text-sm text-muted py-4 text-center">Nog niks afgerond</div>}
+              {done.length === 0 && <div className="text-sm text-muted py-4 text-center">{t9n.noneDone}</div>}
             </div>
           </Card>
         </div>
