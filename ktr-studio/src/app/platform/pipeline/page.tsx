@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { stageMeta, fmtNum, type PipelineStage } from "../_data";
 import { PageHeader, Card, Badge, icons } from "../_components";
 import { getWorkspaceData } from "@/lib/data";
@@ -26,7 +27,7 @@ const formatColor: Record<string, string> = {
   Short: "#34D399",
 };
 
-export default async function Pipeline({ searchParams }: { searchParams: Promise<{ client?: string }> }) {
+export default async function Pipeline({ searchParams }: { searchParams: Promise<{ client?: string; view?: string }> }) {
   const sp = await searchParams;
   const { content: allContent, clients, demo } = await getWorkspaceData();
   const ctx = await getSessionContext();
@@ -55,7 +56,11 @@ export default async function Pipeline({ searchParams }: { searchParams: Promise
   const contentCards = activeClient ? allContent.filter((c) => c.client === activeClient.name) : allContent;
 
   // Editor-rol: Engelstalige schermteksten (editors zijn vaak Engelstalig).
-  const isEditor = ctx.profile?.role === "editor";
+  // Owner/team kan met ?view=editor precies zien wat een editor ziet,
+  // zonder in te loggen op diens account.
+  const realEditor = ctx.profile?.role === "editor";
+  const previewAsEditor = !realEditor && sp.view === "editor";
+  const isEditor = realEditor || previewAsEditor;
   const t = isEditor
     ? {
         eyebrow: "Production",
@@ -81,14 +86,42 @@ export default async function Pipeline({ searchParams }: { searchParams: Promise
         hints: Object.fromEntries(stageOrder.map((s) => [s, stageMeta[s].hint])) as Record<string, string>,
       };
 
+  // Toggle-links behouden het actieve klantfilter.
+  const clientQS = sp.client ? `?client=${sp.client}` : "";
+  const editorViewQS = sp.client ? `?client=${sp.client}&view=editor` : "?view=editor";
+
   return (
     <>
       <PageHeader
         eyebrow={t.eyebrow}
         title={t.title}
         subtitle={t.subtitle}
-        action={isEditor ? undefined : <AddContentDialog clients={clientOptions} editors={editorOptions} />}
+        action={
+          previewAsEditor ? undefined : realEditor ? undefined : (
+            <div className="flex items-center gap-2">
+              <Link
+                href={`/platform/pipeline${editorViewQS}`}
+                className="flex items-center gap-1.5 rounded-xl border border-white/[0.08] hover:border-accent/30 hover:text-accent px-3.5 py-2.5 text-sm transition-all"
+                title="Zie het board precies zoals je editor het ziet"
+              >
+                👁 Bekijk als editor
+              </Link>
+              <AddContentDialog clients={clientOptions} editors={editorOptions} />
+            </div>
+          )
+        }
       />
+
+      {previewAsEditor && (
+        <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-accent/25 bg-accent/[0.06] px-4 py-2.5">
+          <span className="text-[13px]">
+            👁 <strong>Editor-weergave</strong> — dit is precies wat Max ziet (alleen kan zij geen kaarten toevoegen, wel slepen).
+          </span>
+          <Link href={`/platform/pipeline${clientQS}`} className="shrink-0 rounded-lg bg-accent hover:bg-accent-hover text-background font-bold text-[12px] px-3 py-1.5 transition-colors">
+            Terug naar mijn weergave
+          </Link>
+        </div>
+      )}
 
       <ClientFilter clients={clients.map((c) => ({ id: c.id, name: c.name }))} allLabel={t.allLabel} />
 
