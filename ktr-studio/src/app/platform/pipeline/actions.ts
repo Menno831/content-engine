@@ -65,11 +65,16 @@ export async function createContentAction(
     client_id: clientId,
     title,
     hook: String(formData.get("hook") ?? "").trim() || null,
-    format: String(formData.get("format") ?? "Reel"),
+    format: String(formData.get("format") ?? "Talking"),
     content_type: String(formData.get("content_type") ?? "").trim() || null,
     deadline: String(formData.get("deadline") ?? "").trim() || null,
     editor_id: editorId || null,
     brief_url: String(formData.get("brief_url") ?? "").trim() || null,
+    posting_date: String(formData.get("posting_date") ?? "").trim() || null,
+    frame_url: String(formData.get("frame_url") ?? "").trim() || null,
+    vo_url: String(formData.get("vo_url") ?? "").trim() || null,
+    reference_url: String(formData.get("reference_url") ?? "").trim() || null,
+    footage_notes: String(formData.get("footage_notes") ?? "").trim() || null,
     stage,
   });
   if (error) return { error: error.message };
@@ -177,4 +182,100 @@ export async function updateContentStageAction(contentId: string, stage: string)
   revalidatePath("/platform/pipeline");
   revalidatePath("/platform");
   return { ok: "Verplaatst." };
+}
+
+// ── Wekelijkse productieplanning ────────────────────────────────
+// Eén actie maakt de vaste week aan: vijf formats, vijf dagen, met de
+// briefing er al in. Dinsdag de longform, daarna elke dag een lichter
+// format. Deadline staat standaard een dag voor de publicatiedatum.
+const WEEKSJABLOON = [
+  {
+    dag: 0,
+    format: "Longform",
+    titel: "Longform",
+    brief:
+      "Rustig tempo, b-roll bij elk voorbeeld dat genoemd wordt, duidelijke scheiding tussen hoofdstukken. De geanimeerde intro is een asset: bouw hem zo dat hij los werkt, want hij komt voor elke clip uit deze video.",
+  },
+  {
+    dag: 1,
+    format: "Clip",
+    titel: "Clip uit de longform",
+    brief:
+      "Snijden uit de longform van deze week, geen nieuw materiaal. Begin altijd met de geanimeerde intro uit die video. Eén punt, één payoff, knippen op het laatste woord. Laat bewust iets open: de DM-automation stuurt de volledige video na zodra iemand reageert.",
+  },
+  {
+    dag: 2,
+    format: "Lifestyle",
+    titel: "Lifestyle",
+    brief:
+      "Tien tot vijftien seconden uit de gegradede trip-reel. Eén track, één regel tekst. Geen transitions, geen effecten. Bestaat die gegradede reel nog niet voor deze trip, grade dan eerst de hele trip in één keer.",
+  },
+  {
+    dag: 3,
+    format: "VO story",
+    titel: "VO story",
+    brief:
+      "De voice over leidt, knip het beeld op de woorden. Eén beeld per gedachte. Ondertiteling aan, koud openen, hard knippen na de laatste zin, geen outro.",
+  },
+  {
+    dag: 4,
+    format: "Talking",
+    titel: "Talking",
+    brief:
+      "Verse Boedapest- en Estland-b-roll erin, oudere shots eruit. Koud openen op de sterkste zin, hard eindigen.",
+  },
+];
+
+function volgendeDinsdag(): Date {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  const delta = (2 - d.getDay() + 7) % 7 || 7;
+  d.setDate(d.getDate() + delta);
+  return d;
+}
+
+function alsDatum(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+export async function generateWeekAction(
+  _prev: ContentActionResult,
+  formData: FormData
+): Promise<ContentActionResult> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { error: "Supabase niet geconfigureerd." };
+
+  const { agency } = await getSessionContext();
+  if (!agency) return { error: "Geen agency gevonden — log opnieuw in." };
+
+  const clientId = String(formData.get("client_id") ?? "");
+  if (!clientId) return { error: "Kies eerst een klant." };
+
+  const editorId = String(formData.get("editor_id") ?? "");
+  const dinsdag = volgendeDinsdag();
+  const label = dinsdag.toLocaleDateString("nl-NL", { day: "numeric", month: "short" });
+
+  const rijen = WEEKSJABLOON.map((s) => {
+    const live = new Date(dinsdag);
+    live.setDate(dinsdag.getDate() + s.dag);
+    const deadline = new Date(live);
+    deadline.setDate(live.getDate() - 1);
+    return {
+      client_id: clientId,
+      title: `${s.titel} ${label}`,
+      format: s.format,
+      stage: "ready_for_editing",
+      posting_date: alsDatum(live),
+      deadline: alsDatum(deadline),
+      editor_id: editorId || null,
+      footage_notes: s.brief,
+    };
+  });
+
+  const { error } = await supabase.from("content").insert(rijen);
+  if (error) return { error: error.message };
+
+  revalidatePath("/platform/pipeline");
+  revalidatePath("/platform");
+  return { ok: `Week van ${label} aangemaakt: vijf kaarten met briefing.` };
 }

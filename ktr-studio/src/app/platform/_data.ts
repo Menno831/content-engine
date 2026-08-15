@@ -80,7 +80,7 @@ export interface ContentCard {
   title: string;
   client: string;
   stage: PipelineStage;
-  format: "Reel" | "Carrousel" | "Story" | "Short";
+  format: string;
   hook: string;
   assignee: string;
   due: string;
