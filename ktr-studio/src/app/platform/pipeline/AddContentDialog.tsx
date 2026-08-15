@@ -16,7 +16,7 @@ const STAGE_ORDER: PipelineStage[] = [
   "ready_for_posting",
   "posted",
 ];
-const FORMATS = ["Reel", "Carrousel", "Story", "Short"];
+const FORMATS = ["Longform", "Clip", "Lifestyle", "VO story", "Talking", "Trio", "Carrousel"];
 
 interface Option {
   id: string;
@@ -67,7 +67,14 @@ export function AddContentDialog({ clients, editors }: { clients: Option[]; edit
                   <Field name="deadline" label="Deadline" type="date" />
                   <Select name="editor_id" label="Editor" options={editors} placeholder="— geen —" />
                 </div>
-                <Field name="brief_url" label="Files-link (Frame.io / Drive)" placeholder="https://f.io/… — waar de editor het materiaal vindt" />
+                <div className="grid grid-cols-2 gap-3">
+                  <Field name="posting_date" label="Gaat live op" type="date" />
+                  <Field name="reference_url" label="Voorbeeldvideo" placeholder="https://… — hoe het eruit moet zien" />
+                </div>
+                <Field name="brief_url" label="Ruw materiaal (Drive)" placeholder="https://drive.google.com/… — waar de beelden staan" />
+                <Field name="frame_url" label="Oplevering (Frame)" placeholder="https://f.io/… — vult de editor in" />
+                <Field name="vo_url" label="Voice over-bestand" placeholder="https://… — alleen bij een VO story" />
+                <Field name="footage_notes" label="Welke beelden" placeholder="Welke trip, welke map, welke oude clips erbij moeten" />
 
                 {state.error && <p className="text-[13px] text-red-400">{state.error}</p>}
                 {state.ok && <p className="text-[13px] text-emerald-400">{state.ok}</p>}

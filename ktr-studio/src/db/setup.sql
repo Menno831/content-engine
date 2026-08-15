@@ -526,3 +526,26 @@ create policy "team all brief_ideas" on brief_ideas
 
 -- ── Editor-werkflow: files-link per kaart (migratie 016) ────────
 alter table content add column if not exists brief_url text;
+
+-- ── 017 · Productie-formats + assets per kaart ──────────────────
+-- ── 1. format van enum naar tekst ───────────────────────────────
+alter table content alter column format drop default;
+alter table content alter column format type text using format::text;
+alter table content alter column format set default 'Talking';
+
+drop type if exists content_format;
+
+-- Oude waarden meenemen naar de nieuwe indeling.
+update content set format = 'Talking'   where format = 'Reel';
+update content set format = 'Clip'      where format = 'Short';
+update content set format = 'Lifestyle' where format = 'Story';
+-- Carrousel blijft zoals hij is.
+
+-- ── 2. assets per kaart ─────────────────────────────────────────
+alter table content add column if not exists frame_url     text;
+alter table content add column if not exists vo_url        text;
+alter table content add column if not exists reference_url text;
+alter table content add column if not exists footage_notes text;
+
+-- Wekelijkse planning sneller opvragen: wat gaat er wanneer live.
+create index if not exists content_posting_idx on content (client_id, posting_date);
