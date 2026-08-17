@@ -50,6 +50,7 @@ npm run lint
 | `HIGGSFIELD_API_KEY` (`KEY_ID:KEY_SECRET`) | thumbnails |
 | `TRANSKRIPTOR_API_KEY` | audio/video → transcript |
 | `MANYCHAT_WEBHOOK_SECRET`, `CRON_SECRET`, `YOUTUBE_API_KEY`, `RESEND_API_KEY` | webhook/cron/yt/mail |
+| `MONEYBIRD_API_TOKEN` + `MONEYBIRD_ADMINISTRATION_ID` | facturen op Finance (alleen-lezen) |
 
 Vraag de echte waarden aan Menno (nooit committen; `.env.local` is gitignored).
 
