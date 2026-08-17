@@ -487,3 +487,31 @@ export async function deleteClientAction(clientId: string): Promise<ActionResult
   revalidatePath("/platform");
   redirect("/platform/clients");
 }
+
+// Kanalen (IG-handle + YouTube) bijwerken op het klantprofiel — deze
+// sturen de 3x-daagse sync aan.
+export async function updateClientChannelsAction(
+  clientId: string,
+  igHandle: string,
+  ytChannel: string
+): Promise<ActionResult> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { error: "Supabase niet geconfigureerd." };
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "auth vereist" };
+
+  const { error } = await supabase
+    .from("clients")
+    .update({
+      ig_handle: igHandle.trim() || null,
+      yt_channel_id: ytChannel.trim() || null,
+    })
+    .eq("id", clientId);
+  if (error) return { error: error.message };
+
+  revalidatePath(`/platform/clients/${clientId}`);
+  revalidatePath("/platform/clients");
+  return { ok: "Kanalen opgeslagen." };
+}

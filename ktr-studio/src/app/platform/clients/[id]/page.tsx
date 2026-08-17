@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { PageHeader, Card, Badge, Avatar } from "../../_components";
-import { getClient, getClientOrders, getIntakeAnswers, getClientTranscripts } from "@/lib/data";
+import { getClient, getClientOrders, getClientTranscripts } from "@/lib/data";
 import { fmtEur } from "../../_data";
 import { BrandDocs } from "../BrandDocs";
-import { IntakeWizard } from "../IntakeWizard";
 import { TranscriptsCard } from "../TranscriptsCard";
 import { OrdersCard } from "../OrdersCard";
 import { DeleteClientButton } from "../DeleteClientButton";
+import { ChannelsEditor } from "../ChannelsEditor";
 import { SyncButton } from "../SyncButton";
 import { PortalAccessButton } from "../PortalAccessButton";
 
@@ -18,10 +18,9 @@ const statusColor: Record<string, string> = {
 
 export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [c, orders, intakeAnswers, transcripts] = await Promise.all([
+  const [c, orders, transcripts] = await Promise.all([
     getClient(id),
     getClientOrders(id),
-    getIntakeAnswers(id),
     getClientTranscripts(id),
   ]);
 
@@ -73,6 +72,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
             <Row label="Betaalstatus" value={c.paymentStatus} />
             <Row label="Soul-character" value={c.soulCharacter ?? "—"} />
           </div>
+          <ChannelsEditor clientId={c.id} igHandle={c.handle} ytChannel={c.ytChannel ?? ""} />
           {c.notes && (
             <div className="mt-5 pt-4 border-t border-white/[0.06]">
               <div className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1">Notities</div>
@@ -86,7 +86,6 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
 
         {/* Brand-context */}
         <div className="lg:col-span-2">
-          <IntakeWizard clientId={c.id} answers={intakeAnswers} />
           <TranscriptsCard clientId={c.id} transcripts={transcripts} />
           <BrandDocs
             clientId={c.id}

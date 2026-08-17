@@ -43,6 +43,7 @@ export interface Client {
   // Brand-kleuren (sturen carousels/stories/thumbnails aan)
   brandPrimary?: string | null;
   brandSecondary?: string | null;
+  ytChannel?: string | null; // YouTube kanaal-id of @handle (voor de sync)
 }
 
 export const clients: Client[] = [
