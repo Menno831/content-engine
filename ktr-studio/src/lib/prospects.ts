@@ -8,12 +8,23 @@ export async function getProspects(): Promise<Prospect[]> {
   const supabase = await createClient();
   if (!supabase) return [];
 
-  const { data } = await supabase
+  // message apart proberen: bestaat de kolom nog niet (migratie 021 niet
+  // gedraaid), dan valt de pagina terug op de basiskolommen.
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  const base = "id,name,instagram,youtube,weakness,stage,potential_value,note";
+  let data: any[] | null = null;
+  const first = await supabase
     .from("prospects")
-    .select("id,name,instagram,youtube,weakness,stage,potential_value,note")
+    .select(`${base},message`)
     .order("created_at", { ascending: false });
+  if (first.error) {
+    const fallback = await supabase.from("prospects").select(base).order("created_at", { ascending: false });
+    data = fallback.data;
+  } else {
+    data = first.data;
+  }
 
-  return (data ?? []).map((p) => ({
+  return (data ?? []).map((p: any) => ({
     id: p.id,
     name: p.name,
     instagram: p.instagram ?? null,
@@ -22,5 +33,7 @@ export async function getProspects(): Promise<Prospect[]> {
     stage: (p.stage ?? "te_contacteren") as Prospect["stage"],
     potentialValue: Number(p.potential_value ?? 0),
     note: p.note ?? null,
+    message: p.message ?? null,
   }));
+  /* eslint-enable @typescript-eslint/no-explicit-any */
 }

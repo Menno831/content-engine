@@ -29,6 +29,7 @@ export async function createProspectAction(_prev: ProspectResult, formData: Form
     weakness: String(formData.get("weakness") ?? "").trim() || null,
     potential_value: Number(formData.get("potential_value") ?? 0) || 0,
     note: String(formData.get("note") ?? "").trim() || null,
+    message: String(formData.get("message") ?? "").trim() || null,
   });
   if (error) return { error: error.message };
 

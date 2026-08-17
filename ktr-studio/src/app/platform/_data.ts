@@ -267,6 +267,8 @@ export interface Prospect {
   stage: ProspectStage;
   potentialValue: number;
   note: string | null;
+  /** Kant-en-klaar DM-bericht — kopieer & verstuur vanaf de outreach-pagina. */
+  message?: string | null;
 }
 
 export const prospects: Prospect[] = [

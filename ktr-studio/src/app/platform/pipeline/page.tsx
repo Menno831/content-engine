@@ -113,7 +113,7 @@ export default async function Pipeline({ searchParams }: { searchParams: Promise
               >
                 👁 Bekijk als editor
               </Link>
-              <AddContentDialog clients={clientOptions} editors={editorOptions} />
+              <AddContentDialog clients={clientOptions} editors={editorOptions} defaultClient={sp.client} />
             </div>
           )
         }

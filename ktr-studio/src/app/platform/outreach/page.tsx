@@ -1,9 +1,9 @@
-import { PageHeader, Card, Stat, Avatar, icons } from "../_components";
+import { PageHeader, Stat, icons } from "../_components";
 import { getProspects } from "@/lib/prospects";
 import { DEMO_MODE, isSupabaseConfigured } from "@/lib/config";
 import { prospectStageMeta, fmtEur, type ProspectStage } from "../_data";
 import { AddProspectDialog } from "./AddProspectDialog";
-import { ProspectStageControl } from "./ProspectStageControl";
+import { ProspectCard } from "./ProspectCard";
 
 const stageOrder: ProspectStage[] = ["te_contacteren", "dm_verstuurd", "in_gesprek", "audit_verstuurd", "geen_reactie"];
 
@@ -51,24 +51,7 @@ export default async function OutreachPage() {
 
               <div className="space-y-3 min-h-[100px] rounded-2xl bg-white/[0.015] border border-white/[0.04] p-2.5">
                 {items.map((p) => (
-                  <Card key={p.id} hover className="p-4">
-                    <div className="flex items-center gap-2.5 mb-3">
-                      <Avatar initials={p.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()} size={32} />
-                      <div className="min-w-0 flex-1">
-                        <div className="text-sm font-medium truncate">{p.name}</div>
-                        <div className="text-[11px] text-muted truncate">{p.instagram ?? p.youtube ?? "—"}</div>
-                      </div>
-                      <span className="font-mono text-[12px] text-emerald-400">{fmtEur(p.potentialValue)}</span>
-                    </div>
-                    {p.weakness && (
-                      <div className="rounded-lg bg-white/[0.03] border border-white/[0.05] px-2.5 py-2 mb-2">
-                        <div className="text-[10px] font-mono uppercase tracking-wider text-muted mb-0.5">Zwakte</div>
-                        <div className="text-[12px] text-foreground/80">{p.weakness}</div>
-                      </div>
-                    )}
-                    {p.note && <div className="text-[11px] text-muted">{p.note}</div>}
-                    {!demo && <ProspectStageControl prospectId={p.id} stage={p.stage} />}
-                  </Card>
+                  <ProspectCard key={p.id} prospect={p} demo={demo} />
                 ))}
                 {items.length === 0 && <div className="text-center text-[12px] text-muted py-6">Leeg</div>}
               </div>

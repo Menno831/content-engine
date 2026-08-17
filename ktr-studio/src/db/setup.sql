@@ -9,7 +9,7 @@
 -- ════════════════════════════════════════════════════════════════
 
 drop table if exists
-  account_metrics, brief_ideas, competitor_posts, competitors, transcripts, orders, captures, generations, prospects, content_metrics, leads, content,
+  seen_invoices, account_metrics, brief_ideas, competitor_posts, competitors, transcripts, orders, captures, generations, prospects, content_metrics, leads, content,
   integrations, editors, todos, notifications, clients, profiles, agencies
   cascade;
 drop type if exists
@@ -356,9 +356,13 @@ create table if not exists prospects (
   stage           text not null default 'te_contacteren',
   potential_value numeric default 0,
   note            text,
+  message         text,            -- kant-en-klaar DM-bericht
+  external_id     text,            -- herkomst (bv. 'monday:<id>') voor idempotente imports
   created_at      timestamptz not null default now()
 );
 create index if not exists idx_prospects_agency on prospects (agency_id, stage);
+create unique index if not exists idx_prospects_external
+  on prospects (external_id) where external_id is not null;
 alter table prospects enable row level security;
 create policy "read prospects" on prospects
   for select using (agency_id = current_agency_id() and current_client_id() is null);
@@ -575,3 +579,10 @@ create policy "read account_metrics" on account_metrics
     and (current_client_id() is null or client_id = current_client_id())
   );
 
+
+-- ── Moneybird: geziene facturen (cron meldt alleen nieuwe) ──────
+create table if not exists seen_invoices (
+  id      text primary key,
+  seen_at timestamptz not null default now()
+);
+alter table seen_invoices enable row level security;

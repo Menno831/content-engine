@@ -43,6 +43,26 @@ async function notifyClient(
   }
 }
 
+// Editor mailen als er werk voor 'm klaarstaat (best-effort, Engels —
+// werkt zodra RESEND_API_KEY staat).
+async function notifyEditor(
+  supabase: NonNullable<Awaited<ReturnType<typeof supabaseServer>>>,
+  editorId: string,
+  clientId: string,
+  title: string
+) {
+  const [{ data: editor }, { data: client }] = await Promise.all([
+    supabase.from("editors").select("name, email").eq("id", editorId).maybeSingle(),
+    supabase.from("clients").select("name").eq("id", clientId).maybeSingle(),
+  ]);
+  if (!editor?.email) return;
+  await sendEmail({
+    to: editor.email,
+    subject: "🎬 New video ready for editing",
+    html: `<p>Hi ${editor.name ?? ""},</p><p>A new video is ready for you to edit:</p><p><strong>${title}</strong> · ${client?.name ?? ""}</p><p>The files are linked on the card. Drag it to "Quality Control" when you're done.</p><p><a href="https://content-engine-kr5c.vercel.app/platform/pipeline">Open the production board</a></p>`,
+  });
+}
+
 export async function createContentAction(
   _prev: ContentActionResult,
   formData: FormData
@@ -82,6 +102,11 @@ export async function createContentAction(
   // Nieuwe ideation -> de klant krijgt een melding.
   if (stage === "ideation") {
     await notifyClient(supabase, agency.id, clientId, "ideation", "Nieuwe ideation staat klaar", `"${title}" staat klaar — bekijk en reageer.`);
+  }
+
+  // Kaart staat klaar voor de editor -> mail de editor direct.
+  if (stage === "ready_for_editing" && editorId) {
+    await notifyEditor(supabase, editorId, clientId, title).catch(() => undefined);
   }
 
   revalidatePath("/platform/pipeline");
@@ -134,9 +159,14 @@ export async function updateContentStageAction(contentId: string, stage: string)
     .from("content")
     .update(patch)
     .eq("id", contentId)
-    .select("client_id, title, external_id")
+    .select("client_id, title, external_id, editor_id")
     .single();
   if (error) return { error: error.message };
+
+  // Kaart schuift naar "Ready for editing" met een editor erop -> mail 'm.
+  if (stage === "ready_for_editing" && updated?.editor_id) {
+    await notifyEditor(supabase, updated.editor_id, updated.client_id, updated.title).catch(() => undefined);
+  }
 
   // Twee-weg-sync: kwam deze kaart uit Asana, verplaats de taak daar dan
   // ook naar de bijbehorende sectie (best-effort, blokkeert nooit).

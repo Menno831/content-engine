@@ -194,3 +194,14 @@ create policy "team delete content" on content
   );
 -- Klanten met een eigen Asana-bord (bv. Arthur en Bryan) twee-weg syncen.
 alter table clients add column if not exists asana_project_id text;
+
+-- ── 021 · Outreach-upgrade + Moneybird-factuurmeldingen ─────────
+alter table prospects add column if not exists message text;
+alter table prospects add column if not exists external_id text;
+create unique index if not exists idx_prospects_external
+  on prospects (external_id) where external_id is not null;
+create table if not exists seen_invoices (
+  id      text primary key,
+  seen_at timestamptz not null default now()
+);
+alter table seen_invoices enable row level security;

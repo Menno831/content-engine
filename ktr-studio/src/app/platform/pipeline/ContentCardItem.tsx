@@ -41,9 +41,8 @@ export function ContentCardItem({
 }) {
   const [open, setOpen] = useState(false);
 
-  const t = isEditor
-    ? { edit: "Edit card", files: "Open files" }
-    : { edit: "Kaart bewerken", files: "Open bestanden" };
+  // Bewust Engels: het board is er ook voor de editors — één taal.
+  const t = { edit: "Edit card", files: "Open files" };
 
   return (
     <>
@@ -58,9 +57,11 @@ export function ContentCardItem({
           <span className="font-mono text-[10px] text-muted">{card.due}</span>
         </div>
         <h3 className="font-medium text-sm leading-snug mb-2">{card.title}</h3>
-        <p className="text-[12px] text-muted leading-relaxed mb-3 line-clamp-2">
-          &ldquo;{card.hook}&rdquo;
-        </p>
+        {card.hook && (
+          <p className="text-[12px] text-muted leading-relaxed mb-3 line-clamp-2">
+            &ldquo;{card.hook}&rdquo;
+          </p>
+        )}
         {card.briefUrl && (
           <a
             href={card.briefUrl}
@@ -147,33 +148,20 @@ function EditContentDialog({
   const [deleting, startDelete] = useTransition();
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  const t = isEditor
-    ? {
-        title: "Edit card",
-        loading: "Loading…",
-        save: "Save",
-        saving: "Saving…",
-        cancel: "Cancel",
-        del: "Delete card",
-        delConfirm: "Really delete? This can't be undone",
-        fTitle: "Title", fHook: "Hook", fFormat: "Format", fType: "Type", fStage: "Stage",
-        fDeadline: "Deadline", fLive: "Goes live on", fEditor: "Editor",
-        fBrief: "Raw footage (Drive)", fFrame: "Delivery (Frame)", fVo: "Voice-over file",
-        fRef: "Reference video", fNotes: "Briefing / which footage",
-      }
-    : {
-        title: "Kaart bewerken",
-        loading: "Laden…",
-        save: "Opslaan",
-        saving: "Opslaan…",
-        cancel: "Annuleren",
-        del: "Kaart verwijderen",
-        delConfirm: "Zeker weten? Dit kan niet ongedaan worden",
-        fTitle: "Titel", fHook: "Hook", fFormat: "Format", fType: "Type", fStage: "Fase",
-        fDeadline: "Deadline", fLive: "Gaat live op", fEditor: "Editor",
-        fBrief: "Ruw materiaal (Drive)", fFrame: "Oplevering (Frame)", fVo: "Voice over-bestand",
-        fRef: "Voorbeeldvideo", fNotes: "Briefing / welke beelden",
-      };
+  // Eén taal (Engels) voor iedereen — simpel en editors verstaan het.
+  const t = {
+    title: "Edit card",
+    loading: "Loading…",
+    save: "Save",
+    saving: "Saving…",
+    cancel: "Cancel",
+    del: "Delete card",
+    delConfirm: "Really delete? This can't be undone",
+    fTitle: "Title", fHook: "Hook (optional)", fFormat: "Format", fType: "Type",
+    fDeadline: "Deadline", fLive: "Goes live on", fEditor: "Editor",
+    fBrief: "Raw footage (Drive)", fFrame: "Delivery (Frame)", fVo: "Voice-over file",
+    fRef: "Reference video", fNotes: "Extra notes",
+  };
 
   useEffect(() => {
     let alive = true;

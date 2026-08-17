@@ -38,6 +38,15 @@ export function AddProspectDialog() {
               <Field name="weakness" label="Gesignaleerde zwakte" placeholder="Geen hooks, lage retentie" />
               <Field name="potential_value" label="Potentiële waarde (€)" type="number" placeholder="2500" />
               <Field name="note" label="Notitie" placeholder="120k volgers, post inconsistent" />
+              <label className="block">
+                <span className="block text-[12px] font-mono uppercase tracking-wider text-muted mb-1.5">DM-bericht (klaar om te versturen)</span>
+                <textarea
+                  name="message"
+                  rows={3}
+                  placeholder="Hey! Kwam je pagina tegen en…"
+                  className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-3.5 py-2.5 text-sm outline-none focus:border-accent/40 transition-colors resize-y"
+                />
+              </label>
 
               {state.error && <p className="text-[13px] text-red-400">{state.error}</p>}
               {state.ok && <p className="text-[13px] text-emerald-400">{state.ok}</p>}
