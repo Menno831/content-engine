@@ -9,10 +9,8 @@ import { ClientFilter } from "../ClientFilter";
 
 export default async function TodosPage({ searchParams }: { searchParams: Promise<{ client?: string }> }) {
   const sp = await searchParams;
-  const ctx = await getSessionContext();
+  const [ctx, allTodos, { clients }] = await Promise.all([getSessionContext(), getTodos(), getWorkspaceData()]);
   const isClient = ctx.profile?.role === "client";
-  const allTodos = await getTodos();
-  const { clients } = await getWorkspaceData();
   const clientOptions = clients.map((c) => ({ id: c.id, label: c.name }));
 
   const activeClient = clients.find((c) => c.id === sp.client);

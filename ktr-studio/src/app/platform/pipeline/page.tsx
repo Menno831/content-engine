@@ -29,8 +29,7 @@ const formatColor: Record<string, string> = {
 
 export default async function Pipeline({ searchParams }: { searchParams: Promise<{ client?: string; view?: string }> }) {
   const sp = await searchParams;
-  const { content: allContent, clients, demo } = await getWorkspaceData();
-  const ctx = await getSessionContext();
+  const [{ content: allContent, clients, demo }, ctx] = await Promise.all([getWorkspaceData(), getSessionContext()]);
   const isClient = ctx.profile?.role === "client";
 
   // Klant-login: vereenvoudigd, alleen-lezen board (RLS levert al alleen z'n eigen content).
@@ -125,15 +124,16 @@ export default async function Pipeline({ searchParams }: { searchParams: Promise
 
       <ClientFilter clients={clients.map((c) => ({ id: c.id, name: c.name }))} allLabel={t.allLabel} />
 
-      <div className="flex gap-4 overflow-x-auto pb-4 -mx-1 px-1">
+      {/* Verticaal board: fases als rijen onder elkaar (scrollen i.p.v. zijwaarts) */}
+      <div className="space-y-8">
         {stageOrder.map((stage) => {
           const cards = contentCards.filter((c) => c.stage === stage);
           return (
-            <div key={stage} className="w-[300px] shrink-0">
-              {/* Kolomkop */}
+            <section key={stage}>
+              {/* Fasekop */}
               <div className="flex items-center justify-between mb-3 px-1">
                 <div className="flex items-center gap-2">
-                  <span className="font-display font-bold text-sm">{stageMeta[stage].label}</span>
+                  <span className="font-display font-extrabold">{stageMeta[stage].label}</span>
                   <span className="font-mono text-[11px] text-muted bg-white/[0.05] rounded-full px-2 py-0.5">
                     {cards.length}
                   </span>
@@ -141,8 +141,11 @@ export default async function Pipeline({ searchParams }: { searchParams: Promise
                 <span className="text-[11px] text-muted font-mono">{t.hints[stage]}</span>
               </div>
 
-              {/* Kaarten */}
-              <div className="space-y-3 min-h-[120px] rounded-2xl bg-white/[0.015] border border-white/[0.04] p-2.5">
+              {/* Kaarten in een grid; lege fase = compacte lege staat */}
+              <div className={cards.length === 0
+                ? "rounded-2xl bg-white/[0.01] border border-dashed border-white/[0.05] px-4 py-3"
+                : "grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 rounded-2xl bg-white/[0.015] border border-white/[0.04] p-2.5"}>
+                {cards.length === 0 && <span className="text-[12px] text-muted">Leeg</span>}
                 {cards.map((card) => (
                   <Card key={card.id} hover className="p-4 cursor-grab active:cursor-grabbing">
                     <div className="flex items-center justify-between mb-2.5">
@@ -204,11 +207,8 @@ export default async function Pipeline({ searchParams }: { searchParams: Promise
                   </Card>
                 ))}
 
-                <button className="w-full flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-white/[0.08] hover:border-accent/30 hover:text-accent text-muted py-2.5 text-[13px] transition-all">
-                  {icons.plus} Toevoegen
-                </button>
               </div>
-            </div>
+            </section>
           );
         })}
       </div>

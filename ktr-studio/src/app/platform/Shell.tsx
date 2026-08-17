@@ -25,6 +25,10 @@ export interface NavGroup {
 }
 
 // Gegroepeerde navigatie — overzichtelijk in mappen i.p.v. één lange lijst.
+// FOCUS-MODUS: alles wat nu niet actief gebruikt wordt staat op non-actief
+// (uit de nav, routes blijven via URL bereikbaar). Weer aanzetten = de
+// regel hieronder terugzetten. Non-actief: Daily Brief, Studio, Boost,
+// Prompts, AI Visuals, Brand Studio, Boards, Analytics.
 const agencyGroups: NavGroup[] = [
   { title: "Overzicht", items: [{ href: "/platform", label: "Dashboard", icon: icons.dashboard, exact: true }] },
   {
@@ -37,34 +41,21 @@ const agencyGroups: NavGroup[] = [
     ],
   },
   {
-    title: "Maken (AI)",
-    items: [
-      { href: "/platform/brief", label: "Daily Brief", icon: icons.spark },
-      { href: "/platform/studio", label: "Studio (AI)", icon: icons.studio },
-      { href: "/platform/boost", label: "Boost", icon: icons.rocket },
-      { href: "/platform/prompts", label: "Prompts", icon: icons.spark },
-      { href: "/platform/visuals", label: "AI Visuals", icon: icons.spark },
-      { href: "/platform/brand-studio", label: "Brand Studio", icon: icons.thumb },
-    ],
-  },
-  {
     title: "Research",
     items: [
-      { href: "/platform/boards", label: "Boards", icon: icons.dashboard },
       { href: "/platform/discover", label: "Discover", icon: icons.analytics },
     ],
   },
   {
     title: "Sales & groei",
     items: [
-      { href: "/platform/leads", label: "Leads & Omzet", icon: icons.leads },
+      { href: "/platform/leads", label: "Leads", icon: icons.leads },
       { href: "/platform/outreach", label: "Outreach", icon: icons.rocket },
     ],
   },
   {
     title: "Inzicht",
     items: [
-      { href: "/platform/analytics", label: "Analytics", icon: icons.analytics },
       { href: "/platform/finance", label: "Finance", icon: icons.money },
       { href: "/platform/editors", label: "Editors", icon: icons.studio },
       { href: "/platform/reports", label: "Rapporten", icon: icons.reports },

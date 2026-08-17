@@ -70,7 +70,8 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
     supabase
       .from("content_metrics")
       .select("content_id,views,reach,likes,comments,fetched_at")
-      .order("fetched_at", { ascending: false }),
+      .order("fetched_at", { ascending: false })
+      .limit(5000),
   ]);
 
   const clientRows = clientsRes.data ?? [];

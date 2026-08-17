@@ -64,6 +64,17 @@ export async function syncClientInstagram(clientId: string): Promise<SyncResult>
 
   const count = await persistMedia(admin, clientId, source, result);
 
+  // Account-snapshot: volgers/posts per sync (3x per dag) voor groei-tracking.
+  if (result.profile.followers > 0) {
+    await admin.from("account_metrics").insert({
+      client_id: clientId,
+      source,
+      followers: result.profile.followers,
+      total_posts: result.profile.totalPosts || null,
+      fetched_at: result.fetchedAt,
+    });
+  }
+
   await admin
     .from("integrations")
     .update({ status: "connected", last_synced_at: result.fetchedAt, last_error: null })

@@ -30,6 +30,17 @@ export async function syncClientYouTube(clientId: string): Promise<YouTubeSyncRe
     const result = await fetchYouTube(client.yt_channel_id as string);
     const count = await persistMedia(admin, clientId, "youtube", result);
 
+    // Account-snapshot: abonnees per sync voor groei-tracking.
+    if (result.profile.followers > 0) {
+      await admin.from("account_metrics").insert({
+        client_id: clientId,
+        source: "youtube",
+        followers: result.profile.followers,
+        total_posts: result.profile.totalPosts || null,
+        fetched_at: result.fetchedAt,
+      });
+    }
+
     // Integratie-status bijwerken (zelfde UI als IG).
     await admin.from("integrations").upsert(
       {

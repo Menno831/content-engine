@@ -4,8 +4,7 @@ import { getNotifications } from "@/lib/notifications";
 import { Shell } from "./Shell";
 
 export default async function PlatformLayout({ children }: { children: ReactNode }) {
-  const ctx = await getSessionContext();
-  const notifications = await getNotifications();
+  const [ctx, notifications] = await Promise.all([getSessionContext(), getNotifications()]);
 
   // Geen sessie (showroom/demo) -> behandel als agency-owner.
   const role = (ctx.profile?.role as "owner" | "team" | "client" | "editor" | "setter") ?? "owner";

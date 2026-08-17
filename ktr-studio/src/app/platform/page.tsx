@@ -6,9 +6,11 @@ import { getTodos } from "@/lib/notifications";
 import { getSessionContext } from "@/lib/auth";
 
 export default async function Dashboard() {
-  const { clients, content: contentCards, leads, revenueByMonth, demo } = await getWorkspaceData();
-  const todos = await getTodos();
-  const ctx = await getSessionContext();
+  const [{ clients, content: contentCards, leads, demo }, todos, ctx] = await Promise.all([
+    getWorkspaceData(),
+    getTodos(),
+    getSessionContext(),
+  ]);
 
   // Klant-login: eigen overzicht i.p.v. agency-cijfers.
   if (ctx.profile?.role === "client") {
@@ -17,12 +19,7 @@ export default async function Dashboard() {
 
   const brief = await getTodaysBrief();
   const activeClients = clients.filter((c) => c.status === "actief").length;
-  const totalRevenue = clients.reduce((s, c) => s + c.revenueAttributed, 0);
   const totalLeads = clients.reduce((s, c) => s + c.leadsThisMonth, 0);
-  const closed = leads.filter((l) => l.stage === "closed");
-  const closedValue = closed.reduce((s, l) => s + l.value, 0);
-
-  const maxRev = Math.max(1, ...revenueByMonth.map((d) => d.v));
 
   const stageCounts = (Object.keys(stageMeta) as PipelineStage[]).map((st) => ({
     st,
@@ -50,10 +47,6 @@ export default async function Dashboard() {
       </>
     );
   }
-
-  const monthlyTarget = demo ? 20000 : Number(ctx.agency?.monthly_target ?? 0);
-  const monthClosed = revenueByMonth[revenueByMonth.length - 1]?.v ?? 0;
-  const targetPct = monthlyTarget > 0 ? Math.min(100, Math.round((monthClosed / monthlyTarget) * 100)) : 0;
 
   // Datums voor de 'Vandaag'-actierij (server-side, één keer per request).
   const today = new Date().toISOString().slice(0, 10);
@@ -106,65 +99,17 @@ export default async function Dashboard() {
         </Card>
       )}
 
-      {/* KPI's */}
+      {/* KPI's — productie-gericht (omzet-uit-content staat op non-actief tot er echte attributie is) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <Stat label="Omzet uit content" value={fmtEur(totalRevenue)} delta={demo ? "+34% vs. vorige maand" : undefined} icon={icons.money} />
-        <Stat label="Actieve klanten" value={String(activeClients)} delta={demo ? "+1 deze maand" : undefined} icon={icons.clients} />
-        <Stat label="Leads deze maand" value={String(totalLeads)} delta={demo ? "+22% vs. vorige maand" : undefined} icon={icons.leads} />
-        <Stat label="Closed via content" value={fmtEur(closedValue)} delta={`${closed.length} deals`} icon={icons.check} />
+        <Stat label="Actieve klanten" value={String(activeClients)} icon={icons.clients} />
+        <Stat label="In productie" value={String(contentCards.filter((c) => c.stage !== "posted").length)} icon={icons.pipeline} />
+        <Stat label="Live geplaatst" value={String(contentCards.filter((c) => c.stage === "posted").length)} icon={icons.check} />
+        <Stat label="Leads deze maand" value={String(totalLeads)} icon={icons.leads} />
       </div>
 
-      {monthlyTarget > 0 && (
-        <Card className="p-6 mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2.5">
-              <span className="grid place-items-center w-9 h-9 rounded-xl bg-accent/15 text-accent">{icons.target}</span>
-              <div>
-                <div className="font-display font-bold">Maanddoel</div>
-                <div className="text-[12px] text-muted">{fmtEur(monthClosed)} van {fmtEur(monthlyTarget)}</div>
-              </div>
-            </div>
-            <span className="font-display font-extrabold text-2xl">{targetPct}%</span>
-          </div>
-          <div className="h-2.5 rounded-full bg-white/[0.05] overflow-hidden">
-            <div className="h-full rounded-full bg-gradient-to-r from-accent/70 to-accent transition-all" style={{ width: `${targetPct}%` }} />
-          </div>
-        </Card>
-      )}
-
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Omzetgrafiek */}
-        <Card className="lg:col-span-2 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <Eyebrow>Omzet uit content</Eyebrow>
-              <h2 className="font-display font-extrabold text-xl">Laatste 12 maanden</h2>
-            </div>
-            <Badge color="#34D399">{icons.arrowUp} +574% YoY</Badge>
-          </div>
-          {/* Bar chart (pure CSS) */}
-          <div className="flex items-end gap-2 h-44">
-            {revenueByMonth.map((d, i) => (
-              <div key={d.m} className="flex-1 flex flex-col items-center gap-2 group">
-                <div className="relative w-full flex items-end justify-center" style={{ height: "100%" }}>
-                  <div
-                    className="w-full max-w-[26px] rounded-t-md bg-gradient-to-t from-accent/30 to-accent transition-all duration-500 group-hover:from-accent/50 group-hover:to-accent-hover"
-                    style={{ height: `${(d.v / maxRev) * 100}%` }}
-                  />
-                  <span className="absolute -top-5 text-[10px] font-mono text-foreground opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                    {fmtEur(d.v)}
-                  </span>
-                </div>
-                <span className={`font-mono text-[10px] uppercase ${i === revenueByMonth.length - 1 ? "text-accent" : "text-muted"}`}>
-                  {d.m}
-                </span>
-              </div>
-            ))}
-          </div>
-        </Card>
-
         {/* Pipeline status */}
-        <Card className="p-6">
+        <Card className="lg:col-span-2 p-6">
           <Eyebrow>Content pipeline</Eyebrow>
           <h2 className="font-display font-extrabold text-xl mb-5">Status</h2>
           <div className="space-y-3.5">
