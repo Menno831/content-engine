@@ -30,7 +30,10 @@ export function SyncButton({ clientId }: { clientId: string }) {
     startTransition(async () => {
       const r = await syncClientAction(clientId);
       if (r.ok) {
-        setMsg({ ok: true, text: `Gesynct · ${r.items ?? 0} items` });
+        // Bij 0 items is de diagnose belangrijker dan het aantal: laat zien
+        // wat elk endpoint teruggaf (bv. "posts: 403" = abonnement dekt dat niet).
+        const diag = (r.items ?? 0) === 0 && r.detail ? ` — ${r.detail}` : "";
+        setMsg({ ok: true, text: `Gesynct · ${r.items ?? 0} items${diag}` });
       } else {
         setMsg({ ok: false, text: labelFor(r.error ?? "fout") });
       }

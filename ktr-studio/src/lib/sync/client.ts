@@ -12,6 +12,8 @@ export interface ClientSyncResult {
   youtube?: { ok: boolean; items?: number; error?: string };
   items: number;
   error?: string;
+  /** Diagnose (volgers + per-endpoint status) — getoond als er 0 items binnenkomen. */
+  detail?: string;
 }
 
 export async function syncClientAll(clientId: string): Promise<ClientSyncResult> {
@@ -30,6 +32,7 @@ export async function syncClientAll(clientId: string): Promise<ClientSyncResult>
     instagram: igReal ? { ok: ig.ok, items: "items" in ig ? ig.items : undefined, error: ig.error } : undefined,
     youtube: ytReal ? { ok: yt.ok, items: "items" in yt ? yt.items : undefined, error: yt.error } : undefined,
     items,
+    detail: "detail" in ig ? ig.detail : undefined,
     error: !ig.ok && !yt.ok ? (ig.error === "geen_bron" && yt.error === "geen_bron" ? "geen_bron" : (ig.error || yt.error)) : undefined,
   };
 }

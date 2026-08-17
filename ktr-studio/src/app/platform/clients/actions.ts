@@ -488,12 +488,13 @@ export async function deleteClientAction(clientId: string): Promise<ActionResult
   redirect("/platform/clients");
 }
 
-// Kanalen (IG-handle + YouTube) bijwerken op het klantprofiel — deze
-// sturen de 3x-daagse sync aan.
+// Kanalen (IG-handle + YouTube) + video-mix bijwerken op het klantprofiel —
+// de kanalen sturen de 3x-daagse sync aan.
 export async function updateClientChannelsAction(
   clientId: string,
   igHandle: string,
-  ytChannel: string
+  ytChannel: string,
+  contentMix?: string
 ): Promise<ActionResult> {
   const supabase = await supabaseServer();
   if (!supabase) return { error: "Supabase niet geconfigureerd." };
@@ -502,13 +503,13 @@ export async function updateClientChannelsAction(
   } = await supabase.auth.getUser();
   if (!user) return { error: "auth vereist" };
 
-  const { error } = await supabase
-    .from("clients")
-    .update({
-      ig_handle: igHandle.trim() || null,
-      yt_channel_id: ytChannel.trim() || null,
-    })
-    .eq("id", clientId);
+  const patch: Record<string, unknown> = {
+    ig_handle: igHandle.trim() || null,
+    yt_channel_id: ytChannel.trim() || null,
+  };
+  if (contentMix !== undefined) patch.content_mix = contentMix.trim() || null;
+
+  const { error } = await supabase.from("clients").update(patch).eq("id", clientId);
   if (error) return { error: error.message };
 
   revalidatePath(`/platform/clients/${clientId}`);

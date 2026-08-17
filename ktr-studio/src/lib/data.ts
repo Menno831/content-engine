@@ -216,7 +216,7 @@ export async function getClient(id: string): Promise<Client | null> {
   const { data: c } = await supabase
     .from("clients")
     .select(
-      "id,name,ig_handle,yt_channel_id,status,monthly_value,package,videos_per_month,editor_cost,payment_status,soul_character_id,reference_image_url,brand_prompt,brand_identity,brand_story,brand_strategy,brand_voice,notes,brand_primary,brand_secondary"
+      "id,name,ig_handle,yt_channel_id,status,monthly_value,package,videos_per_month,content_mix,editor_cost,payment_status,soul_character_id,reference_image_url,brand_prompt,brand_identity,brand_story,brand_strategy,brand_voice,notes,brand_primary,brand_secondary"
     )
     .eq("id", id)
     .single();
@@ -234,6 +234,7 @@ export async function getClient(id: string): Promise<Client | null> {
     leadsThisMonth: 0,
     packageName: c.package ?? null,
     videosPerMonth: Number(c.videos_per_month ?? 0),
+    contentMix: c.content_mix ?? null,
     editorCost: Number(c.editor_cost ?? 0),
     paymentStatus: (c.payment_status ?? "open") as Client["paymentStatus"],
     soulCharacter: c.soul_character_id ?? null,

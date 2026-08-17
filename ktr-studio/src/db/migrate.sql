@@ -178,3 +178,8 @@ create policy "read account_metrics" on account_metrics
     client_id in (select id from clients where agency_id = current_agency_id())
     and (current_client_id() is null or client_id = current_client_id())
   );
+
+-- ── 019 · Video-mix per klant ───────────────────────────────────
+-- Vrij tekstveld naast videos_per_month: wélke soorten video's in de
+-- retainer zitten (bv. "4× Talking, 2× Lifestyle" of "Alleen YouTube").
+alter table clients add column if not exists content_mix text;

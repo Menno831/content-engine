@@ -184,6 +184,112 @@ export async function updateContentStageAction(contentId: string, stage: string)
   return { ok: "Verplaatst." };
 }
 
+// ── Kaart openen, bewerken en verwijderen ───────────────────────
+// De kaart op het board toont een samenvatting; wie erop klikt krijgt
+// alle velden. Detail wordt pas bij openen opgehaald (board blijft licht).
+
+export interface ContentDetail {
+  id: string;
+  title: string;
+  hook: string;
+  format: string;
+  content_type: string;
+  stage: string;
+  deadline: string;
+  posting_date: string;
+  editor_id: string;
+  brief_url: string;
+  frame_url: string;
+  vo_url: string;
+  reference_url: string;
+  footage_notes: string;
+}
+
+export async function getContentDetailAction(
+  contentId: string
+): Promise<{ error?: string; data?: ContentDetail }> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { error: "Supabase niet geconfigureerd." };
+
+  const { data, error } = await supabase
+    .from("content")
+    .select(
+      "id,title,hook,format,content_type,stage,deadline,posting_date,editor_id,brief_url,frame_url,vo_url,reference_url,footage_notes"
+    )
+    .eq("id", contentId)
+    .maybeSingle();
+  if (error) return { error: error.message };
+  if (!data) return { error: "Kaart niet gevonden." };
+
+  return {
+    data: {
+      id: data.id,
+      title: data.title ?? "",
+      hook: data.hook ?? "",
+      format: data.format ?? "Talking",
+      content_type: data.content_type ?? "",
+      stage: data.stage ?? "ideation",
+      deadline: data.deadline ?? "",
+      posting_date: data.posting_date ?? "",
+      editor_id: data.editor_id ?? "",
+      brief_url: data.brief_url ?? "",
+      frame_url: data.frame_url ?? "",
+      vo_url: data.vo_url ?? "",
+      reference_url: data.reference_url ?? "",
+      footage_notes: data.footage_notes ?? "",
+    },
+  };
+}
+
+export async function updateContentAction(
+  _prev: ContentActionResult,
+  formData: FormData
+): Promise<ContentActionResult> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { error: "Supabase niet geconfigureerd." };
+
+  const contentId = String(formData.get("content_id") ?? "");
+  const title = String(formData.get("title") ?? "").trim();
+  if (!contentId) return { error: "Onbekende kaart." };
+  if (!title) return { error: "Titel is verplicht." };
+
+  const editorId = String(formData.get("editor_id") ?? "");
+  const { error } = await supabase
+    .from("content")
+    .update({
+      title,
+      hook: String(formData.get("hook") ?? "").trim() || null,
+      format: String(formData.get("format") ?? "Talking"),
+      content_type: String(formData.get("content_type") ?? "").trim() || null,
+      deadline: String(formData.get("deadline") ?? "").trim() || null,
+      posting_date: String(formData.get("posting_date") ?? "").trim() || null,
+      editor_id: editorId || null,
+      brief_url: String(formData.get("brief_url") ?? "").trim() || null,
+      frame_url: String(formData.get("frame_url") ?? "").trim() || null,
+      vo_url: String(formData.get("vo_url") ?? "").trim() || null,
+      reference_url: String(formData.get("reference_url") ?? "").trim() || null,
+      footage_notes: String(formData.get("footage_notes") ?? "").trim() || null,
+    })
+    .eq("id", contentId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/platform/pipeline");
+  revalidatePath("/platform");
+  return { ok: "Kaart opgeslagen." };
+}
+
+export async function deleteContentAction(contentId: string): Promise<ContentActionResult> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { error: "Supabase niet geconfigureerd." };
+
+  const { error } = await supabase.from("content").delete().eq("id", contentId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/platform/pipeline");
+  revalidatePath("/platform");
+  return { ok: "Kaart verwijderd." };
+}
+
 // ── Wekelijkse productieplanning ────────────────────────────────
 // Eén actie maakt de vaste week aan: vijf formats, vijf dagen, met de
 // briefing er al in. Dinsdag de longform, daarna elke dag een lichter

@@ -4,6 +4,7 @@ import { getWorkspaceData } from "@/lib/data";
 import { getSessionContext } from "@/lib/auth";
 import { TodoToggle } from "./TodoToggle";
 import { AddTodoDialog } from "./AddTodoDialog";
+import { QuickAddTodo } from "./QuickAddTodo";
 import { NoData } from "../_states";
 import { ClientFilter } from "../ClientFilter";
 
@@ -35,6 +36,8 @@ export default async function TodosPage({ searchParams }: { searchParams: Promis
       />
 
       {!isClient && <ClientFilter clients={clients.map((c) => ({ id: c.id, name: c.name }))} allLabel={isEditor ? "All clients" : "Alle klanten"} />}
+
+      {!isClient && !isEditor && <QuickAddTodo clients={clientOptions} />}
 
       {todos.length === 0 ? (
         <NoData label={t9n.none} />

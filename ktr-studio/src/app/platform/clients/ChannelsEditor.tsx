@@ -9,21 +9,24 @@ export function ChannelsEditor({
   clientId,
   igHandle,
   ytChannel,
+  contentMix,
 }: {
   clientId: string;
   igHandle: string;
   ytChannel: string;
+  contentMix?: string;
 }) {
   const [ig, setIg] = useState(igHandle);
   const [yt, setYt] = useState(ytChannel);
+  const [mix, setMix] = useState(contentMix ?? "");
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   function save() {
     setMsg(null);
     start(async () => {
-      const r = await updateClientChannelsAction(clientId, ig, yt);
-      setMsg(r.ok ? { ok: true, text: "Kanalen opgeslagen — klik nu op Sync." } : { ok: false, text: r.error ?? "Opslaan mislukt." });
+      const r = await updateClientChannelsAction(clientId, ig, yt, mix);
+      setMsg(r.ok ? { ok: true, text: "Opgeslagen — klik nu op Sync." } : { ok: false, text: r.error ?? "Opslaan mislukt." });
     });
   }
 
@@ -48,6 +51,15 @@ export function ChannelsEditor({
             value={yt}
             onChange={(e) => setYt(e.target.value)}
             placeholder="@handle of UC…"
+            className="w-full rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-sm outline-none focus:border-accent/40"
+          />
+        </label>
+        <label className="block">
+          <span className="block text-[10px] font-mono uppercase tracking-wider text-muted mb-1">Video-mix (soorten per maand)</span>
+          <input
+            value={mix}
+            onChange={(e) => setMix(e.target.value)}
+            placeholder="bv. 4× Talking, 2× Lifestyle — of: alleen YouTube"
             className="w-full rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-sm outline-none focus:border-accent/40"
           />
         </label>

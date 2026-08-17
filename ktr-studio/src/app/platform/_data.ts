@@ -27,6 +27,8 @@ export interface Client {
   // Finance
   packageName: string | null;
   videosPerMonth: number;
+  /** Soorten video's in de retainer, bv. "4× Talking, 2× Lifestyle" of "Alleen YouTube". */
+  contentMix?: string | null;
   editorCost: number;
   paymentStatus: PaymentStatus;
   createdThisMonth?: boolean; // nieuw deze maand

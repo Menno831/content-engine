@@ -68,7 +68,7 @@ export function CompetitorBoard({ competitors, posts }: { competitors: Competito
         <form action={action} className="flex flex-col sm:flex-row gap-2">
           <input
             name="handle"
-            placeholder="@handle van een account om te volgen"
+            placeholder="@handle (Instagram) of YouTube-kanaal-URL om te volgen"
             className="flex-1 rounded-xl border border-white/[0.08] bg-white/[0.02] px-3.5 py-2.5 text-sm outline-none focus:border-accent/40"
           />
           <input

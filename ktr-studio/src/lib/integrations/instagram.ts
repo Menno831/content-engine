@@ -37,6 +37,8 @@ export interface InstagramResult {
   profile: InstagramProfile;
   media: InstagramMedia[];
   fetchedAt: string;
+  /** Per-endpoint status voor de sync-melding, bv. "posts: 12 · reels: 403". */
+  debug?: string;
 }
 
 export const instagramConfigured = () => Boolean(RAPIDAPI_KEY);
@@ -85,10 +87,20 @@ export async function fetchInstagram(handle: string): Promise<InstagramResult> {
   if (!RAPIDAPI_KEY) throw new Error("not_configured");
   const clean = handle.replace("@", "").trim().toLowerCase();
 
+  // Fouten per endpoint vasthouden (niet stil wegslikken) zodat de
+  // sync-knop kan tonen wáár het misgaat — "0 items" zonder uitleg is niks.
+  let postsErr = "";
+  let reelsErr = "";
   const [profile, postsData, reelsData] = await Promise.all([
     apiFetch("profile", { username: clean }),
-    apiFetch("posts", { username: clean }).catch(() => null),
-    apiFetch("reels", { username: clean }).catch(() => null),
+    apiFetch("posts", { username: clean }).catch((e) => {
+      postsErr = e instanceof Error ? e.message : "fout";
+      return null;
+    }),
+    apiFetch("reels", { username: clean }).catch((e) => {
+      reelsErr = e instanceof Error ? e.message : "fout";
+      return null;
+    }),
   ]);
 
   if (!profile) throw new Error("not_found");
@@ -102,7 +114,13 @@ export async function fetchInstagram(handle: string): Promise<InstagramResult> {
     ...feed.map((p) => mapMedia(p, false)),
   ].filter((m) => m.externalId);
 
+  const debug = [
+    `posts: ${postsErr || (postsData ? feed.length : "leeg")}`,
+    `reels: ${reelsErr || (reelsData ? reels.length : "leeg")}`,
+  ].join(" · ");
+
   return {
+    debug,
     profile: {
       username: user.username || clean,
       fullName: user.full_name || "",

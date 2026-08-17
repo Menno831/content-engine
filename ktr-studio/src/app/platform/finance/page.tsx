@@ -1,13 +1,32 @@
 import { PageHeader, Card, Stat, Avatar, Badge, Eyebrow, icons } from "../_components";
 import { getWorkspaceData } from "@/lib/data";
 import { getSessionContext } from "@/lib/auth";
+import { getMoneybirdMonth } from "@/lib/integrations/moneybird";
 import { fmtEur } from "../_data";
 import { PaymentStatusControl } from "./PaymentStatusControl";
 import { ExportButton } from "../ExportButton";
 
+const invoiceStateColor: Record<string, string> = {
+  paid: "#34D399",
+  open: "#FBBF24",
+  pending_payment: "#FBBF24",
+  late: "#F87171",
+  uncollectible: "#6B7280",
+};
+const invoiceStateLabel: Record<string, string> = {
+  paid: "betaald",
+  open: "open",
+  pending_payment: "in behandeling",
+  late: "te laat",
+  uncollectible: "oninbaar",
+};
+
 export default async function FinancePage() {
-  const { clients, demo } = await getWorkspaceData();
-  const { agency } = await getSessionContext();
+  const [{ clients, demo }, { agency }, moneybird] = await Promise.all([
+    getWorkspaceData(),
+    getSessionContext(),
+    getMoneybirdMonth(),
+  ]);
   const billable = clients.filter((c) => c.status !== "gepauzeerd");
   const target = Number(agency?.monthly_target ?? 0);
 
@@ -84,6 +103,70 @@ export default async function FinancePage() {
               style={{ width: `${Math.min(100, target ? (mrr / target) * 100 : 0)}%` }}
             />
           </div>
+        </Card>
+      )}
+
+      {/* Moneybird: wat er deze maand écht binnenkomt (facturen, excl. btw) */}
+      {!demo && moneybird.configured && (
+        <Card className="p-6 mb-6">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div>
+              <Eyebrow>Moneybird · deze maand</Eyebrow>
+              <h2 className="font-display font-extrabold text-xl">Wat er binnenkomt</h2>
+            </div>
+            <div className="flex items-center gap-5 text-sm">
+              <span>
+                <span className="text-muted text-[12px]">Gefactureerd </span>
+                <strong className="font-mono">{fmtEur(moneybird.invoiced)}</strong>
+              </span>
+              <span>
+                <span className="text-muted text-[12px]">Betaald </span>
+                <strong className="font-mono text-emerald-400">{fmtEur(moneybird.paid)}</strong>
+              </span>
+              <span>
+                <span className="text-muted text-[12px]">Nog open </span>
+                <strong className="font-mono text-amber-300">{fmtEur(moneybird.open)}</strong>
+              </span>
+              <span>
+                <span className="text-muted text-[12px]">Winst na editors </span>
+                <strong className="font-mono text-emerald-400">{fmtEur(moneybird.invoiced - editorCosts)}</strong>
+              </span>
+            </div>
+          </div>
+          {moneybird.error ? (
+            <p className="text-[13px] text-amber-300">{moneybird.error}</p>
+          ) : moneybird.invoices.length === 0 ? (
+            <p className="text-[13px] text-muted">Nog geen facturen deze maand.</p>
+          ) : (
+            <div className="space-y-1">
+              {moneybird.invoices.map((inv) => (
+                <div key={inv.id} className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl hover:bg-white/[0.02] transition-colors">
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium truncate">{inv.contact}</div>
+                    <div className="text-[11px] text-muted">
+                      {inv.reference ?? "—"}
+                      {inv.dueDate && ` · vervalt ${new Date(inv.dueDate).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}`}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="font-mono text-sm">{fmtEur(inv.totalExcl)}</span>
+                    <Badge color={invoiceStateColor[inv.state] ?? "#6B7280"}>
+                      {invoiceStateLabel[inv.state] ?? inv.state}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      )}
+      {!demo && !moneybird.configured && (
+        <Card className="p-4 mb-6 border-dashed">
+          <p className="text-[13px] text-muted">
+            💡 <strong className="text-foreground">Moneybird koppelen?</strong> Zet <code className="text-accent">MONEYBIRD_API_TOKEN</code> en{" "}
+            <code className="text-accent">MONEYBIRD_ADMINISTRATION_ID</code> in Vercel — dan zie je hier per klant wat er deze maand
+            gefactureerd, betaald en nog open is, plus je winst na editor-kosten.
+          </p>
         </Card>
       )}
 

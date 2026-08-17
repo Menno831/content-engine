@@ -13,6 +13,8 @@ export interface SyncResult {
   source?: "instagram_graph" | "instagram_scrape";
   items?: number;
   error?: string;
+  /** Diagnose voor de sync-melding: volgers + status per endpoint. */
+  detail?: string;
 }
 
 export async function syncClientInstagram(clientId: string): Promise<SyncResult> {
@@ -81,5 +83,12 @@ export async function syncClientInstagram(clientId: string): Promise<SyncResult>
     .eq("client_id", clientId)
     .eq("provider", source);
 
-  return { ok: true, source, items: count };
+  const detail = [
+    result.profile.followers > 0 ? `${result.profile.followers} volgers` : "profiel zonder volgers-data",
+    result.debug,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  return { ok: true, source, items: count, detail };
 }

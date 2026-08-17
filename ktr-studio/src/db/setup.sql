@@ -63,6 +63,7 @@ create table if not exists clients (
   package          text,
   monthly_value    numeric default 0,   -- retainer
   videos_per_month int default 0,
+  content_mix      text,               -- soorten video's in de retainer
   editor_cost      numeric default 0,
   payment_status   text default 'open', -- 'betaald' | 'open' | 'te_laat'
   -- AI Visuals (Higgsfield Soul)

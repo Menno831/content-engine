@@ -61,13 +61,19 @@ export function Card({
   children,
   className = "",
   hover = false,
+  onClick,
+  title,
 }: {
   children: ReactNode;
   className?: string;
   hover?: boolean;
+  onClick?: () => void;
+  title?: string;
 }) {
   return (
     <div
+      onClick={onClick}
+      title={title}
       className={`bg-card border border-white/[0.07] rounded-2xl ${
         hover ? "card-hover hover:border-accent/25" : ""
       } ${className}`}

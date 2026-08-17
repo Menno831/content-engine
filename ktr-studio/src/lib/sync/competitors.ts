@@ -1,10 +1,22 @@
 // ════════════════════════════════════════════════════════════════
-// Competitor-sync (kern): posts van een gevolgd account ophalen via
-// de Instagram-scraper en upserten. Gedeeld door de handmatige
-// ↻-knop (Discover) en de automatische cron.
+// Competitor-sync (kern): posts van een gevolgd account ophalen en
+// upserten. Instagram-handles gaan via de scraper; YouTube-kanalen
+// (URL, UC…-id of "yt:@handle") via de YouTube Data API. Gedeeld door
+// de handmatige ↻-knop (Discover) en de automatische cron.
 // ════════════════════════════════════════════════════════════════
 import { createAdminClient } from "@/lib/supabase/admin";
 import { fetchInstagram } from "@/lib/integrations/instagram";
+import { fetchYouTube } from "@/lib/integrations/youtube";
+
+// Herkent YouTube-invoer: volledige kanaal-URL, kaal UC…-id of "yt:"-prefix.
+function asYouTube(handle: string): string | null {
+  const h = handle.trim();
+  if (/^yt:/i.test(h)) return h.replace(/^yt:/i, "").trim();
+  const url = h.match(/youtube\.com\/(@[\w.-]+|channel\/(UC[\w-]{21,22}))/i);
+  if (url) return url[2] ?? url[1];
+  if (/^UC[\w-]{21,22}$/.test(h)) return h;
+  return null;
+}
 
 export interface CompetitorSyncResult {
   ok: boolean;
@@ -24,7 +36,8 @@ export async function syncCompetitorCore(competitorId: string): Promise<Competit
   if (!comp) return { ok: false, error: "onbekende competitor" };
 
   try {
-    const result = await fetchInstagram(comp.handle as string);
+    const yt = asYouTube(comp.handle as string);
+    const result = yt ? await fetchYouTube(yt) : await fetchInstagram(comp.handle as string);
     for (const m of result.media) {
       await admin.from("competitor_posts").upsert(
         {
@@ -55,6 +68,15 @@ export async function syncCompetitorCore(competitorId: string): Promise<Competit
     return { ok: true, items: result.media.length };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "sync mislukt";
-    return { ok: false, error: msg === "not_configured" ? "RAPIDAPI_KEY ontbreekt (Instagram-bron)." : msg };
+    const isYt = asYouTube(comp.handle as string) !== null;
+    return {
+      ok: false,
+      error:
+        msg === "not_configured"
+          ? isYt
+            ? "YOUTUBE_API_KEY ontbreekt (YouTube-bron)."
+            : "RAPIDAPI_KEY ontbreekt (Instagram-bron)."
+          : msg,
+    };
   }
 }
