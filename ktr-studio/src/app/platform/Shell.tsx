@@ -35,6 +35,7 @@ const agencyGroups: NavGroup[] = [
     title: "Content",
     items: [
       { href: "/platform/pipeline", label: "Content pipeline", icon: icons.pipeline },
+      { href: "/platform/scripts", label: "Scripts", icon: icons.reports },
       { href: "/platform/calendar", label: "Kalender", icon: icons.calendar },
       { href: "/platform/approvals", label: "Approvals", icon: icons.check },
       { href: "/platform/todos", label: "Taken", icon: icons.check },
