@@ -21,6 +21,14 @@ const stageOrder: PipelineStage[] = [
 ];
 
 const formatColor: Record<string, string> = {
+  // Productie-formats (migratie 017)
+  Longform: "#60A5FA",
+  Clip: "#34D399",
+  Lifestyle: "#FBBF24",
+  "VO story": "#A78BFA",
+  Talking: "#F97316",
+  Trio: "#F87171",
+  // Oude/gesyncte formats
   Reel: "#F97316",
   Carrousel: "#A78BFA",
   Story: "#60A5FA",
@@ -149,7 +157,7 @@ export default async function Pipeline({ searchParams }: { searchParams: Promise
                 {cards.map((card) => (
                   <Card key={card.id} hover className="p-4 cursor-grab active:cursor-grabbing">
                     <div className="flex items-center justify-between mb-2.5">
-                      <Badge color={formatColor[card.format]}>{card.format}</Badge>
+                      <Badge color={formatColor[card.format] ?? "#9CA3AF"}>{card.format}</Badge>
                       <span className="font-mono text-[10px] text-muted">{card.due}</span>
                     </div>
                     <h3 className="font-medium text-sm leading-snug mb-2">{card.title}</h3>
