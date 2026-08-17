@@ -213,13 +213,18 @@ export async function getClient(id: string): Promise<Client | null> {
 
   const supabase = await createClient();
   if (!supabase) return null;
-  const { data: c } = await supabase
+  const baseCols =
+    "id,name,ig_handle,yt_channel_id,status,monthly_value,package,videos_per_month,editor_cost,payment_status,soul_character_id,reference_image_url,brand_prompt,brand_identity,brand_story,brand_strategy,brand_voice,notes,brand_primary,brand_secondary";
+  // Nieuwe kolommen apart: als een migratie nog niet gedraaid is mag het
+  // klantprofiel niet stuk — dan vallen we terug op de basiskolommen.
+  let { data: c, error } = await supabase
     .from("clients")
-    .select(
-      "id,name,ig_handle,yt_channel_id,status,monthly_value,package,videos_per_month,content_mix,editor_cost,payment_status,soul_character_id,reference_image_url,brand_prompt,brand_identity,brand_story,brand_strategy,brand_voice,notes,brand_primary,brand_secondary"
-    )
+    .select(`${baseCols},content_mix,asana_project_id`)
     .eq("id", id)
-    .single();
+    .maybeSingle();
+  if (error) {
+    ({ data: c } = await supabase.from("clients").select(baseCols).eq("id", id).maybeSingle());
+  }
   if (!c) return null;
 
   return {
@@ -235,6 +240,7 @@ export async function getClient(id: string): Promise<Client | null> {
     packageName: c.package ?? null,
     videosPerMonth: Number(c.videos_per_month ?? 0),
     contentMix: c.content_mix ?? null,
+    asanaProject: c.asana_project_id ?? null,
     editorCost: Number(c.editor_cost ?? 0),
     paymentStatus: (c.payment_status ?? "open") as Client["paymentStatus"],
     soulCharacter: c.soul_character_id ?? null,

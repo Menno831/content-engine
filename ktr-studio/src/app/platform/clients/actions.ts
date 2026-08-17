@@ -494,7 +494,8 @@ export async function updateClientChannelsAction(
   clientId: string,
   igHandle: string,
   ytChannel: string,
-  contentMix?: string
+  contentMix?: string,
+  asanaProject?: string
 ): Promise<ActionResult> {
   const supabase = await supabaseServer();
   if (!supabase) return { error: "Supabase niet geconfigureerd." };
@@ -503,13 +504,24 @@ export async function updateClientChannelsAction(
   } = await supabase.auth.getUser();
   if (!user) return { error: "auth vereist" };
 
-  const patch: Record<string, unknown> = {
+  const base: Record<string, unknown> = {
     ig_handle: igHandle.trim() || null,
     yt_channel_id: ytChannel.trim() || null,
   };
+  const patch = { ...base };
   if (contentMix !== undefined) patch.content_mix = contentMix.trim() || null;
+  if (asanaProject !== undefined) {
+    // Ook een volledige Asana-URL accepteren: we vissen het projectnummer eruit.
+    const m = asanaProject.match(/\d{6,}/);
+    patch.asana_project_id = m ? m[0] : asanaProject.trim() || null;
+  }
 
-  const { error } = await supabase.from("clients").update(patch).eq("id", clientId);
+  let { error } = await supabase.from("clients").update(patch).eq("id", clientId);
+  // Migratie nog niet gedraaid? Dan in elk geval de kanalen opslaan.
+  if (error && /content_mix|asana_project_id/.test(error.message)) {
+    ({ error } = await supabase.from("clients").update(base).eq("id", clientId));
+    if (!error) return { error: "Kanalen opgeslagen, maar draai eerst migratie 019+020 in Supabase voor video-mix en Asana." };
+  }
   if (error) return { error: error.message };
 
   revalidatePath(`/platform/clients/${clientId}`);

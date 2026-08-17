@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { icons } from "./_components";
 import { markNotificationsReadAction } from "./todos/actions";
 import type { Notification } from "./_data";
@@ -15,12 +15,25 @@ const typeColor: Record<string, string> = {
 
 export function NotificationsBell({ notifications }: { notifications: Notification[] }) {
   const [open, setOpen] = useState(false);
-  const unread = notifications.filter((n) => !n.read).length;
+  // Paneel openen = gezien: het oranje bolletje verdwijnt meteen (lokaal)
+  // en de meldingen worden op de achtergrond als gelezen gemarkeerd.
+  const [seen, setSeen] = useState(false);
+  const [, startRead] = useTransition();
+  const unread = seen ? 0 : notifications.filter((n) => !n.read).length;
+
+  function toggle() {
+    const next = !open;
+    setOpen(next);
+    if (next && unread > 0) {
+      setSeen(true);
+      startRead(() => markNotificationsReadAction());
+    }
+  }
 
   return (
     <div className="relative">
       <button
-        onClick={() => setOpen((o) => !o)}
+        onClick={toggle}
         className="relative grid place-items-center w-9 h-9 rounded-xl border border-white/[0.07] bg-white/[0.02] text-muted hover:text-foreground transition-colors"
       >
         {icons.bell}

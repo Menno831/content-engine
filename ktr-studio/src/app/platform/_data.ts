@@ -29,6 +29,8 @@ export interface Client {
   videosPerMonth: number;
   /** Soorten video's in de retainer, bv. "4× Talking, 2× Lifestyle" of "Alleen YouTube". */
   contentMix?: string | null;
+  /** Asana-project-id als deze klant z'n eigen Asana-bord heeft (twee-weg-sync). */
+  asanaProject?: string | null;
   editorCost: number;
   paymentStatus: PaymentStatus;
   createdThisMonth?: boolean; // nieuw deze maand

@@ -134,9 +134,27 @@ export async function updateContentStageAction(contentId: string, stage: string)
     .from("content")
     .update(patch)
     .eq("id", contentId)
-    .select("client_id, title")
+    .select("client_id, title, external_id")
     .single();
   if (error) return { error: error.message };
+
+  // Twee-weg-sync: kwam deze kaart uit Asana, verplaats de taak daar dan
+  // ook naar de bijbehorende sectie (best-effort, blokkeert nooit).
+  if (updated?.external_id?.startsWith("asana:")) {
+    const { data: clientRow } = await supabase
+      .from("clients")
+      .select("asana_project_id")
+      .eq("id", updated.client_id)
+      .maybeSingle();
+    if (clientRow?.asana_project_id) {
+      const { moveAsanaTaskToStage } = await import("@/lib/integrations/asana");
+      await moveAsanaTaskToStage(
+        clientRow.asana_project_id as string,
+        updated.external_id.slice("asana:".length),
+        stage
+      ).catch(() => undefined);
+    }
+  }
 
   // Klant-goedkeuring nodig -> melding naar klant.
   if (stage === "client_approval" && updated && agency) {
@@ -282,8 +300,16 @@ export async function deleteContentAction(contentId: string): Promise<ContentAct
   const supabase = await supabaseServer();
   if (!supabase) return { error: "Supabase niet geconfigureerd." };
 
-  const { error } = await supabase.from("content").delete().eq("id", contentId);
+  // .select() erbij: zo zien we of er echt iets verwijderd is. Zonder
+  // delete-policy filtert RLS stilletjes alles weg en "lukt" de delete
+  // terwijl de kaart blijft staan — dat melden we dan eerlijk.
+  const { data: deleted, error } = await supabase
+    .from("content")
+    .delete()
+    .eq("id", contentId)
+    .select("id");
   if (error) return { error: error.message };
+  if (!deleted?.length) return { error: "Niet verwijderd — draai migratie 020 in Supabase (delete-rechten) en probeer opnieuw." };
 
   revalidatePath("/platform/pipeline");
   revalidatePath("/platform");

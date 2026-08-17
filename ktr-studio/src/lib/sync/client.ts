@@ -5,11 +5,13 @@
 // ════════════════════════════════════════════════════════════════
 import { syncClientInstagram } from "./instagram";
 import { syncClientYouTube } from "./youtube";
+import { syncClientAsana } from "./asana";
 
 export interface ClientSyncResult {
   ok: boolean;
   instagram?: { ok: boolean; items?: number; error?: string };
   youtube?: { ok: boolean; items?: number; error?: string };
+  asana?: { ok: boolean; items?: number; error?: string };
   items: number;
   error?: string;
   /** Diagnose (volgers + per-endpoint status) — getoond als er 0 items binnenkomen. */
@@ -17,22 +19,31 @@ export interface ClientSyncResult {
 }
 
 export async function syncClientAll(clientId: string): Promise<ClientSyncResult> {
-  const [ig, yt] = await Promise.all([
+  const [ig, yt, as] = await Promise.all([
     syncClientInstagram(clientId).catch((e) => ({ ok: false, error: e instanceof Error ? e.message : "fout" })),
     syncClientYouTube(clientId).catch((e) => ({ ok: false, error: e instanceof Error ? e.message : "fout" })),
+    syncClientAsana(clientId).catch((e) => ({ ok: false, error: e instanceof Error ? e.message : "fout" })),
   ]);
 
   // "geen_bron" telt niet als echte fout (die bron is simpelweg niet gekoppeld).
   const igReal = ig.ok || ig.error !== "geen_bron";
   const ytReal = yt.ok || yt.error !== "geen_bron";
-  const items = ("items" in ig ? ig.items ?? 0 : 0) + ("items" in yt ? yt.items ?? 0 : 0);
+  const asReal = as.ok || as.error !== "geen_bron";
+  const items =
+    ("items" in ig ? ig.items ?? 0 : 0) +
+    ("items" in yt ? yt.items ?? 0 : 0) +
+    ("items" in as ? as.items ?? 0 : 0);
+
+  const anyOk = ig.ok || yt.ok || as.ok;
+  const allNoSource = ig.error === "geen_bron" && yt.error === "geen_bron" && as.error === "geen_bron";
 
   return {
-    ok: ig.ok || yt.ok,
+    ok: anyOk,
     instagram: igReal ? { ok: ig.ok, items: "items" in ig ? ig.items : undefined, error: ig.error } : undefined,
     youtube: ytReal ? { ok: yt.ok, items: "items" in yt ? yt.items : undefined, error: yt.error } : undefined,
+    asana: asReal ? { ok: as.ok, items: "items" in as ? as.items : undefined, error: as.error } : undefined,
     items,
     detail: "detail" in ig ? ig.detail : undefined,
-    error: !ig.ok && !yt.ok ? (ig.error === "geen_bron" && yt.error === "geen_bron" ? "geen_bron" : (ig.error || yt.error)) : undefined,
+    error: !anyOk ? (allNoSource ? "geen_bron" : (ig.error || yt.error || as.error)) : undefined,
   };
 }

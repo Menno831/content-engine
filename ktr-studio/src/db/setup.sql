@@ -64,6 +64,7 @@ create table if not exists clients (
   monthly_value    numeric default 0,   -- retainer
   videos_per_month int default 0,
   content_mix      text,               -- soorten video's in de retainer
+  asana_project_id text,               -- eigen Asana-bord (twee-weg-sync)
   editor_cost      numeric default 0,
   payment_status   text default 'open', -- 'betaald' | 'open' | 'te_laat'
   -- AI Visuals (Higgsfield Soul)
@@ -254,6 +255,11 @@ create policy "team insert content" on content
   );
 create policy "team update content" on content
   for update using (
+    current_client_id() is null
+    and client_id in (select id from clients where agency_id = current_agency_id())
+  );
+create policy "team delete content" on content
+  for delete using (
     current_client_id() is null
     and client_id in (select id from clients where agency_id = current_agency_id())
   );

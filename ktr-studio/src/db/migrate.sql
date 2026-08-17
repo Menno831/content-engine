@@ -183,3 +183,14 @@ create policy "read account_metrics" on account_metrics
 -- Vrij tekstveld naast videos_per_month: wélke soorten video's in de
 -- retainer zitten (bv. "4× Talking, 2× Lifestyle" of "Alleen YouTube").
 alter table clients add column if not exists content_mix text;
+
+-- ── 020 · Kaarten verwijderen + Asana-koppeling per klant ───────
+-- Delete-policy ontbrak: "Kaart verwijderen" deed stilletjes niets.
+drop policy if exists "team delete content" on content;
+create policy "team delete content" on content
+  for delete using (
+    current_client_id() is null
+    and client_id in (select id from clients where agency_id = current_agency_id())
+  );
+-- Klanten met een eigen Asana-bord (bv. Arthur en Bryan) twee-weg syncen.
+alter table clients add column if not exists asana_project_id text;

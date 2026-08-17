@@ -73,7 +73,13 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
             <Row label="Betaalstatus" value={c.paymentStatus} />
             <Row label="Soul-character" value={c.soulCharacter ?? "—"} />
           </div>
-          <ChannelsEditor clientId={c.id} igHandle={c.handle} ytChannel={c.ytChannel ?? ""} contentMix={c.contentMix ?? ""} />
+          <ChannelsEditor
+            clientId={c.id}
+            igHandle={c.handle}
+            ytChannel={c.ytChannel ?? ""}
+            contentMix={c.contentMix ?? ""}
+            asanaProject={c.asanaProject ?? ""}
+          />
           {c.notes && (
             <div className="mt-5 pt-4 border-t border-white/[0.06]">
               <div className="text-[11px] font-mono uppercase tracking-wider text-muted mb-1">Notities</div>
