@@ -4,12 +4,14 @@ import { Card, Stat, PageHeader, Avatar, Badge, icons, Eyebrow } from "./_compon
 import { getWorkspaceData, getTodaysBrief } from "@/lib/data";
 import { getTodos } from "@/lib/notifications";
 import { getSessionContext } from "@/lib/auth";
+import { getOutreachTodoCount } from "@/lib/prospects";
 
 export default async function Dashboard() {
-  const [{ clients, content: contentCards, leads, demo }, todos, ctx] = await Promise.all([
+  const [{ clients, content: contentCards, leads, demo }, todos, ctx, outreachTodo] = await Promise.all([
     getWorkspaceData(),
     getTodos(),
     getSessionContext(),
+    getOutreachTodoCount(),
   ]);
 
   // Klant-login: eigen overzicht i.p.v. agency-cijfers.
@@ -70,6 +72,7 @@ export default async function Dashboard() {
         }
         waitingApproval={contentCards.filter((c) => c.stage === "client_approval").length}
         todosOpen={todos.filter((t) => !t.done).length}
+        outreachTodo={outreachTodo}
       />
 
       {/* Daily Brief teaser: vandaag's verse ideeën */}
@@ -193,21 +196,24 @@ function ActionRow({
   deadlinesSoon,
   waitingApproval,
   todosOpen,
+  outreachTodo,
 }: {
   followupsDue: number;
   deadlinesSoon: number;
   waitingApproval: number;
   todosOpen: number;
+  outreachTodo: number;
 }) {
   const items = [
     { label: "Vandaag opvolgen", count: followupsDue, href: "/platform/leads", urgent: followupsDue > 0 },
     { label: "Deadline ≤ 3 dagen", count: deadlinesSoon, href: "/platform/pipeline", urgent: deadlinesSoon > 0 },
     { label: "Wacht op klant-akkoord", count: waitingApproval, href: "/platform/approvals", urgent: false },
     { label: "Open taken", count: todosOpen, href: "/platform/todos", urgent: false },
+    { label: "Outreach te contacteren", count: outreachTodo, href: "/platform/outreach", urgent: false },
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+    <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
       {items.map((it) => (
         <Link
           key={it.label}

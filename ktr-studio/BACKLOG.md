@@ -9,8 +9,8 @@ of netwerktoegang vraagt hoort in RUNBOOK.md, niet hier.
 2. ✅ (18 aug) Klantenoverzicht: video's/mnd + video-mix op de klantkaarten;
    de "omzet €"-tegel (lead-attributie) is daarbij vervallen — omzet is weg
    uit de UI zolang er geen echte attributie is.
-3. Dashboard "Vandaag"-rij: outreach-teller toevoegen (aantal 'te contacteren',
-   linkt naar /platform/outreach).
+3. ✅ (18 aug) Dashboard "Vandaag"-rij: vijfde tegel "Outreach te contacteren"
+   (head-count, linkt naar /platform/outreach).
 4. Kalender: controleren dat kaarten met posting_date goed verschijnen en
    klikken → bewerkdialoog (zelfde als op het bord).
 5. Settings: koppelingen-status tonen — per integratie (Resend, RapidAPI,

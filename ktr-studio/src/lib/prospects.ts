@@ -3,6 +3,21 @@ import { DEMO_MODE, isSupabaseConfigured } from "@/lib/config";
 import { createClient } from "@/lib/supabase/server";
 import { prospects as demoProspects, type Prospect } from "@/app/platform/_data";
 
+// Alleen het aantal 'te contacteren' (voor de Vandaag-rij op het dashboard) —
+// een head-count, dus zonder de 265 volledige rijen op te halen.
+export async function getOutreachTodoCount(): Promise<number> {
+  if (DEMO_MODE || !isSupabaseConfigured) {
+    return demoProspects.filter((p) => p.stage === "te_contacteren").length;
+  }
+  const supabase = await createClient();
+  if (!supabase) return 0;
+  const { count } = await supabase
+    .from("prospects")
+    .select("id", { count: "exact", head: true })
+    .eq("stage", "te_contacteren");
+  return count ?? 0;
+}
+
 export async function getProspects(): Promise<Prospect[]> {
   if (DEMO_MODE || !isSupabaseConfigured) return demoProspects;
   const supabase = await createClient();
