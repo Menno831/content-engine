@@ -35,7 +35,7 @@ const formatColor: Record<string, string> = {
   Short: "#34D399",
 };
 
-export default async function Pipeline({ searchParams }: { searchParams: Promise<{ client?: string; view?: string }> }) {
+export default async function Pipeline({ searchParams }: { searchParams: Promise<{ client?: string; view?: string; all?: string }> }) {
   const sp = await searchParams;
   const [{ content: allContent, clients, demo }, ctx] = await Promise.all([getWorkspaceData(), getSessionContext()]);
   const isClient = ctx.profile?.role === "client";
@@ -135,7 +135,22 @@ export default async function Pipeline({ searchParams }: { searchParams: Promise
       {/* Verticaal board: fases als rijen onder elkaar (scrollen i.p.v. zijwaarts) */}
       <div className="space-y-8">
         {stageOrder.map((stage) => {
-          const cards = contentCards.filter((c) => c.stage === stage);
+          let cards = contentCards.filter((c) => c.stage === stage);
+          // Posted is het archief: nieuwste eerst, standaard ingeklapt tot 12
+          // kaarten — anders wordt het bord eindeloos zodra het archief groeit.
+          let hiddenPosted = 0;
+          if (stage === "posted") {
+            cards = [...cards].sort((a, b) => (b.dateISO ?? "").localeCompare(a.dateISO ?? ""));
+            if (sp.all !== "1" && cards.length > 12) {
+              hiddenPosted = cards.length - 12;
+              cards = cards.slice(0, 12);
+            }
+          }
+          const toggleQS = new URLSearchParams({
+            ...(sp.client ? { client: sp.client } : {}),
+            ...(sp.view ? { view: sp.view } : {}),
+            ...(sp.all === "1" ? {} : { all: "1" }),
+          }).toString();
           return (
             <section key={stage}>
               {/* Fasekop */}
@@ -143,7 +158,7 @@ export default async function Pipeline({ searchParams }: { searchParams: Promise
                 <div className="flex items-center gap-2">
                   <span className="font-display font-extrabold">{stageMeta[stage].label}</span>
                   <span className="font-mono text-[11px] text-muted bg-white/[0.05] rounded-full px-2 py-0.5">
-                    {cards.length}
+                    {cards.length + hiddenPosted}
                   </span>
                 </div>
                 <span className="text-[11px] text-muted font-mono">{t.hints[stage]}</span>
@@ -166,6 +181,18 @@ export default async function Pipeline({ searchParams }: { searchParams: Promise
                 ))}
 
               </div>
+
+              {/* Archief-schakel: alles tonen of weer inklappen */}
+              {stage === "posted" && (hiddenPosted > 0 || sp.all === "1") && (
+                <div className="mt-3 text-center">
+                  <Link
+                    href={`/platform/pipeline${toggleQS ? `?${toggleQS}` : ""}`}
+                    className="inline-block rounded-full border border-white/[0.08] hover:border-accent/30 hover:text-accent px-4 py-1.5 text-[12.5px] text-muted transition-all"
+                  >
+                    {sp.all === "1" ? "Show fewer" : `Show all (${cards.length + hiddenPosted})`}
+                  </Link>
+                </div>
+              )}
             </section>
           );
         })}
