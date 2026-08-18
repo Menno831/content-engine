@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { fmtEur, fmtNum, type ClientStatus } from "../_data";
+import { fmtEur, type ClientStatus } from "../_data";
 import { PageHeader, Card, Avatar, Badge, Eyebrow, icons } from "../_components";
 import { getWorkspaceData } from "@/lib/data";
 import { NotConnected } from "../_states";
@@ -96,10 +96,17 @@ export default async function Clients() {
                 <div className="text-[10px] font-mono uppercase tracking-wider text-muted">leads</div>
               </div>
               <div>
-                <div className="font-display font-bold text-lg text-emerald-400">{fmtNum(c.revenueAttributed)}</div>
-                <div className="text-[10px] font-mono uppercase tracking-wider text-muted">omzet €</div>
+                <div className="font-display font-bold text-lg">{c.videosPerMonth || "—"}</div>
+                <div className="text-[10px] font-mono uppercase tracking-wider text-muted">video&rsquo;s/mnd</div>
               </div>
             </div>
+
+            {/* Wat er in de retainer zit (video-mix van het klantprofiel) */}
+            {c.contentMix && (
+              <div className="mt-3 text-[11.5px] text-muted truncate" title={c.contentMix}>
+                🎬 {c.contentMix}
+              </div>
+            )}
 
             <div className="flex items-center justify-between mt-4">
               <span className="text-[12px] text-muted">{fmtEur(c.monthlyValue)}/mnd</span>

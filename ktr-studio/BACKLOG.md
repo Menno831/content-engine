@@ -6,8 +6,9 @@ of netwerktoegang vraagt hoort in RUNBOOK.md, niet hier.
 
 1. ✅ (18 aug) Productieboord: Posted-rij standaard inklappen tot de 12 nieuwste
    (met "Show all"-schakel) — anders wordt het bord eindeloos na de imports.
-2. Klantenoverzicht (/platform/clients): video-mix + video's/maand tonen op de
-   klantkaarten, zodat je het verschil Jip (€750) vs Arthur & Bryan (€1500) ziet.
+2. ✅ (18 aug) Klantenoverzicht: video's/mnd + video-mix op de klantkaarten;
+   de "omzet €"-tegel (lead-attributie) is daarbij vervallen — omzet is weg
+   uit de UI zolang er geen echte attributie is.
 3. Dashboard "Vandaag"-rij: outreach-teller toevoegen (aantal 'te contacteren',
    linkt naar /platform/outreach).
 4. Kalender: controleren dat kaarten met posting_date goed verschijnen en

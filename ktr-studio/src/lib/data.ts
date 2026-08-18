@@ -55,12 +55,10 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
   const supabase = await createClient();
   if (!supabase) return demoBundle();
 
-  const [clientsRes, contentRes, leadsRes, metricsRes] = await Promise.all([
-    supabase
-      .from("clients")
-      .select(
-        "id,name,ig_handle,status,monthly_value,package,videos_per_month,editor_cost,payment_status,created_at,soul_character_id,reference_image_url,brand_prompt,brand_primary,brand_secondary"
-      ),
+  const clientCols =
+    "id,name,ig_handle,status,monthly_value,package,videos_per_month,editor_cost,payment_status,created_at,soul_character_id,reference_image_url,brand_prompt,brand_primary,brand_secondary";
+  let [clientsRes, contentRes, leadsRes, metricsRes] = await Promise.all([
+    supabase.from("clients").select(`${clientCols},content_mix`),
     supabase
       .from("content")
       .select("id,client_id,title,hook,format,stage,published_at,permalink,posting_date,deadline,brief_url"),
@@ -73,6 +71,12 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
       .order("fetched_at", { ascending: false })
       .limit(5000),
   ]);
+
+  // Migratie 019 nog niet gedraaid? Val terug op de basiskolommen zodat
+  // dashboard/board/klanten nooit leeg raken door één ontbrekende kolom.
+  if (clientsRes.error) {
+    clientsRes = await supabase.from("clients").select(clientCols);
+  }
 
   const clientRows = clientsRes.data ?? [];
   const contentRows = contentRes.data ?? [];
@@ -114,6 +118,7 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
       leadsThisMonth: cLeads.filter((l) => inThisMonth(l.created_at)).length,
       packageName: c.package ?? null,
       videosPerMonth: Number(c.videos_per_month ?? 0),
+      contentMix: c.content_mix ?? null,
       editorCost: Number(c.editor_cost ?? 0),
       paymentStatus: (c.payment_status ?? "open") as Client["paymentStatus"],
       createdThisMonth: inThisMonth(c.created_at),
