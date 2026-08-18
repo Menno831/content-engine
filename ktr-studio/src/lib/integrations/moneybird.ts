@@ -8,9 +8,10 @@
 //   MONEYBIRD_ADMINISTRATION_ID    (het cijfer in de URL als je in Moneybird ingelogd bent)
 // ════════════════════════════════════════════════════════════════
 
-// Waarden schoonmaken: een spatie of regeleinde uit het kopiëren, of een
-// geplakte URL i.p.v. alleen het nummer, mag de koppeling niet breken.
-const TOKEN = (process.env.MONEYBIRD_API_TOKEN || "").trim();
+// Waarden schoonmaken: een spatie of regeleinde uit het kopiëren, een dubbel
+// geplakte token, of een geplakte URL i.p.v. alleen het nummer, mag de
+// koppeling niet breken.
+const TOKEN = (process.env.MONEYBIRD_API_TOKEN || "").trim().split(/\s+/)[0] || "";
 const ADMINISTRATION_ID = (process.env.MONEYBIRD_ADMINISTRATION_ID || "").replace(/\D/g, "");
 
 export const moneybirdConfigured = () => Boolean(TOKEN && ADMINISTRATION_ID);
@@ -78,7 +79,9 @@ export async function getMoneybirdMonth(): Promise<MoneybirdMonth> {
 
     return { configured: true, invoices, invoiced, paid, open: invoiced - paid };
   } catch (e) {
-    const why = e instanceof Error ? e.message : "onbekende fout";
+    let why = e instanceof Error ? e.message : "onbekende fout";
+    // De token mag nooit in een foutmelding op het scherm belanden.
+    if (TOKEN) why = why.split(TOKEN).join("•••");
     return { configured: true, invoices: [], invoiced: 0, paid: 0, open: 0, error: `Moneybird niet bereikbaar (${why}).` };
   }
 }
