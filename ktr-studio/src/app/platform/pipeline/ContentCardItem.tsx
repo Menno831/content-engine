@@ -130,7 +130,8 @@ export function ContentCardItem({
 
 const initial: ContentActionResult = {};
 
-function EditContentDialog({
+// Ook los bruikbaar (bv. vanaf de kalender): kaart-bewerkdialoog op id.
+export function EditContentDialog({
   contentId,
   editors,
   isEditor,

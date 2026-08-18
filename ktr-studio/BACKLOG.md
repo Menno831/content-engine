@@ -11,8 +11,9 @@ of netwerktoegang vraagt hoort in RUNBOOK.md, niet hier.
    uit de UI zolang er geen echte attributie is.
 3. ✅ (18 aug) Dashboard "Vandaag"-rij: vijfde tegel "Outreach te contacteren"
    (head-count, linkt naar /platform/outreach).
-4. Kalender: controleren dat kaarten met posting_date goed verschijnen en
-   klikken → bewerkdialoog (zelfde als op het bord).
+4. ✅ (18 aug) Kalender: chips zijn nu klikbaar voor owner/team → zelfde
+   bewerkdialoog als het bord (datum verzetten, links, verwijderen);
+   klant/editor-rollen zien de kalender alleen-lezen.
 5. Settings: koppelingen-status tonen — per integratie (Resend, RapidAPI,
    YouTube, Moneybird, Asana, Anthropic) alleen "ingesteld / ontbreekt"
    (boolean op de server, nooit de waarde zelf).

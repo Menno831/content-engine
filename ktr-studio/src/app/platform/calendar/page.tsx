@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { PageHeader, Card, icons } from "../_components";
 import { getWorkspaceData } from "@/lib/data";
+import { getSessionContext } from "@/lib/auth";
+import { getEditors } from "@/lib/editors";
 import { stageMeta, type PipelineStage } from "../_data";
 import { ClientFilter } from "../ClientFilter";
+import { CalendarItem } from "./CalendarItem";
 
 const stageColor: Record<string, string> = {
   ideation: "#F97316",
@@ -33,7 +36,11 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
     month = mo - 1;
   }
 
-  const { content: allContent, clients, demo } = await getWorkspaceData();
+  const [{ content: allContent, clients, demo }, ctx] = await Promise.all([getWorkspaceData(), getSessionContext()]);
+  // Owner/team mag vanaf de kalender direct bewerken; klant/editor niet hier.
+  const canEdit = !demo && ctx.profile?.role !== "client" && ctx.profile?.role !== "editor";
+  const editors = canEdit ? await getEditors() : [];
+  const editorOptions = editors.map((e) => ({ id: e.id, label: e.name }));
   const activeClient = clients.find((c) => c.id === sp.client);
   const content = activeClient ? allContent.filter((c) => c.client === activeClient.name) : allContent;
   const clientQS = sp.client ? `&client=${sp.client}` : "";
@@ -98,9 +105,15 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
                 <div className={`text-[11px] mb-1 px-1 ${isToday ? "text-accent font-bold" : "text-muted"}`}>{day}</div>
                 <div className="space-y-1">
                   {items.slice(0, 3).map((c) => (
-                    <div key={c.id} className="rounded px-1.5 py-0.5 text-[10px] leading-tight truncate" style={{ background: `${stageColor[c.stage] ?? "#888"}22`, color: stageColor[c.stage] ?? "#aaa" }} title={`${c.title} · ${stageMeta[c.stage as PipelineStage]?.label ?? ""}`}>
-                      {c.title}
-                    </div>
+                    <CalendarItem
+                      key={c.id}
+                      contentId={c.id}
+                      title={c.title}
+                      color={stageColor[c.stage] ?? "#9CA3AF"}
+                      tooltip={`${c.title} · ${stageMeta[c.stage as PipelineStage]?.label ?? ""}`}
+                      editable={canEdit}
+                      editors={editorOptions}
+                    />
                   ))}
                   {items.length > 3 && <div className="text-[10px] text-muted px-1">+{items.length - 3} meer</div>}
                 </div>
