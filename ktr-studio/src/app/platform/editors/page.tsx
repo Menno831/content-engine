@@ -1,3 +1,4 @@
+import { redirectEditorToBoard } from "@/lib/guard";
 import Link from "next/link";
 import { PageHeader, Card, Stat, Avatar, Badge, icons } from "../_components";
 import { getEditors } from "@/lib/editors";
@@ -8,6 +9,7 @@ import { NoData } from "../_states";
 import { ExportButton } from "../ExportButton";
 
 export default async function EditorsPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+  await redirectEditorToBoard();
   const sp = await searchParams;
   const tab = sp.tab === "pool" ? "pool" : "payouts";
   const editors = await getEditors();

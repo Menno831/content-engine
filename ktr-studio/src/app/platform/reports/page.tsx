@@ -1,3 +1,4 @@
+import { redirectEditorToBoard } from "@/lib/guard";
 import { fmtEur, fmtNum } from "../_data";
 import { PageHeader, Card, Stat, Eyebrow, Badge, Avatar, icons } from "../_components";
 import { getWorkspaceData, getClientReport, type PeriodStats } from "@/lib/data";
@@ -45,6 +46,7 @@ function PeriodCard({ title, cur, prev }: { title: string; cur: PeriodStats; pre
 }
 
 export default async function Reports({ searchParams }: { searchParams: Promise<{ client?: string }> }) {
+  await redirectEditorToBoard();
   const sp = await searchParams;
   const { clients, topContent, demo } = await getWorkspaceData();
   const client = clients.find((c) => c.id === sp.client) ?? clients[0];

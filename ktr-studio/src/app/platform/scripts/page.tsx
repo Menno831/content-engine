@@ -1,3 +1,4 @@
+import { redirectEditorToBoard } from "@/lib/guard";
 import { PageHeader } from "../_components";
 import { createClient } from "@/lib/supabase/server";
 import { DEMO_MODE, isSupabaseConfigured } from "@/lib/config";
@@ -6,6 +7,7 @@ import { ScriptsBoard, type ScriptRow } from "./ScriptsBoard";
 // Scripts-bibliotheek: alles wat eerst los op mennokater.nl stond.
 // Nog schrijven → klaar om op te nemen → opgenomen, met inline autosave.
 export default async function ScriptsPage() {
+  await redirectEditorToBoard();
   const demo = DEMO_MODE || !isSupabaseConfigured;
 
   let scripts: ScriptRow[] = [];

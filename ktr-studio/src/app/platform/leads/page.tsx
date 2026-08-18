@@ -1,3 +1,4 @@
+import { redirectEditorToBoard } from "@/lib/guard";
 import { leadStageMeta, fmtEur, type LeadStage } from "../_data";
 import { PageHeader, Card, Stat, Avatar, icons } from "../_components";
 import { getWorkspaceData } from "@/lib/data";
@@ -9,6 +10,7 @@ import { ExportButton } from "../ExportButton";
 const stageOrder: LeadStage[] = ["nieuw", "gekwalificeerd", "call_gepland", "closed", "verloren"];
 
 export default async function Leads() {
+  await redirectEditorToBoard();
   const { leads, clients, content, demo } = await getWorkspaceData();
 
   const closed = leads.filter((l) => l.stage === "closed");

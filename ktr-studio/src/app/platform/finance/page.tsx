@@ -1,3 +1,4 @@
+import { redirectEditorToBoard } from "@/lib/guard";
 import { PageHeader, Card, Stat, Avatar, Badge, Eyebrow, icons } from "../_components";
 import { getWorkspaceData } from "@/lib/data";
 import { getSessionContext } from "@/lib/auth";
@@ -26,6 +27,7 @@ const invoiceStateLabel: Record<string, string> = {
 };
 
 export default async function FinancePage({ searchParams }: { searchParams: Promise<{ maand?: string }> }) {
+  await redirectEditorToBoard();
   const sp = await searchParams;
 
   // Maandkeuze: chips vanaf januari 2026 t/m nu; zonder ?maand = deze maand.

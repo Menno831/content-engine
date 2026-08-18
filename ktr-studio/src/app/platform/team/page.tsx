@@ -1,3 +1,4 @@
+import { redirectEditorToBoard } from "@/lib/guard";
 import { PageHeader, Card } from "../_components";
 import { DEMO_MODE, isSupabaseConfigured } from "@/lib/config";
 import { createClient } from "@/lib/supabase/server";
@@ -31,6 +32,7 @@ async function getTeam(): Promise<TeamMember[]> {
 }
 
 export default async function TeamPage() {
+  await redirectEditorToBoard();
   const members = await getTeam();
   const editors = await getEditors();
   const editorOptions = editors.map((e) => ({ id: e.id, label: e.name }));

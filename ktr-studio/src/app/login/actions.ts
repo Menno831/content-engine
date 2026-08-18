@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { homeForRole } from "@/lib/guard";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -36,7 +37,17 @@ export async function signIn(_prev: AuthResult, formData: FormData): Promise<Aut
   }
 
   revalidatePath("/", "layout");
-  redirect("/platform");
+
+  // Landen waar je hoort: editor op het productieboard, setter in de CRM.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  let role: string | null = null;
+  if (user) {
+    const { data: p } = await supabase.from("profiles").select("role").eq("user_id", user.id).maybeSingle();
+    role = p?.role ?? null;
+  }
+  redirect(homeForRole(role));
 }
 
 export async function signUp(_prev: AuthResult, formData: FormData): Promise<AuthResult> {

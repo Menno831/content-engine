@@ -1,3 +1,4 @@
+import { redirectEditorToBoard } from "@/lib/guard";
 import Link from "next/link";
 import { fmtEur, type ClientStatus } from "../_data";
 import { PageHeader, Card, Avatar, Badge, Eyebrow, icons } from "../_components";
@@ -15,6 +16,7 @@ const statusColor: Record<ClientStatus, string> = {
 };
 
 export default async function Clients() {
+  await redirectEditorToBoard();
   const { clients, demo } = await getWorkspaceData();
   const mrr = clients.filter((c) => c.status !== "gepauzeerd").reduce((s, c) => s + c.monthlyValue, 0);
 

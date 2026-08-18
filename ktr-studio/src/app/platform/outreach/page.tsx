@@ -1,3 +1,4 @@
+import { redirectEditorToBoard } from "@/lib/guard";
 import { PageHeader, Stat, icons } from "../_components";
 import { getProspects } from "@/lib/prospects";
 import { DEMO_MODE, isSupabaseConfigured } from "@/lib/config";
@@ -8,6 +9,7 @@ import { ProspectCard } from "./ProspectCard";
 const stageOrder: ProspectStage[] = ["te_contacteren", "dm_verstuurd", "in_gesprek", "audit_verstuurd", "geen_reactie"];
 
 export default async function OutreachPage() {
+  await redirectEditorToBoard();
   const prospects = await getProspects();
   const demo = DEMO_MODE || !isSupabaseConfigured;
 

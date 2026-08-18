@@ -5,6 +5,7 @@ import { getWorkspaceData, getTodaysBrief } from "@/lib/data";
 import { getTodos } from "@/lib/notifications";
 import { getSessionContext } from "@/lib/auth";
 import { getOutreachTodoCount } from "@/lib/prospects";
+import { redirect } from "next/navigation";
 
 export default async function Dashboard() {
   const [{ clients, content: contentCards, leads, demo }, todos, ctx, outreachTodo] = await Promise.all([
@@ -13,6 +14,9 @@ export default async function Dashboard() {
     getSessionContext(),
     getOutreachTodoCount(),
   ]);
+
+  // Editor-login: het dashboard is agency-cijfers — door naar het board.
+  if (ctx.profile?.role === "editor") redirect("/platform/pipeline");
 
   // Klant-login: eigen overzicht i.p.v. agency-cijfers.
   if (ctx.profile?.role === "client") {
