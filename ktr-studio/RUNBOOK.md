@@ -17,11 +17,11 @@ Supabase SQL Editor gedraaid, Vercel via de lokaal ingelogde CLI.)
    `MONEYBIRD_API_TOKEN` staat er maar de waarde is verhaspeld (token meerdere keren
    achter elkaar geplakt); de code vangt dit sinds 18 aug op, maar netjes opnieuw
    zetten blijft beter. Na het zetten: redeploy zonder build-cache.
-2. **Moneybird-check afronden**: de "invalid header value"-fout is 18 aug in code
-   gefixt (token-sanering + token nooit meer in de foutmelding). Na de eerstvolgende
-   deploy op de live Finance-pagina controleren of het facturenblok data toont.
 
 ## Afgerond (18 aug 2026)
+- **Moneybird-check**: "invalid header value"-fout gefixt (token-sanering + token
+  nooit meer in de foutmelding) en live geverifieerd: Finance toont facturen
+  (€6.377 gefactureerd deze maand).
 - **Outreach-import**: 265 prospects (100 audit-bord + 165 DM-bord) via Monday-MCP
   ingelezen en idempotent in `prospects` gezet (external_id `monday-audit:<id>` /
   `monday-dm:<id>`, statusmap volgens dit runbook, DM variant A/B als message).
