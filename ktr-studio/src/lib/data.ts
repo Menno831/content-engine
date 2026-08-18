@@ -61,7 +61,7 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
     supabase.from("clients").select(`${clientCols},content_mix`),
     supabase
       .from("content")
-      .select("id,client_id,title,hook,format,stage,published_at,permalink,posting_date,deadline,brief_url"),
+      .select("id,client_id,title,hook,format,stage,published_at,permalink,posting_date,deadline,brief_url,editor_id"),
     supabase
       .from("leads")
       .select("id,client_id,name,source_label,source_content_id,stage,value,setter,created_at,closed_at,next_followup,followup_note"),
@@ -140,6 +140,7 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
       format: (x.format ?? "Reel") as ContentCard["format"],
       hook: x.hook ?? "",
       assignee: "—",
+      editorId: x.editor_id ?? null,
       // Editors plannen op posting_date/deadline; pas ná publicatie telt published_at.
       due: (() => {
         const d = x.posting_date ?? x.deadline ?? x.published_at;

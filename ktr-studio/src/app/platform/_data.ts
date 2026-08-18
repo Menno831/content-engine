@@ -95,6 +95,7 @@ export interface ContentCard {
   permalink?: string | null;
   dateISO?: string | null; // planningsdatum (posting_date of deadline) voor de kalender
   briefUrl?: string | null; // files/brief-link (Frame.io, Drive) voor de editor
+  editorId?: string | null; // toegewezen editor (voor het editor-board en de mails)
 }
 
 export const contentCards: ContentCard[] = [

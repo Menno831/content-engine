@@ -4,6 +4,7 @@ import { PageHeader } from "../_components";
 import { getWorkspaceData } from "@/lib/data";
 import { getEditors } from "@/lib/editors";
 import { AddContentDialog } from "./AddContentDialog";
+import { QuickAddDialog } from "./QuickAddDialog";
 import { ContentCardItem } from "./ContentCardItem";
 import { ClientFilter } from "../ClientFilter";
 import { ClientBoard } from "./ClientBoard";
@@ -58,9 +59,19 @@ export default async function Pipeline({ searchParams }: { searchParams: Promise
   const clientOptions = clients.map((c) => ({ id: c.id, label: c.name }));
   const editorOptions = editors.map((e) => ({ id: e.id, label: e.name }));
 
+  // Kaarten dragen de editor-naam (voor het board en de editor-weergave).
+  const editorNameById = new Map(editors.map((e) => [e.id, e.name]));
+  const namedContent = allContent.map((c) =>
+    c.editorId ? { ...c, assignee: editorNameById.get(c.editorId) ?? c.assignee } : c
+  );
+
   // Klantfilter via ?client=<id> (kaarten dragen de klantnaam).
   const activeClient = clients.find((c) => c.id === sp.client);
-  const contentCards = activeClient ? allContent.filter((c) => c.client === activeClient.name) : allContent;
+  let contentCards = activeClient ? namedContent.filter((c) => c.client === activeClient.name) : namedContent;
+
+  // Editor-login met gekoppelde editor: alleen de eigen kaarten.
+  const ownEditorId = ctx.profile?.role === "editor" ? ctx.profile.editor_id : null;
+  if (ownEditorId) contentCards = contentCards.filter((c) => c.editorId === ownEditorId);
 
   // Editor-rol: Engelstalige schermteksten (editors zijn vaak Engelstalig).
   // Owner/team kan met ?view=editor precies zien wat een editor ziet,
@@ -113,6 +124,7 @@ export default async function Pipeline({ searchParams }: { searchParams: Promise
               >
                 👁 Bekijk als editor
               </Link>
+              <QuickAddDialog clients={clientOptions} editors={editorOptions} defaultClient={sp.client} />
               <AddContentDialog clients={clientOptions} editors={editorOptions} defaultClient={sp.client} />
             </div>
           )

@@ -43,24 +43,69 @@ async function notifyClient(
   }
 }
 
-// Editor mailen als er werk voor 'm klaarstaat (best-effort, Engels —
-// werkt zodra RESEND_API_KEY staat).
+// Editor mailen (best-effort, Engels — werkt zodra RESEND_API_KEY staat).
+// Drie momenten: kaart toegewezen, klaar om te editen, revisie gevraagd.
+const BOARD_URL = "https://content-engine-kr5c.vercel.app/platform/pipeline";
+
+type EditorMailKind = "assigned" | "ready" | "revision";
+
 async function notifyEditor(
   supabase: NonNullable<Awaited<ReturnType<typeof supabaseServer>>>,
   editorId: string,
   clientId: string,
-  title: string
+  title: string,
+  kind: EditorMailKind = "ready"
 ) {
   const [{ data: editor }, { data: client }] = await Promise.all([
     supabase.from("editors").select("name, email").eq("id", editorId).maybeSingle(),
     supabase.from("clients").select("name").eq("id", clientId).maybeSingle(),
   ]);
   if (!editor?.email) return;
-  await sendEmail({
-    to: editor.email,
-    subject: "🎬 New video ready for editing",
-    html: `<p>Hi ${editor.name ?? ""},</p><p>A new video is ready for you to edit:</p><p><strong>${title}</strong> · ${client?.name ?? ""}</p><p>The files are linked on the card. Drag it to "Quality Control" when you're done.</p><p><a href="https://content-engine-kr5c.vercel.app/platform/pipeline">Open the production board</a></p>`,
+  const hi = `<p>Hi ${editor.name ?? ""},</p>`;
+  const card = `<p><strong>${title}</strong> · ${client?.name ?? ""}</p>`;
+  const link = `<p><a href="${BOARD_URL}">Open the production board</a></p>`;
+  const mail =
+    kind === "revision"
+      ? {
+          subject: `✏️ Changes requested: ${title}`,
+          html: `${hi}<p>This video needs another pass:</p>${card}<p>Check the notes on the card, make the changes and drag it to "Changes done" when you're finished.</p>${link}`,
+        }
+      : kind === "assigned"
+        ? {
+            subject: `🎬 New video on your board: ${title}`,
+            html: `${hi}<p>A new video was just added to your board:</p>${card}<p>You'll get another email the moment it's ready for editing.</p>${link}`,
+          }
+        : {
+            subject: `🎬 New video ready for editing: ${title}`,
+            html: `${hi}<p>A new video is ready for you to edit:</p>${card}<p>The files are linked on the card. Drag it to "Quality Control" when you're done.</p>${link}`,
+          };
+  await sendEmail({ to: editor.email, ...mail });
+}
+
+// Melding + mail naar de agency-eigenaar (best-effort).
+async function notifyOwner(
+  supabase: NonNullable<Awaited<ReturnType<typeof supabaseServer>>>,
+  agencyId: string,
+  type: string,
+  title: string,
+  body: string,
+  emailSubject: string,
+  emailHtml: string
+) {
+  await supabase.from("notifications").insert({
+    agency_id: agencyId,
+    audience: "team",
+    type,
+    title,
+    body,
+    link: "/platform/pipeline",
   });
+  const admin = createAdminClient();
+  if (!admin) return;
+  const { data: agencyRow } = await admin.from("agencies").select("owner_id").eq("id", agencyId).maybeSingle();
+  if (!agencyRow?.owner_id) return;
+  const { data: ownerUser } = await admin.auth.admin.getUserById(agencyRow.owner_id as string);
+  await sendEmail({ to: ownerUser?.user?.email, subject: emailSubject, html: emailHtml });
 }
 
 export async function createContentAction(
@@ -104,9 +149,10 @@ export async function createContentAction(
     await notifyClient(supabase, agency.id, clientId, "ideation", "Nieuwe ideation staat klaar", `"${title}" staat klaar — bekijk en reageer.`);
   }
 
-  // Kaart staat klaar voor de editor -> mail de editor direct.
-  if (stage === "ready_for_editing" && editorId) {
-    await notifyEditor(supabase, editorId, clientId, title).catch(() => undefined);
+  // Editor toegewezen -> direct mailen. "Ready for editing" krijgt de
+  // edit-mail, elke andere fase de "staat eraan te komen"-mail.
+  if (editorId) {
+    await notifyEditor(supabase, editorId, clientId, title, stage === "ready_for_editing" ? "ready" : "assigned").catch(() => undefined);
   }
 
   revalidatePath("/platform/pipeline");
@@ -165,7 +211,12 @@ export async function updateContentStageAction(contentId: string, stage: string)
 
   // Kaart schuift naar "Ready for editing" met een editor erop -> mail 'm.
   if (stage === "ready_for_editing" && updated?.editor_id) {
-    await notifyEditor(supabase, updated.editor_id, updated.client_id, updated.title).catch(() => undefined);
+    await notifyEditor(supabase, updated.editor_id, updated.client_id, updated.title, "ready").catch(() => undefined);
+  }
+
+  // Revisie gevraagd -> de editor hoort het direct.
+  if (stage === "revisions_needed" && updated?.editor_id) {
+    await notifyEditor(supabase, updated.editor_id, updated.client_id, updated.title, "revision").catch(() => undefined);
   }
 
   // Twee-weg-sync: kwam deze kaart uit Asana, verplaats de taak daar dan
@@ -196,35 +247,32 @@ export async function updateContentStageAction(contentId: string, stage: string)
   if (stage === "quality_control" && updated && agency) {
     await supabase.from("content").update({ delivered_at: new Date().toISOString() }).eq("id", contentId);
 
-    const { data: clientRow } = await supabase
-      .from("clients")
-      .select("name")
-      .eq("id", updated.client_id)
-      .maybeSingle();
+    const { data: clientRow } = await supabase.from("clients").select("name").eq("id", updated.client_id).maybeSingle();
     const clientName = clientRow?.name ?? "een klant";
+    await notifyOwner(
+      supabase,
+      agency.id,
+      "review",
+      "Video aangeleverd — klaar voor review",
+      `"${updated.title}" (${clientName}) staat in Quality Control.`,
+      `🎬 Klaar voor review: ${updated.title}`,
+      `<p>Er staat een video klaar voor review.</p><p><strong>${updated.title}</strong> · ${clientName}</p><p><a href="${BOARD_URL}">Open het productieboord</a></p>`
+    ).catch(() => undefined);
+  }
 
-    await supabase.from("notifications").insert({
-      agency_id: agency.id,
-      audience: "team",
-      type: "review",
-      title: "Video aangeleverd — klaar voor review",
-      body: `"${updated.title}" (${clientName}) staat in Quality Control.`,
-      link: "/platform/pipeline",
-    });
-
-    // E-mail naar de agency-eigenaar (best-effort; werkt zodra RESEND_API_KEY staat).
-    const admin = createAdminClient();
-    if (admin) {
-      const { data: agencyRow } = await admin.from("agencies").select("owner_id").eq("id", agency.id).maybeSingle();
-      if (agencyRow?.owner_id) {
-        const { data: ownerUser } = await admin.auth.admin.getUserById(agencyRow.owner_id as string);
-        await sendEmail({
-          to: ownerUser?.user?.email,
-          subject: `🎬 Klaar voor review: ${updated.title}`,
-          html: `<p>Er staat een video klaar voor review.</p><p><strong>${updated.title}</strong> · ${clientName}</p><p><a href="https://content-engine-kr5c.vercel.app/platform/pipeline">Open het productieboard</a></p>`,
-        });
-      }
-    }
+  // Editor rondt de revisie af -> de eigenaar hoort dat direct.
+  if (stage === "revisions_completed" && updated && agency) {
+    const { data: clientRow } = await supabase.from("clients").select("name").eq("id", updated.client_id).maybeSingle();
+    const clientName = clientRow?.name ?? "een klant";
+    await notifyOwner(
+      supabase,
+      agency.id,
+      "review",
+      "Revisie afgerond — check opnieuw",
+      `"${updated.title}" (${clientName}) staat op Changes done.`,
+      `✅ Revisie afgerond: ${updated.title}`,
+      `<p>De gevraagde aanpassingen zijn gedaan.</p><p><strong>${updated.title}</strong> · ${clientName}</p><p><a href="${BOARD_URL}">Open het productieboord</a></p>`
+    ).catch(() => undefined);
   }
 
   revalidatePath("/platform/pipeline");
@@ -302,6 +350,14 @@ export async function updateContentAction(
   if (!title) return { error: "Titel is verplicht." };
 
   const editorId = String(formData.get("editor_id") ?? "");
+
+  // Oude toewijzing kennen: een nieuw toegewezen editor krijgt direct mail.
+  const { data: before } = await supabase
+    .from("content")
+    .select("editor_id, stage, client_id")
+    .eq("id", contentId)
+    .maybeSingle();
+
   const { error } = await supabase
     .from("content")
     .update({
@@ -320,6 +376,16 @@ export async function updateContentAction(
     })
     .eq("id", contentId);
   if (error) return { error: error.message };
+
+  if (editorId && before && editorId !== (before.editor_id ?? "")) {
+    await notifyEditor(
+      supabase,
+      editorId,
+      before.client_id,
+      title,
+      before.stage === "ready_for_editing" ? "ready" : "assigned"
+    ).catch(() => undefined);
+  }
 
   revalidatePath("/platform/pipeline");
   revalidatePath("/platform");
@@ -344,6 +410,72 @@ export async function deleteContentAction(contentId: string): Promise<ContentAct
   revalidatePath("/platform/pipeline");
   revalidatePath("/platform");
   return { ok: "Kaart verwijderd." };
+}
+
+// ── Snel meerdere video's toevoegen ─────────────────────────────
+// Eén titel per regel, klant + editor + format één keer kiezen.
+// De editor krijgt één verzamelmail in plaats van tien losse.
+export async function bulkCreateContentAction(
+  _prev: ContentActionResult,
+  formData: FormData
+): Promise<ContentActionResult> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { error: "Supabase niet geconfigureerd." };
+
+  const { agency } = await getSessionContext();
+  if (!agency) return { error: "Geen agency gevonden — log opnieuw in." };
+
+  const clientId = String(formData.get("client_id") ?? "");
+  if (!clientId) return { error: "Kies een klant." };
+
+  const titles = String(formData.get("titles") ?? "")
+    .split("\n")
+    .map((t) => t.trim())
+    .filter(Boolean)
+    .slice(0, 50);
+  if (!titles.length) return { error: "Zet elke video op een eigen regel." };
+
+  const stage = String(formData.get("stage") ?? "ready_for_editing");
+  const editorId = String(formData.get("editor_id") ?? "") || null;
+  const format = String(formData.get("format") ?? "Talking");
+  const deadline = String(formData.get("deadline") ?? "").trim() || null;
+  const briefUrl = String(formData.get("brief_url") ?? "").trim() || null;
+
+  const { error } = await supabase.from("content").insert(
+    titles.map((title) => ({
+      client_id: clientId,
+      title,
+      format,
+      stage,
+      editor_id: editorId,
+      deadline,
+      brief_url: briefUrl,
+    }))
+  );
+  if (error) return { error: error.message };
+
+  // Eén digest-mail naar de editor voor de hele batch.
+  if (editorId) {
+    const [{ data: editor }, { data: client }] = await Promise.all([
+      supabase.from("editors").select("name, email").eq("id", editorId).maybeSingle(),
+      supabase.from("clients").select("name").eq("id", clientId).maybeSingle(),
+    ]);
+    if (editor?.email) {
+      const ready = stage === "ready_for_editing";
+      const items = titles.map((t) => `<li><strong>${t}</strong></li>`).join("");
+      await sendEmail({
+        to: editor.email,
+        subject: ready
+          ? `🎬 ${titles.length} new video${titles.length > 1 ? "s" : ""} ready for editing`
+          : `🎬 ${titles.length} new video${titles.length > 1 ? "s" : ""} on your board`,
+        html: `<p>Hi ${editor.name ?? ""},</p><p>${ready ? "These videos are ready for you to edit" : "These videos were just added to your board"} (${client?.name ?? ""}):</p><ul>${items}</ul>${deadline ? `<p>Deadline: ${deadline}</p>` : ""}<p>The files are linked on the cards. Drag a card to "Quality Control" when it's done.</p><p><a href="${BOARD_URL}">Open the production board</a></p>`,
+      }).catch(() => undefined);
+    }
+  }
+
+  revalidatePath("/platform/pipeline");
+  revalidatePath("/platform");
+  return { ok: `${titles.length} kaart${titles.length > 1 ? "en" : ""} toegevoegd.` };
 }
 
 // ── Wekelijkse productieplanning ────────────────────────────────
