@@ -18,7 +18,7 @@ export default async function ScriptsPage() {
       const [scriptsRes, clientsRes] = await Promise.all([
         supabase
           .from("scripts")
-          .select("id,title,content,status,tag,client_id,updated_at")
+          .select("id,title,content,status,tag,location,review_note,client_id,updated_at")
           .order("updated_at", { ascending: false }),
         supabase.from("clients").select("id,name").order("name"),
       ]);
@@ -42,7 +42,7 @@ export default async function ScriptsPage() {
         <p className="text-sm text-muted">Demo-modus — scripts verschijnen hier in de echte omgeving.</p>
       ) : migrationMissing ? (
         <div className="rounded-xl border border-amber-400/25 bg-amber-400/[0.06] px-4 py-3 text-[13px] text-amber-300">
-          Draai eerst migratie 022 in Supabase (tabel <code>scripts</code>) — daarna werkt deze pagina direct.
+          Draai eerst migratie 022/023 in Supabase (tabel <code>scripts</code> + locatie/review-velden) — daarna werkt deze pagina direct.
         </div>
       ) : (
         <ScriptsBoard initial={scripts} clients={clients} />

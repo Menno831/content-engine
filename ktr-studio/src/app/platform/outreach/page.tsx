@@ -17,6 +17,10 @@ export default async function OutreachPage() {
   const inGesprek = prospects.filter((p) => p.stage === "in_gesprek").length;
   const auditSent = prospects.filter((p) => p.stage === "audit_verstuurd").length;
 
+  // Dagteller: DM's die vandaag verstuurd zijn (dm_sent_at van vandaag).
+  const today = new Date().toISOString().slice(0, 10);
+  const sentToday = prospects.filter((p) => (p.dmSentAt ?? "").slice(0, 10) === today).length;
+
   return (
     <>
       <PageHeader
@@ -26,7 +30,8 @@ export default async function OutreachPage() {
         action={<AddProspectDialog />}
       />
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        <Stat label="Vandaag verstuurd" value={String(sentToday)} icon={icons.send} />
         <Stat label="Prospects" value={String(prospects.length)} icon={icons.leads} />
         <Stat label="Potentiële waarde" value={fmtEur(pipelineValue)} icon={icons.money} />
         <Stat label="In gesprek" value={String(inGesprek)} icon={icons.send} />

@@ -80,3 +80,36 @@ export async function markNotificationsReadAction(): Promise<void> {
   await supabase.from("notifications").update({ read: true }).eq("read", false);
   revalidatePath("/platform");
 }
+
+
+// ── Persoonlijke taken (geen klant): vandaag of lange termijn ───
+export async function createPersonalTodoAction(title: string, urgency: "vandaag" | "later"): Promise<TodoActionResult> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { error: "Supabase niet geconfigureerd." };
+
+  const { agency, user } = await getSessionContext();
+  if (!agency || !user) return { error: "Geen agency — log opnieuw in." };
+  if (!title.trim()) return { error: "Omschrijving is verplicht." };
+
+  const { error } = await supabase.from("todos").insert({
+    agency_id: agency.id,
+    client_id: null,
+    user_id: user.id,
+    urgency,
+    title: title.trim(),
+  });
+  if (error) return { error: error.message.includes("client_id") ? "Draai migratie 023 in Supabase (persoonlijke taken)." : error.message };
+
+  revalidatePath("/platform/todos");
+  revalidatePath("/platform");
+  return { ok: "Taak toegevoegd." };
+}
+
+export async function deleteTodoAction(todoId: string): Promise<TodoActionResult> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { error: "Supabase niet geconfigureerd." };
+  const { error } = await supabase.from("todos").delete().eq("id", todoId);
+  if (error) return { error: error.message };
+  revalidatePath("/platform/todos");
+  return { ok: "Taak verwijderd." };
+}

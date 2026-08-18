@@ -38,14 +38,23 @@ export interface MoneybirdMonth {
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export async function getMoneybirdMonth(): Promise<MoneybirdMonth> {
+// month als "YYYY-MM" voor een specifieke maand; weggelaten = deze maand.
+export async function getMoneybirdMonth(month?: string): Promise<MoneybirdMonth> {
   if (!moneybirdConfigured()) {
     return { configured: false, invoices: [], invoiced: 0, paid: 0, open: 0 };
   }
 
+  let period = "this_month";
+  if (month && /^\d{4}-\d{2}$/.test(month)) {
+    const [y, m] = month.split("-").map(Number);
+    const last = new Date(y, m, 0).getDate();
+    const mm = String(m).padStart(2, "0");
+    period = `${y}${mm}01..${y}${mm}${String(last).padStart(2, "0")}`;
+  }
+
   try {
     const res = await fetch(
-      `https://moneybird.com/api/v2/${ADMINISTRATION_ID}/sales_invoices.json?filter=${encodeURIComponent("period:this_month")}&per_page=100`,
+      `https://moneybird.com/api/v2/${ADMINISTRATION_ID}/sales_invoices.json?filter=${encodeURIComponent(`period:${period}`)}&per_page=100`,
       {
         headers: { Authorization: `Bearer ${TOKEN}` },
         // Facturen veranderen niet per minuut — 10 min cache houdt Finance snel.

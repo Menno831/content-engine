@@ -193,6 +193,9 @@ export interface Todo {
   title: string;
   done: boolean;
   due: string | null;
+  /** Persoonlijke taak: 'vandaag' of 'later' (client-taken hebben dit niet). */
+  urgency?: string | null;
+  userId?: string | null;
 }
 
 export const todos: Todo[] = [
@@ -206,6 +209,7 @@ export const todos: Todo[] = [
 export interface Editor {
   id: string;
   name: string;
+  email?: string | null;
   payPerVideo: number;
   active: boolean;
   videosThisMonth: number;
@@ -270,6 +274,8 @@ export interface Prospect {
   note: string | null;
   /** Kant-en-klaar DM-bericht — kopieer & verstuur vanaf de outreach-pagina. */
   message?: string | null;
+  /** Wanneer de DM verstuurd is — voedt de "vandaag verstuurd"-teller. */
+  dmSentAt?: string | null;
 }
 
 export const prospects: Prospect[] = [

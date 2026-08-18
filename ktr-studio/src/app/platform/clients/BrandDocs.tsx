@@ -57,60 +57,29 @@ export function BrandDocs({
   values: Record<string, string>;
 }) {
   const [vals, setVals] = useState<Record<string, string>>(values);
-  const [gen, setGen] = useState<string | null>(null);
+  const [openDocs, setOpenDocs] = useState(false);
   const [state, action, pending] = useActionState(saveBrandDocsAction, initial);
-
-  async function aiGenerate(field: FieldDef) {
-    setGen(field.key);
-    const context = `Klant: ${clientName} (${handle || "geen handle"}). ${
-      vals.brand_identity ? `Identity: ${vals.brand_identity}. ` : ""
-    }`;
-    const template = `${field.instruction}\n\n${context}`;
-    try {
-      const res = await fetch("/api/ai/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ template, input: clientName }),
-      });
-      const data = await res.json();
-      if (data.ok) setVals((v) => ({ ...v, [field.key]: data.text }));
-    } catch {
-      /* stil falen */
-    } finally {
-      setGen(null);
-    }
-  }
 
   return (
     <Card className="p-6">
-      <div className="flex items-center justify-between mb-1">
-        <h2 className="font-display font-extrabold text-xl">Brand-context</h2>
-        {state.ok && <span className="text-[13px] text-emerald-400">{state.ok}</span>}
-        {state.error && <span className="text-[13px] text-red-400">{state.error}</span>}
-      </div>
-      <p className="text-muted text-sm mb-5">
-        Leg vast wie de klant is. De <strong>brand voice</strong> stuurt straks alle AI-gegenereerde content aan.
-      </p>
+      <button type="button" onClick={() => setOpenDocs((o) => !o)} className="w-full text-left">
+        <div className="flex items-center justify-between mb-1">
+          <h2 className="font-display font-extrabold text-xl">Brand-context {openDocs ? "▾" : "▸"}</h2>
+          {state.ok && <span className="text-[13px] text-emerald-400">{state.ok}</span>}
+          {state.error && <span className="text-[13px] text-red-400">{state.error}</span>}
+        </div>
+        <p className="text-muted text-sm mb-2">
+          Optioneel naslagwerk per klant — de <strong>brand voice</strong> stuurt de AI-content aan. Ingeklapt tot je &rsquo;m nodig hebt.
+        </p>
+      </button>
 
-      <form action={action} className="space-y-5">
+      {openDocs && (
+      <form action={action} className="space-y-5 mt-3">
         <input type="hidden" name="client_id" value={clientId} />
         {FIELDS.map((f) => (
           <div key={f.key}>
             <div className="flex items-center justify-between mb-1.5">
               <label className="text-[12px] font-mono uppercase tracking-wider text-muted">{f.label}</label>
-              <button
-                type="button"
-                onClick={() => aiGenerate(f)}
-                disabled={gen === f.key}
-                className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] hover:border-accent/30 hover:text-accent disabled:opacity-50 px-2.5 py-1 text-[11px] transition-all"
-              >
-                {gen === f.key ? (
-                  <span className="w-3 h-3 border-2 border-muted/40 border-t-accent rounded-full animate-spin" />
-                ) : (
-                  icons.spark
-                )}
-                AI-genereer
-              </button>
             </div>
             <textarea
               name={f.key}
@@ -172,6 +141,7 @@ export function BrandDocs({
           {pending ? "Opslaan…" : "Brand-context opslaan"}
         </button>
       </form>
+      )}
     </Card>
   );
 }

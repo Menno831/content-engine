@@ -16,6 +16,8 @@ export async function persistMedia(
 ): Promise<number> {
   let count = 0;
   for (const m of result.media) {
+    // Carrousels doen klant/Menno zelf — die horen niet op het productieboard.
+    if (m.type === "Carrousel") continue;
     const { data: existing } = await admin
       .from("content")
       .select("id")

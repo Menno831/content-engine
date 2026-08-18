@@ -42,7 +42,10 @@ export async function updateProspectStageAction(prospectId: string, stage: strin
   if (!supabase) return { error: "Supabase niet geconfigureerd." };
   if (!STAGES.includes(stage as (typeof STAGES)[number])) return { error: "Ongeldige fase." };
 
-  const { error } = await supabase.from("prospects").update({ stage }).eq("id", prospectId);
+  // DM verstuurd -> tijdstip vastleggen voor de dagteller.
+  const patch: Record<string, unknown> = { stage };
+  if (stage === "dm_verstuurd") patch.dm_sent_at = new Date().toISOString();
+  const { error } = await supabase.from("prospects").update(patch).eq("id", prospectId);
   if (error) return { error: error.message };
 
   revalidatePath("/platform/outreach");

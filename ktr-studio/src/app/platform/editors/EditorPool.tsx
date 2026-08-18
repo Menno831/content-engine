@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { Card, Avatar, Badge } from "../_components";
 import { fmtEur, type Editor } from "../_data";
-import { updateEditorPoolAction } from "./actions";
+import { updateEditorPoolAction, updateEditorAction, deleteEditorAction } from "./actions";
 
 const POOL = ["actief", "pool", "gestopt"] as const;
 const poolColor: Record<string, string> = { actief: "#34D399", pool: "#FBBF24", gestopt: "#6B7280" };
@@ -76,6 +76,7 @@ export function EditorPool({ editors }: { editors: Editor[] }) {
                       <option key={s} value={s} className="bg-card text-foreground">{s === "pool" ? "pool (achterhand)" : s}</option>
                     ))}
                   </select>
+                  <EditEditorButton editor={e} />
                   <span className="sr-only"><Badge color={poolColor[g.status]}>{g.status}</Badge></span>
                 </Card>
               ))}
@@ -84,5 +85,101 @@ export function EditorPool({ editors }: { editors: Editor[] }) {
         </div>
       ))}
     </div>
+  );
+}
+
+
+// Bewerken + verwijderen per editor: naam, e-mail (voor de mails vanaf
+// het board), tarief, specialiteit, contact en portfolio.
+function EditEditorButton({ editor }: { editor: Editor }) {
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({
+    name: editor.name,
+    email: editor.email ?? "",
+    pay: String(editor.payPerVideo ?? 0),
+    specialty: editor.specialty ?? "",
+    contact: editor.contact ?? "",
+    portfolio: editor.portfolioUrl ?? "",
+    notes: editor.notes ?? "",
+  });
+  const [error, setError] = useState("");
+  const [ok, setOk] = useState("");
+  const [pending, start] = useTransition();
+
+  function save() {
+    start(async () => {
+      const r = await updateEditorAction(editor.id, {
+        name: form.name,
+        email: form.email,
+        pay_per_video: Number(form.pay) || 0,
+        specialty: form.specialty,
+        contact: form.contact,
+        portfolio_url: form.portfolio,
+        notes: form.notes,
+      });
+      setError(r.error ?? "");
+      setOk(r.ok ?? "");
+      if (r.ok) setTimeout(() => setOpen(false), 700);
+    });
+  }
+
+  function remove() {
+    if (!confirm(`${editor.name} verwijderen? Kaarten op het board raken de toewijzing kwijt.`)) return;
+    start(async () => {
+      const r = await deleteEditorAction(editor.id);
+      setError(r.error ?? "");
+      if (r.ok) setOpen(false);
+    });
+  }
+
+  const field = "w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-3.5 py-2.5 text-sm outline-none focus:border-accent/40";
+  const label = "block text-[12px] font-mono uppercase tracking-wider text-muted mb-1.5";
+
+  return (
+    <>
+      <button
+        onClick={() => { setOpen(true); setError(""); setOk(""); }}
+        className="w-full mt-2 rounded-lg border border-white/[0.08] hover:border-accent/30 hover:text-accent px-2.5 py-1.5 text-[12px] text-muted transition-all"
+      >
+        ✏️ Bewerken
+      </button>
+
+      {open && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setOpen(false)}>
+          <div className="w-full max-w-md bg-card border border-white/[0.08] rounded-2xl p-6 max-h-[90vh] overflow-y-auto" onClick={(ev) => ev.stopPropagation()}>
+            <h3 className="font-display font-extrabold text-xl mb-4">{editor.name}</h3>
+            <div className="space-y-3.5">
+              <label className="block"><span className={label}>Naam</span>
+                <input value={form.name} onChange={(ev) => setForm({ ...form, name: ev.target.value })} className={field} /></label>
+              <label className="block"><span className={label}>E-mail (voor de video-mails)</span>
+                <input value={form.email} onChange={(ev) => setForm({ ...form, email: ev.target.value })} placeholder="editor@mail.com" className={field} /></label>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="block"><span className={label}>Tarief / video (€)</span>
+                  <input value={form.pay} onChange={(ev) => setForm({ ...form, pay: ev.target.value })} type="number" className={field} /></label>
+                <label className="block"><span className={label}>Specialiteit</span>
+                  <input value={form.specialty} onChange={(ev) => setForm({ ...form, specialty: ev.target.value })} placeholder="Reels / longform" className={field} /></label>
+              </div>
+              <label className="block"><span className={label}>Contact (WhatsApp/IG)</span>
+                <input value={form.contact} onChange={(ev) => setForm({ ...form, contact: ev.target.value })} className={field} /></label>
+              <label className="block"><span className={label}>Portfolio-link</span>
+                <input value={form.portfolio} onChange={(ev) => setForm({ ...form, portfolio: ev.target.value })} placeholder="https://…" className={field} /></label>
+              <label className="block"><span className={label}>Notities</span>
+                <textarea value={form.notes} onChange={(ev) => setForm({ ...form, notes: ev.target.value })} rows={2} className={field + " resize-y"} /></label>
+
+              {error && <p className="text-[13px] text-red-400">{error}</p>}
+              {ok && <p className="text-[13px] text-emerald-400">{ok}</p>}
+
+              <div className="flex gap-2 pt-1">
+                <button onClick={() => setOpen(false)} className="flex-1 rounded-xl border border-white/[0.08] hover:border-white/20 py-2.5 text-sm transition-colors">Sluiten</button>
+                <button onClick={save} disabled={pending} className="flex-1 rounded-xl bg-accent hover:bg-accent-hover disabled:opacity-60 text-background font-bold text-sm py-2.5 transition-colors">{pending ? "…" : "Opslaan"}</button>
+              </div>
+              <button onClick={remove} disabled={pending} className="w-full rounded-xl border border-white/[0.08] hover:border-red-500/40 hover:text-red-400 py-2 text-[13px] text-muted transition-all">
+                🗑 Editor verwijderen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

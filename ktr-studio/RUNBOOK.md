@@ -18,6 +18,15 @@ Supabase SQL Editor gedraaid, Vercel via de lokaal ingelogde CLI.)
    achter elkaar geplakt); de code vangt dit sinds 18 aug op, maar netjes opnieuw
    zetten blijft beter. Na het zetten: redeploy zonder build-cache.
 
+3. **Outreach-berichten herschrijven** (na akkoord Menno over de toon): de 265
+   prospects hebben nog DM's in negging-stijl; nieuwe principes staan vast
+   (YouTube-first, positief, gratis waarde eerst, geen zwaktes benoemen).
+   Per prospect ook de "waarom fit" vanuit hun YouTube onderbouwen.
+4. **Rapporten-databronnen**: IG-sync draait en vult content+metrics (3 klanten).
+   YouTube wacht op `YOUTUBE_API_KEY`; alternatieve bronnen waar al abonnementen
+   op lopen: vidIQ, Metricool, Instagram-app-exports. ManyChat-koppeling voor
+   reply-detectie op outreach (auto "geen reactie"-scan) is een latere stap.
+
 ## Afgerond (18 aug 2026)
 - **Moneybird-check**: "invalid header value"-fout gefixt (token-sanering + token
   nooit meer in de foutmelding) en live geverifieerd: Finance toont facturen

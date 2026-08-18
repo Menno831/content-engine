@@ -24,6 +24,7 @@ function ytUrl(v: string): string {
 export function ProspectCard({ prospect: p, demo }: { prospect: Prospect; demo: boolean }) {
   const [copied, setCopied] = useState(false);
   const [showMsg, setShowMsg] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const handle = p.instagram ? igHandle(p.instagram) : null;
 
@@ -39,18 +40,20 @@ export function ProspectCard({ prospect: p, demo }: { prospect: Prospect; demo: 
   }
 
   return (
-    <Card hover className="p-4">
-      <div className="flex items-center gap-2.5 mb-3">
-        <Avatar initials={p.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()} size={32} />
-        <div className="min-w-0 flex-1">
-          <div className="text-sm font-medium truncate">{p.name}</div>
-          <div className="text-[11px] text-muted truncate">{p.instagram ?? p.youtube ?? "—"}</div>
+    <Card hover className="p-3.5">
+      {/* Ingeklapt: naam, waarde en de kanaal-links — meer niet. */}
+      <button onClick={() => setOpen((o) => !o)} className="w-full text-left">
+        <div className="flex items-center gap-2.5">
+          <Avatar initials={p.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()} size={30} />
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-medium truncate">{p.name}</div>
+          </div>
+          <span className="font-mono text-[12px] text-emerald-400 shrink-0">{fmtEur(p.potentialValue)}</span>
+          <span className="text-[11px] text-muted shrink-0">{open ? "▾" : "▸"}</span>
         </div>
-        <span className="font-mono text-[12px] text-emerald-400">{fmtEur(p.potentialValue)}</span>
-      </div>
+      </button>
 
-      {/* Kanalen checken: één klik naar het profiel */}
-      <div className="flex flex-wrap gap-1.5 mb-2.5">
+      <div className="flex flex-wrap gap-1.5 mt-2">
         {handle && (
           <a
             href={`https://instagram.com/${handle}`}
@@ -73,6 +76,8 @@ export function ProspectCard({ prospect: p, demo }: { prospect: Prospect; demo: 
         )}
       </div>
 
+      {!open ? null : (
+      <div className="mt-2.5">
       {p.weakness && (
         <div className="rounded-lg bg-white/[0.03] border border-white/[0.05] px-2.5 py-2 mb-2">
           <div className="text-[10px] font-mono uppercase tracking-wider text-muted mb-0.5">Waarom fit</div>
@@ -114,6 +119,8 @@ export function ProspectCard({ prospect: p, demo }: { prospect: Prospect; demo: 
 
       {p.note && <div className="text-[11px] text-muted">{p.note}</div>}
       {!demo && <ProspectStageControl prospectId={p.id} stage={p.stage} />}
+      </div>
+      )}
     </Card>
   );
 }

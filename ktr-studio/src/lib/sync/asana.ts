@@ -42,6 +42,8 @@ export async function syncClientAsana(clientId: string): Promise<AsanaSyncResult
 
   let touched = 0;
   for (const t of tasks) {
+    // Carrousels blijven buiten het board (doen klanten zelf).
+    if (/carr?ousel/i.test(t.name)) continue;
     const key = `asana:${t.gid}`;
     const row = byGid.get(key);
     if (!row) {

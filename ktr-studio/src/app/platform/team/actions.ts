@@ -57,3 +57,95 @@ export async function grantTeamLoginAction(_prev: TeamResult, formData: FormData
   revalidatePath("/platform/team");
   return { ok: `Login voor ${name} (${role}) aangemaakt.`, email, password };
 }
+
+// ── Teamlid bekijken, bewerken en wachtwoord resetten ───────────
+// E-mail en wachtwoord leven in Supabase Auth; alles loopt via de
+// admin-key en is afgeschermd tot owner/team van dezelfde agency.
+
+async function requireTeam() {
+  const { agency, profile } = await getSessionContext();
+  if (!agency) return { error: "Geen agency gevonden — log opnieuw in." as const };
+  if (profile && profile.role !== "owner" && profile.role !== "team") {
+    return { error: "Alleen owner/team mag dit." as const };
+  }
+  const admin = createAdminClient();
+  if (!admin) return { error: "Serverkey ontbreekt." as const };
+  return { agency, admin };
+}
+
+export interface MemberDetail {
+  user_id: string;
+  name: string;
+  role: string;
+  email: string;
+  editor_id: string | null;
+}
+
+export async function getTeamMemberAction(userId: string): Promise<{ error?: string; data?: MemberDetail }> {
+  const ctx = await requireTeam();
+  if ("error" in ctx) return { error: ctx.error };
+
+  const { data: profile } = await ctx.admin
+    .from("profiles")
+    .select("user_id, full_name, role, editor_id, agency_id")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (!profile || profile.agency_id !== ctx.agency.id) return { error: "Teamlid niet gevonden." };
+
+  const { data: userRes } = await ctx.admin.auth.admin.getUserById(userId);
+  return {
+    data: {
+      user_id: userId,
+      name: profile.full_name ?? "—",
+      role: profile.role ?? "team",
+      email: userRes?.user?.email ?? "",
+      editor_id: profile.editor_id ?? null,
+    },
+  };
+}
+
+export async function updateTeamMemberAction(
+  userId: string,
+  patch: { name?: string; role?: string; editor_id?: string | null }
+): Promise<TeamResult> {
+  const ctx = await requireTeam();
+  if ("error" in ctx) return { error: ctx.error };
+
+  const update: Record<string, unknown> = {};
+  if (patch.name !== undefined) update.full_name = patch.name.trim() || "—";
+  if (patch.role !== undefined) {
+    if (!ROLES.includes(patch.role as (typeof ROLES)[number]) && patch.role !== "owner") return { error: "Ongeldige rol." };
+    update.role = patch.role;
+  }
+  if (patch.editor_id !== undefined) update.editor_id = patch.editor_id || null;
+
+  const { error } = await ctx.admin
+    .from("profiles")
+    .update(update)
+    .eq("user_id", userId)
+    .eq("agency_id", ctx.agency.id);
+  if (error) return { error: error.message };
+
+  revalidatePath("/platform/team");
+  return { ok: "Opgeslagen." };
+}
+
+// Nieuw wachtwoord genereren (het oude is niet terug te halen) en
+// tonen, zodat je het direct kunt doorsturen met de login-link.
+export async function resetTeamPasswordAction(userId: string): Promise<TeamResult> {
+  const ctx = await requireTeam();
+  if ("error" in ctx) return { error: ctx.error };
+
+  const { data: profile } = await ctx.admin
+    .from("profiles")
+    .select("agency_id")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (!profile || profile.agency_id !== ctx.agency.id) return { error: "Teamlid niet gevonden." };
+
+  const password = randomBytes(9).toString("base64").replace(/[^a-zA-Z0-9]/g, "").slice(0, 12) + "9!";
+  const { data: updated, error } = await ctx.admin.auth.admin.updateUserById(userId, { password });
+  if (error) return { error: error.message };
+
+  return { ok: "Nieuw wachtwoord gezet.", email: updated?.user?.email ?? undefined, password };
+}

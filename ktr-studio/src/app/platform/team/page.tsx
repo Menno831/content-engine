@@ -1,9 +1,10 @@
-import { PageHeader, Card, Avatar, Badge } from "../_components";
+import { PageHeader, Card } from "../_components";
 import { DEMO_MODE, isSupabaseConfigured } from "@/lib/config";
 import { createClient } from "@/lib/supabase/server";
 import { getEditors } from "@/lib/editors";
 import { team as demoTeam, type TeamMember } from "../_data";
 import { AddTeamDialog } from "./AddTeamDialog";
+import { TeamMemberCard } from "./MemberDialog";
 
 const roleMeta: Record<string, { label: string; color: string }> = {
   owner: { label: "Owner", color: "#F97316" },
@@ -47,14 +48,13 @@ export default async function TeamPage() {
         {members.map((m) => {
           const r = roleMeta[m.role] ?? roleMeta.team;
           return (
-            <Card key={m.id} hover className="p-5 flex items-center gap-3">
-              <Avatar initials={m.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()} size={42} />
-              <div className="min-w-0 flex-1">
-                <div className="font-medium truncate">{m.name}</div>
-                {m.email && <div className="text-[12px] text-muted truncate">{m.email}</div>}
-              </div>
-              <Badge color={r.color}>{r.label}</Badge>
-            </Card>
+            <TeamMemberCard
+              key={m.id}
+              member={{ id: m.id, name: m.name, role: m.role }}
+              roleLabel={r.label}
+              roleColor={r.color}
+              editors={editorOptions}
+            />
           );
         })}
       </div>

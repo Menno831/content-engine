@@ -30,11 +30,18 @@ export async function getProspects(): Promise<Prospect[]> {
   let data: any[] | null = null;
   const first = await supabase
     .from("prospects")
-    .select(`${base},message`)
+    .select(`${base},message,dm_sent_at`)
     .order("created_at", { ascending: false });
   if (first.error) {
-    const fallback = await supabase.from("prospects").select(base).order("created_at", { ascending: false });
-    data = fallback.data;
+    // Migratie 023 (dm_sent_at) nog niet gedraaid? Probeer met alleen message;
+    // daarna desnoods puur de basiskolommen (pre-021).
+    const second = await supabase.from("prospects").select(`${base},message`).order("created_at", { ascending: false });
+    if (second.error) {
+      const fallback = await supabase.from("prospects").select(base).order("created_at", { ascending: false });
+      data = fallback.data;
+    } else {
+      data = second.data;
+    }
   } else {
     data = first.data;
   }
@@ -48,6 +55,7 @@ export async function getProspects(): Promise<Prospect[]> {
     stage: (p.stage ?? "te_contacteren") as Prospect["stage"],
     potentialValue: Number(p.potential_value ?? 0),
     note: p.note ?? null,
+    dmSentAt: p.dm_sent_at ?? null,
     message: p.message ?? null,
   }));
   /* eslint-enable @typescript-eslint/no-explicit-any */

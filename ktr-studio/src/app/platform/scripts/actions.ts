@@ -36,7 +36,7 @@ export async function createScriptAction(input?: { title?: string; tag?: string 
 // Autosave vanaf de editor: alleen de meegegeven velden worden bijgewerkt.
 export async function updateScriptAction(
   scriptId: string,
-  patch: { title?: string; content?: string; status?: string; tag?: string; client_id?: string | null }
+  patch: { title?: string; content?: string; status?: string; tag?: string; location?: string; review_note?: string; client_id?: string | null }
 ): Promise<ScriptResult> {
   const supabase = await supabaseServer();
   if (!supabase) return { error: "Supabase niet geconfigureerd." };
@@ -46,6 +46,8 @@ export async function updateScriptAction(
   if (patch.content !== undefined) update.content = patch.content;
   if (patch.status !== undefined) update.status = patch.status;
   if (patch.tag !== undefined) update.tag = patch.tag.trim() || null;
+  if (patch.location !== undefined) update.location = patch.location.trim() || null;
+  if (patch.review_note !== undefined) update.review_note = patch.review_note.trim() || null;
   if (patch.client_id !== undefined) update.client_id = patch.client_id || null;
 
   const { error } = await supabase.from("scripts").update(update).eq("id", scriptId);

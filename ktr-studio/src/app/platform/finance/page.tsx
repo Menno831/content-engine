@@ -5,6 +5,10 @@ import { getMoneybirdMonth } from "@/lib/integrations/moneybird";
 import { fmtEur } from "../_data";
 import { PaymentStatusControl } from "./PaymentStatusControl";
 import { ExportButton } from "../ExportButton";
+import { InvoiceCost } from "./InvoiceCost";
+import { FixedCosts, type FixedCostRow } from "./FixedCosts";
+import { createClient as supabaseServer } from "@/lib/supabase/server";
+import Link from "next/link";
 
 const invoiceStateColor: Record<string, string> = {
   paid: "#34D399",
@@ -21,12 +25,42 @@ const invoiceStateLabel: Record<string, string> = {
   uncollectible: "oninbaar",
 };
 
-export default async function FinancePage() {
+export default async function FinancePage({ searchParams }: { searchParams: Promise<{ maand?: string }> }) {
+  const sp = await searchParams;
+
+  // Maandkeuze: chips vanaf januari 2026 t/m nu; zonder ?maand = deze maand.
+  const now = new Date();
+  const thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const months: string[] = [];
+  for (let d = new Date(2026, 0, 1); d <= now; d.setMonth(d.getMonth() + 1)) {
+    months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+  }
+  const maand = sp.maand && /^\d{4}-\d{2}$/.test(sp.maand) ? sp.maand : thisMonth;
+  const maandLabel = new Date(`${maand}-01`).toLocaleDateString("nl-NL", { month: "long", year: "numeric" });
+  const isCurrentMonth = maand === thisMonth;
+
   const [{ clients, demo }, { agency }, moneybird] = await Promise.all([
     getWorkspaceData(),
     getSessionContext(),
-    getMoneybirdMonth(),
+    getMoneybirdMonth(isCurrentMonth ? undefined : maand),
   ]);
+
+  // Kosten per factuur + vaste lasten (migratie 023; ontbreekt die, dan leeg).
+  const supabase = await supabaseServer();
+  let invoiceCostById = new Map<string, number>();
+  let fixedCosts: FixedCostRow[] = [];
+  if (supabase && !demo) {
+    const ids = moneybird.invoices.map((i) => i.id);
+    const [costsRes, fixedRes] = await Promise.all([
+      ids.length ? supabase.from("invoice_costs").select("id,cost").in("id", ids) : Promise.resolve({ data: [] as { id: string; cost: number }[] }),
+      supabase.from("fixed_costs").select("id,name,amount").order("created_at"),
+    ]);
+    invoiceCostById = new Map((costsRes.data ?? []).map((r) => [String(r.id), Number(r.cost ?? 0)]));
+    fixedCosts = ((fixedRes.data ?? []) as { id: string; name: string; amount: number }[]).map((r) => ({ id: r.id, name: r.name, amount: Number(r.amount ?? 0) }));
+  }
+  const invoiceCostsSum = moneybird.invoices.reduce((s, i) => s + (invoiceCostById.get(i.id) ?? 0), 0);
+  const fixedTotal = fixedCosts.reduce((s, r) => s + r.amount, 0);
+  const monthProfit = moneybird.invoiced - invoiceCostsSum - fixedTotal;
   const billable = clients.filter((c) => c.status !== "gepauzeerd");
   const target = Number(agency?.monthly_target ?? 0);
 
@@ -109,12 +143,12 @@ export default async function FinancePage() {
       {/* Moneybird: wat er deze maand écht binnenkomt (facturen, excl. btw) */}
       {!demo && moneybird.configured && (
         <Card className="p-6 mb-6">
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
             <div>
-              <Eyebrow>Moneybird · deze maand</Eyebrow>
+              <Eyebrow>Moneybird · {maandLabel}</Eyebrow>
               <h2 className="font-display font-extrabold text-xl">Wat er binnenkomt</h2>
             </div>
-            <div className="flex items-center gap-5 text-sm">
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
               <span>
                 <span className="text-muted text-[12px]">Gefactureerd </span>
                 <strong className="font-mono">{fmtEur(moneybird.invoiced)}</strong>
@@ -128,15 +162,38 @@ export default async function FinancePage() {
                 <strong className="font-mono text-amber-300">{fmtEur(moneybird.open)}</strong>
               </span>
               <span>
-                <span className="text-muted text-[12px]">Winst na editors </span>
-                <strong className="font-mono text-emerald-400">{fmtEur(moneybird.invoiced - editorCosts)}</strong>
+                <span className="text-muted text-[12px]">Kosten </span>
+                <strong className="font-mono text-red-400">{fmtEur(invoiceCostsSum + fixedTotal)}</strong>
+              </span>
+              <span>
+                <span className="text-muted text-[12px]">Winst </span>
+                <strong className={`font-mono ${monthProfit >= 0 ? "text-emerald-400" : "text-red-400"}`}>{fmtEur(monthProfit)}</strong>
               </span>
             </div>
+          </div>
+
+          {/* Maandkiezer: klik door de maanden vanaf januari */}
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {months.map((m) => {
+              const label = new Date(`${m}-01`).toLocaleDateString("nl-NL", { month: "short" });
+              const activeMonth = m === maand;
+              return (
+                <Link
+                  key={m}
+                  href={m === thisMonth ? "/platform/finance" : `/platform/finance?maand=${m}`}
+                  className={`rounded-full px-3 py-1 text-[12px] transition-all ${
+                    activeMonth ? "bg-accent text-background font-bold" : "border border-white/[0.08] text-muted hover:border-accent/30 hover:text-accent"
+                  }`}
+                >
+                  {label} {m.slice(0, 4) !== String(now.getFullYear()) ? m.slice(2, 4) : ""}
+                </Link>
+              );
+            })}
           </div>
           {moneybird.error ? (
             <p className="text-[13px] text-amber-300">{moneybird.error}</p>
           ) : moneybird.invoices.length === 0 ? (
-            <p className="text-[13px] text-muted">Nog geen facturen deze maand.</p>
+            <p className="text-[13px] text-muted">Geen facturen in {maandLabel}.</p>
           ) : (
             <div className="space-y-1">
               {moneybird.invoices.map((inv) => (
@@ -148,8 +205,9 @@ export default async function FinancePage() {
                       {inv.dueDate && ` · vervalt ${new Date(inv.dueDate).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}`}
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 shrink-0">
+                  <div className="flex flex-wrap items-center gap-3 shrink-0 justify-end">
                     <span className="font-mono text-sm">{fmtEur(inv.totalExcl)}</span>
+                    <InvoiceCost invoiceId={inv.id} totalExcl={inv.totalExcl} initialCost={invoiceCostById.get(inv.id) ?? 0} />
                     <Badge color={invoiceStateColor[inv.state] ?? "#6B7280"}>
                       {invoiceStateLabel[inv.state] ?? inv.state}
                     </Badge>
@@ -211,7 +269,8 @@ export default async function FinancePage() {
           </div>
         </Card>
 
-        {/* Per pakket */}
+        {/* Per pakket + vaste lasten */}
+        <div className="space-y-6">
         <Card className="p-6">
           <Eyebrow>Per pakket</Eyebrow>
           <h2 className="font-display font-extrabold text-xl mb-5">Pakketten</h2>
@@ -233,6 +292,8 @@ export default async function FinancePage() {
             ))}
           </div>
         </Card>
+        {!demo && <FixedCosts initial={fixedCosts} />}
+        </div>
       </div>
     </>
   );

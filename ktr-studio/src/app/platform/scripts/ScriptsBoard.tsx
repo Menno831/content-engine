@@ -14,14 +14,17 @@ export interface ScriptRow {
   id: string;
   title: string;
   content: string | null;
-  status: string; // to_write | to_record | recorded
+  status: string; // to_write | to_review | to_record | recorded
   tag: string | null;
+  location: string | null;
+  review_note: string | null;
   client_id: string | null;
   updated_at: string;
 }
 
 const STATUS = [
   { id: "to_write", label: "Nog schrijven", color: "#FBBF24" },
+  { id: "to_review", label: "Nog aanpassen", color: "#F87171" },
   { id: "to_record", label: "Klaar om op te nemen", color: "#F97316" },
   { id: "recorded", label: "Opgenomen", color: "#34D399" },
 ];
@@ -32,14 +35,22 @@ export function ScriptsBoard({ initial, clients }: { initial: ScriptRow[]; clien
   const [scripts, setScripts] = useState(initial);
   const [activeId, setActiveId] = useState<string | null>(initial[0]?.id ?? null);
   const [filter, setFilter] = useState<string>("");
+  const [locFilter, setLocFilter] = useState<string>("");
   const [saved, setSaved] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [pendingNew, startNew] = useTransition();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const active = scripts.find((s) => s.id === activeId) ?? null;
+  const locations = useMemo(
+    () => [...new Set(scripts.map((s) => (s.location ?? "").trim()).filter(Boolean))].sort(),
+    [scripts]
+  );
   const shown = useMemo(
-    () => (filter ? scripts.filter((s) => s.status === filter) : scripts),
-    [scripts, filter]
+    () =>
+      scripts
+        .filter((s) => (filter ? s.status === filter : true))
+        .filter((s) => (locFilter ? (s.location ?? "").trim() === locFilter : true)),
+    [scripts, filter, locFilter]
   );
 
   // Debounced autosave: lokaal bijwerken, na 0,8s naar de server.
@@ -53,6 +64,8 @@ export function ScriptsBoard({ initial, clients }: { initial: ScriptRow[]; clien
         content: p.content ?? undefined,
         status: p.status,
         tag: p.tag ?? undefined,
+        location: p.location ?? undefined,
+        review_note: p.review_note ?? undefined,
         client_id: p.client_id,
       });
       setSaved(r.error ? "error" : "saved");
@@ -71,6 +84,8 @@ export function ScriptsBoard({ initial, clients }: { initial: ScriptRow[]; clien
           content: "",
           status: "to_write",
           tag: null,
+          location: null,
+          review_note: null,
           client_id: null,
           updated_at: new Date().toISOString(),
         };
@@ -113,6 +128,19 @@ export function ScriptsBoard({ initial, clients }: { initial: ScriptRow[]; clien
             />
           ))}
         </div>
+        {locations.length > 0 && (
+          <div className="flex gap-1.5 mb-3 flex-wrap">
+            <FilterPill active={!locFilter} label="Overal opnemen" onClick={() => setLocFilter("")} />
+            {locations.map((l) => (
+              <FilterPill
+                key={l}
+                active={locFilter === l}
+                label={`📍 ${l} (${scripts.filter((x) => (x.location ?? "").trim() === l).length})`}
+                onClick={() => setLocFilter(l)}
+              />
+            ))}
+          </div>
+        )}
         <div className="space-y-2 max-h-[65vh] overflow-y-auto pr-1">
           {shown.map((s) => (
             <button
@@ -130,7 +158,8 @@ export function ScriptsBoard({ initial, clients }: { initial: ScriptRow[]; clien
               </div>
               <div className="text-[11px] text-muted mt-0.5 truncate">
                 {s.tag && <span className="text-accent">#{s.tag} · </span>}
-                {(s.content ?? "").slice(0, 60) || "Nog leeg"}
+                {s.location && <span>📍 {s.location} · </span>}
+                {s.status === "to_review" && s.review_note ? `✏️ ${s.review_note}` : (s.content ?? "").slice(0, 60) || "Nog leeg"}
               </div>
             </button>
           ))}
@@ -165,8 +194,15 @@ export function ScriptsBoard({ initial, clients }: { initial: ScriptRow[]; clien
             <input
               value={active.tag ?? ""}
               onChange={(e) => patch(active.id, { tag: e.target.value })}
-              placeholder="Tag (bv. Mexico)"
-              className="w-36 rounded-lg border border-white/[0.08] bg-white/[0.02] px-2.5 py-1.5 text-[13px] outline-none focus:border-accent/40"
+              placeholder="Tag (bv. Story)"
+              className="w-32 rounded-lg border border-white/[0.08] bg-white/[0.02] px-2.5 py-1.5 text-[13px] outline-none focus:border-accent/40"
+            />
+            <input
+              value={active.location ?? ""}
+              onChange={(e) => patch(active.id, { location: e.target.value })}
+              placeholder="📍 Locatie (bv. Mexico)"
+              className="w-40 rounded-lg border border-white/[0.08] bg-white/[0.02] px-2.5 py-1.5 text-[13px] outline-none focus:border-accent/40"
+              title="Waar moet dit opgenomen worden? Zelfde naam = zelfde filter."
             />
             <select
               value={active.client_id ?? ""}
@@ -186,6 +222,15 @@ export function ScriptsBoard({ initial, clients }: { initial: ScriptRow[]; clien
             </button>
           </div>
 
+          {active.status === "to_review" && (
+            <textarea
+              value={active.review_note ?? ""}
+              onChange={(e) => patch(active.id, { review_note: e.target.value })}
+              placeholder="Wat moet er nog aangepast? (bv. hook strakker, voorbeeld vervangen, intro korter)"
+              rows={2}
+              className="w-full mb-3 rounded-xl border border-red-400/25 bg-red-400/[0.04] px-4 py-2.5 text-[13px] outline-none focus:border-red-400/50 transition-colors resize-y"
+            />
+          )}
           <textarea
             value={active.content ?? ""}
             onChange={(e) => patch(active.id, { content: e.target.value })}

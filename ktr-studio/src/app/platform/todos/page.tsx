@@ -7,6 +7,7 @@ import { AddTodoDialog } from "./AddTodoDialog";
 import { QuickAddTodo } from "./QuickAddTodo";
 import { NoData } from "../_states";
 import { ClientFilter } from "../ClientFilter";
+import { PersonalTodos } from "./PersonalTodos";
 
 export default async function TodosPage({ searchParams }: { searchParams: Promise<{ client?: string }> }) {
   const sp = await searchParams;
@@ -14,8 +15,12 @@ export default async function TodosPage({ searchParams }: { searchParams: Promis
   const isClient = ctx.profile?.role === "client";
   const clientOptions = clients.map((c) => ({ id: c.id, label: c.name }));
 
+  // Persoonlijke taken (van deze gebruiker) los van de klant-taken.
+  const personal = allTodos.filter((t) => t.userId && t.userId === ctx.user?.id);
+  const clientTodos = allTodos.filter((t) => !t.userId);
+
   const activeClient = clients.find((c) => c.id === sp.client);
-  const todos = activeClient ? allTodos.filter((t) => t.client === activeClient.name) : allTodos;
+  const todos = activeClient ? clientTodos.filter((t) => t.client === activeClient.name) : clientTodos;
 
   const open = todos.filter((t) => !t.done);
   const done = todos.filter((t) => t.done);
@@ -37,6 +42,9 @@ export default async function TodosPage({ searchParams }: { searchParams: Promis
 
       {!isClient && <ClientFilter clients={clients.map((c) => ({ id: c.id, name: c.name }))} allLabel={isEditor ? "All clients" : "Alle klanten"} />}
 
+      {!isClient && !isEditor && <PersonalTodos initial={personal} />}
+
+      {!isClient && !isEditor && <h2 className="font-display font-extrabold text-xl mb-3">Klant-taken</h2>}
       {!isClient && !isEditor && <QuickAddTodo clients={clientOptions} />}
 
       {todos.length === 0 ? (
