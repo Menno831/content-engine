@@ -59,7 +59,7 @@ export async function updateEditorPoolAction(editorId: string, status: string): 
 // ── Editor bewerken en verwijderen ──────────────────────────────
 export async function updateEditorAction(
   editorId: string,
-  patch: { name?: string; email?: string; pay_per_video?: number; specialty?: string; contact?: string; portfolio_url?: string; notes?: string }
+  patch: { name?: string; email?: string; pay_per_video?: number; specialty?: string; contact?: string; portfolio_url?: string; notes?: string; client_ids?: string[] }
 ): Promise<EditorActionResult> {
   const supabase = await supabaseServer();
   if (!supabase) return { error: "Supabase niet geconfigureerd." };
@@ -72,6 +72,7 @@ export async function updateEditorAction(
   if (patch.contact !== undefined) update.contact = patch.contact.trim() || null;
   if (patch.portfolio_url !== undefined) update.portfolio_url = patch.portfolio_url.trim() || null;
   if (patch.notes !== undefined) update.notes = patch.notes.trim() || null;
+  if (patch.client_ids !== undefined) update.client_ids = patch.client_ids.length ? patch.client_ids : null;
 
   const { error } = await supabase.from("editors").update(update).eq("id", editorId);
   if (error) return { error: error.message };

@@ -69,9 +69,19 @@ export default async function Pipeline({ searchParams }: { searchParams: Promise
   const activeClient = clients.find((c) => c.id === sp.client);
   let contentCards = activeClient ? namedContent.filter((c) => c.client === activeClient.name) : namedContent;
 
-  // Editor-login met gekoppelde editor: alleen de eigen kaarten.
+  // Editor-login met gekoppelde editor: alleen de eigen kaarten — en als
+  // de editor aan klant(en) gekoppeld is, alleen de borden van die klanten
+  // (toegewezen aan hem/haar, of nog niet toegewezen).
   const ownEditorId = ctx.profile?.role === "editor" ? ctx.profile.editor_id : null;
-  if (ownEditorId) contentCards = contentCards.filter((c) => c.editorId === ownEditorId);
+  if (ownEditorId) {
+    const own = editors.find((e) => e.id === ownEditorId);
+    const allowedNames = new Set(
+      (own?.clientIds ?? []).map((id) => clients.find((c) => c.id === id)?.name).filter(Boolean) as string[]
+    );
+    contentCards = allowedNames.size
+      ? contentCards.filter((c) => allowedNames.has(c.client) && (c.editorId === ownEditorId || !c.editorId))
+      : contentCards.filter((c) => c.editorId === ownEditorId);
+  }
 
   // Editor-rol: Engelstalige schermteksten (editors zijn vaak Engelstalig).
   // Owner/team kan met ?view=editor precies zien wat een editor ziet,

@@ -220,6 +220,8 @@ export interface Editor {
   contact?: string | null;
   portfolioUrl?: string | null;
   notes?: string | null;
+  /** Op welke klant(en) deze editor zit — login ziet alleen die borden. */
+  clientIds?: string[] | null;
 }
 
 export const editors: Editor[] = [

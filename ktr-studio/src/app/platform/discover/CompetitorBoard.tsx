@@ -50,16 +50,18 @@ export function CompetitorBoard({ competitors, posts }: { competitors: Competito
   const [query, setQuery] = useState("");
   const [activeComp, setActiveComp] = useState<string>("");
   const [onlyOutliers, setOnlyOutliers] = useState(false);
+  const [platform, setPlatform] = useState<"" | "instagram" | "youtube">("");
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return posts.filter((p) => {
+      if (platform && p.platform !== platform) return false;
       if (activeComp && p.competitorId !== activeComp) return false;
       if (onlyOutliers && !p.outlier) return false;
       if (q && !p.caption.toLowerCase().includes(q) && !p.handle.toLowerCase().includes(q)) return false;
       return true;
     });
-  }, [posts, query, activeComp, onlyOutliers]);
+  }, [posts, query, activeComp, onlyOutliers, platform]);
 
   return (
     <>
@@ -90,7 +92,19 @@ export function CompetitorBoard({ competitors, posts }: { competitors: Competito
         {syncMsg.error && <p className="mt-2 text-[13px] text-red-400">{syncMsg.error}</p>}
 
         {competitors.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-4">
+          <div className="flex flex-wrap items-center gap-2 mt-4">
+            {(["", "instagram", "youtube"] as const).map((pf) => (
+              <button
+                key={pf || "alles"}
+                onClick={() => setPlatform(pf)}
+                className={`rounded-lg px-3 py-1.5 text-[12px] font-bold transition-all ${
+                  platform === pf ? "bg-white/[0.1] text-foreground" : "border border-white/[0.08] text-muted hover:text-accent"
+                }`}
+              >
+                {pf === "" ? "IG + YT" : pf === "instagram" ? "📸 Instagram" : "▶️ YouTube"}
+              </button>
+            ))}
+            <span className="w-px h-5 bg-white/[0.08] mx-1" />
             <button
               onClick={() => setActiveComp("")}
               className={`rounded-full px-3 py-1.5 text-[12px] transition-all ${
@@ -110,6 +124,7 @@ export function CompetitorBoard({ competitors, posts }: { competitors: Competito
                   }`}
                   title={`${c.followers ? fmtNum(c.followers) + " volgers · " : ""}${c.postCount} posts`}
                 >
+                  {c.platform === "youtube" ? "▶️ " : "📸 "}
                   {c.handle}
                 </button>
                 <button
@@ -185,6 +200,7 @@ export function CompetitorBoard({ competitors, posts }: { competitors: Competito
             <Card key={p.id} hover className="p-4">
               <div className="flex items-center justify-between mb-2.5">
                 <div className="flex items-center gap-2">
+                  <Badge color={p.platform === "youtube" ? "#F87171" : "#A78BFA"}>{p.platform === "youtube" ? "YouTube" : "IG"}</Badge>
                   <Badge color={formatColor[p.format] ?? "#888"}>{p.format}</Badge>
                   {p.outlier && <Badge color="#F87171">🔥 {p.multiplier}x outlier</Badge>}
                 </div>

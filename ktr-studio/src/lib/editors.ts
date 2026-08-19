@@ -11,7 +11,7 @@ export async function getEditors(): Promise<Editor[]> {
   if (!supabase) return [];
 
   const [{ data: editorRows }, { data: contentRows }] = await Promise.all([
-    supabase.from("editors").select("id,name,email,pay_per_video,active,specialty,pool_status,contact,portfolio_url,notes").order("active", { ascending: false }),
+    supabase.from("editors").select("id,name,email,pay_per_video,active,specialty,pool_status,contact,portfolio_url,notes,client_ids").order("active", { ascending: false }),
     supabase.from("content").select("editor_id,stage,deadline,posting_date,published_at,delivered_at"),
   ]);
 
@@ -45,6 +45,7 @@ export async function getEditors(): Promise<Editor[]> {
       contact: e.contact ?? null,
       portfolioUrl: e.portfolio_url ?? null,
       notes: e.notes ?? null,
+      clientIds: (e.client_ids as string[] | null) ?? null,
     };
   });
 }

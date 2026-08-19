@@ -8,7 +8,12 @@ import { updateEditorPoolAction, updateEditorAction, deleteEditorAction } from "
 const POOL = ["actief", "pool", "gestopt"] as const;
 const poolColor: Record<string, string> = { actief: "#34D399", pool: "#FBBF24", gestopt: "#6B7280" };
 
-export function EditorPool({ editors }: { editors: Editor[] }) {
+interface ClientOption {
+  id: string;
+  label: string;
+}
+
+export function EditorPool({ editors, clients }: { editors: Editor[]; clients: ClientOption[] }) {
   const [, start] = useTransition();
   const [msg, setMsg] = useState<string | null>(null);
 
@@ -76,7 +81,7 @@ export function EditorPool({ editors }: { editors: Editor[] }) {
                       <option key={s} value={s} className="bg-card text-foreground">{s === "pool" ? "pool (achterhand)" : s}</option>
                     ))}
                   </select>
-                  <EditEditorButton editor={e} />
+                  <EditEditorButton editor={e} clients={clients} />
                   <span className="sr-only"><Badge color={poolColor[g.status]}>{g.status}</Badge></span>
                 </Card>
               ))}
@@ -91,7 +96,7 @@ export function EditorPool({ editors }: { editors: Editor[] }) {
 
 // Bewerken + verwijderen per editor: naam, e-mail (voor de mails vanaf
 // het board), tarief, specialiteit, contact en portfolio.
-function EditEditorButton({ editor }: { editor: Editor }) {
+function EditEditorButton({ editor, clients }: { editor: Editor; clients: ClientOption[] }) {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     name: editor.name,
@@ -102,6 +107,7 @@ function EditEditorButton({ editor }: { editor: Editor }) {
     portfolio: editor.portfolioUrl ?? "",
     notes: editor.notes ?? "",
   });
+  const [clientIds, setClientIds] = useState<string[]>(editor.clientIds ?? []);
   const [error, setError] = useState("");
   const [ok, setOk] = useState("");
   const [pending, start] = useTransition();
@@ -116,6 +122,7 @@ function EditEditorButton({ editor }: { editor: Editor }) {
         contact: form.contact,
         portfolio_url: form.portfolio,
         notes: form.notes,
+        client_ids: clientIds,
       });
       setError(r.error ?? "");
       setOk(r.ok ?? "");
@@ -163,6 +170,28 @@ function EditEditorButton({ editor }: { editor: Editor }) {
                 <input value={form.contact} onChange={(ev) => setForm({ ...form, contact: ev.target.value })} className={field} /></label>
               <label className="block"><span className={label}>Portfolio-link</span>
                 <input value={form.portfolio} onChange={(ev) => setForm({ ...form, portfolio: ev.target.value })} placeholder="https://…" className={field} /></label>
+              <div>
+                <span className={label}>Zit op klant(en) — login ziet alleen deze borden</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {clients.map((c) => {
+                    const on = clientIds.includes(c.id);
+                    return (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => setClientIds((cur) => (on ? cur.filter((x) => x !== c.id) : [...cur, c.id]))}
+                        className={`rounded-full px-3 py-1.5 text-[12px] transition-all ${
+                          on ? "bg-accent text-background font-bold" : "border border-white/[0.08] text-muted hover:border-accent/30 hover:text-accent"
+                        }`}
+                      >
+                        {c.label}
+                      </button>
+                    );
+                  })}
+                  {clients.length === 0 && <span className="text-[12px] text-muted">Nog geen klanten.</span>}
+                </div>
+                <p className="text-[11px] text-muted mt-1">Niks aangevinkt = alle klanten zichtbaar (zoals nu).</p>
+              </div>
               <label className="block"><span className={label}>Notities</span>
                 <textarea value={form.notes} onChange={(ev) => setForm({ ...form, notes: ev.target.value })} rows={2} className={field + " resize-y"} /></label>
 

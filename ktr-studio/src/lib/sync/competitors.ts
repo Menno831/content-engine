@@ -69,14 +69,14 @@ export async function syncCompetitorCore(competitorId: string): Promise<Competit
   } catch (e) {
     const msg = e instanceof Error ? e.message : "sync mislukt";
     const isYt = asYouTube(comp.handle as string) !== null;
-    return {
-      ok: false,
-      error:
-        msg === "not_configured"
-          ? isYt
-            ? "YOUTUBE_API_KEY ontbreekt (YouTube-bron)."
-            : "RAPIDAPI_KEY ontbreekt (Instagram-bron)."
-          : msg,
-    };
+    const friendly =
+      msg === "not_configured"
+        ? isYt
+          ? "YOUTUBE_API_KEY ontbreekt (YouTube-bron)."
+          : "RAPIDAPI_KEY ontbreekt (Instagram-bron)."
+        : msg === "not_found" || /profile: (404|500)/.test(msg)
+          ? `Account ${comp.handle} niet gevonden — check de spelling (verwijder en voeg de juiste handle toe).`
+          : msg;
+    return { ok: false, error: friendly };
   }
 }

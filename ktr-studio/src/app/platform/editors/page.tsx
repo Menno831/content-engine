@@ -2,6 +2,7 @@ import { redirectEditorToBoard } from "@/lib/guard";
 import Link from "next/link";
 import { PageHeader, Card, Stat, Avatar, Badge, icons } from "../_components";
 import { getEditors } from "@/lib/editors";
+import { getWorkspaceData } from "@/lib/data";
 import { fmtEur, editorPayout, LATE_DEDUCTION } from "../_data";
 import { AddEditorDialog } from "./AddEditorDialog";
 import { EditorPool } from "./EditorPool";
@@ -12,7 +13,8 @@ export default async function EditorsPage({ searchParams }: { searchParams: Prom
   await redirectEditorToBoard();
   const sp = await searchParams;
   const tab = sp.tab === "pool" ? "pool" : "payouts";
-  const editors = await getEditors();
+  const [editors, { clients }] = await Promise.all([getEditors(), getWorkspaceData()]);
+  const clientOptions = clients.map((c) => ({ id: c.id, label: c.name }));
   const active = editors.filter((e) => e.active);
 
   const totalVideos = active.reduce((s, e) => s + e.videosThisMonth, 0);
@@ -67,7 +69,7 @@ export default async function EditorsPage({ searchParams }: { searchParams: Prom
       </div>
 
       {tab === "pool" ? (
-        editors.length === 0 ? <NoData label="Nog geen editors" /> : <EditorPool editors={editors} />
+        editors.length === 0 ? <NoData label="Nog geen editors" /> : <EditorPool editors={editors} clients={clientOptions} />
       ) : (
       <>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

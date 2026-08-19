@@ -6,9 +6,16 @@
 import { DEMO_MODE, isSupabaseConfigured } from "@/lib/config";
 import { createClient } from "@/lib/supabase/server";
 
+// Zelfde herkenning als de sync: YouTube-URL, UC…-id of "yt:"-prefix.
+function platformOf(handle: string): "instagram" | "youtube" {
+  const h = (handle ?? "").trim();
+  return /^yt:/i.test(h) || /youtube\.com\//i.test(h) || /^UC[\w-]{21,22}$/.test(h) ? "youtube" : "instagram";
+}
+
 export interface Competitor {
   id: string;
   handle: string;
+  platform: "instagram" | "youtube";
   name: string | null;
   niche: string | null;
   followers: number | null;
@@ -20,6 +27,7 @@ export interface CompetitorPost {
   id: string;
   competitorId: string;
   handle: string;
+  platform: "instagram" | "youtube";
   caption: string;
   format: string;
   permalink: string | null;
@@ -68,6 +76,7 @@ export async function getCompetitorFeed(): Promise<{ competitors: Competitor[]; 
       id: p.id,
       competitorId: p.competitor_id,
       handle: handleById.get(p.competitor_id) ?? "—",
+      platform: platformOf(handleById.get(p.competitor_id) ?? ""),
       caption: p.caption ?? "",
       format: p.format ?? "Reel",
       permalink: p.permalink ?? null,
@@ -85,6 +94,7 @@ export async function getCompetitorFeed(): Promise<{ competitors: Competitor[]; 
 
   const competitors: Competitor[] = (comps ?? []).map((c) => ({
     id: c.id,
+    platform: platformOf(c.handle as string),
     handle: c.handle,
     name: c.name ?? null,
     niche: c.niche ?? null,

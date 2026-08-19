@@ -8,6 +8,9 @@ import { PaymentStatusControl } from "./PaymentStatusControl";
 import { ExportButton } from "../ExportButton";
 import { InvoiceCost } from "./InvoiceCost";
 import { FixedCosts, type FixedCostRow } from "./FixedCosts";
+import { OtherIncome, type IncomeRow } from "./OtherIncome";
+import { ClientFinanceDialog } from "./ClientFinanceDialog";
+import type { CostLine } from "./actions";
 import { createClient as supabaseServer } from "@/lib/supabase/server";
 import Link from "next/link";
 
@@ -41,28 +44,56 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
   const maandLabel = new Date(`${maand}-01`).toLocaleDateString("nl-NL", { month: "long", year: "numeric" });
   const isCurrentMonth = maand === thisMonth;
 
-  const [{ clients, demo }, { agency }, moneybird] = await Promise.all([
+  // Alle maanden in één keer (Moneybird cachet per maand 10 min) voor de
+  // maandvergelijking: gaan we er elke maand op vooruit?
+  const [{ clients, demo }, { agency }, ...allMonths] = await Promise.all([
     getWorkspaceData(),
     getSessionContext(),
-    getMoneybirdMonth(isCurrentMonth ? undefined : maand),
+    ...months.map((m) => getMoneybirdMonth(m === thisMonth ? undefined : m)),
   ]);
+  const byMonth = new Map(months.map((m, i) => [m, allMonths[i]]));
+  const moneybird = byMonth.get(maand) ?? allMonths[allMonths.length - 1];
 
-  // Kosten per factuur + vaste lasten (migratie 023; ontbreekt die, dan leeg).
+  // Kosten per factuur (alle maanden), vaste lasten en overige inkomsten.
   const supabase = await supabaseServer();
   let invoiceCostById = new Map<string, number>();
+  let breakdownById = new Map<string, CostLine[] | null>();
   let fixedCosts: FixedCostRow[] = [];
+  let incomeByMonth = new Map<string, IncomeRow[]>();
   if (supabase && !demo) {
-    const ids = moneybird.invoices.map((i) => i.id);
-    const [costsRes, fixedRes] = await Promise.all([
-      ids.length ? supabase.from("invoice_costs").select("id,cost").in("id", ids) : Promise.resolve({ data: [] as { id: string; cost: number }[] }),
+    const allIds = allMonths.flatMap((mo) => mo.invoices.map((i) => i.id));
+    const [costsRes, fixedRes, incomeRes] = await Promise.all([
+      allIds.length
+        ? supabase.from("invoice_costs").select("id,cost,breakdown").in("id", allIds)
+        : Promise.resolve({ data: [] as { id: string; cost: number; breakdown: CostLine[] | null }[] }),
       supabase.from("fixed_costs").select("id,name,amount").order("created_at"),
+      supabase.from("other_income").select("id,month,label,amount").order("created_at"),
     ]);
     invoiceCostById = new Map((costsRes.data ?? []).map((r) => [String(r.id), Number(r.cost ?? 0)]));
+    breakdownById = new Map((costsRes.data ?? []).map((r) => [String(r.id), (r.breakdown as CostLine[] | null) ?? null]));
     fixedCosts = ((fixedRes.data ?? []) as { id: string; name: string; amount: number }[]).map((r) => ({ id: r.id, name: r.name, amount: Number(r.amount ?? 0) }));
+    for (const r of incomeRes.data ?? []) {
+      const key = String(r.month).slice(0, 7);
+      const arr = incomeByMonth.get(key) ?? [];
+      arr.push({ id: r.id, label: r.label, amount: Number(r.amount ?? 0) });
+      incomeByMonth.set(key, arr);
+    }
   }
-  const invoiceCostsSum = moneybird.invoices.reduce((s, i) => s + (invoiceCostById.get(i.id) ?? 0), 0);
   const fixedTotal = fixedCosts.reduce((s, r) => s + r.amount, 0);
-  const monthProfit = moneybird.invoiced - invoiceCostsSum - fixedTotal;
+
+  // Winst per maand: gefactureerd + overig − factuurkosten − vaste lasten.
+  const profitOf = (m: string) => {
+    const mo = byMonth.get(m);
+    if (!mo) return { omzet: 0, kosten: 0, winst: 0 };
+    const kosten = mo.invoices.reduce((s, i) => s + (invoiceCostById.get(i.id) ?? 0), 0) + fixedTotal;
+    const overig = (incomeByMonth.get(m) ?? []).reduce((s, r) => s + r.amount, 0);
+    const omzet = mo.invoiced + overig;
+    return { omzet, kosten, winst: omzet - kosten };
+  };
+
+  const invoiceCostsSum = moneybird.invoices.reduce((s, i) => s + (invoiceCostById.get(i.id) ?? 0), 0);
+  const maandOverig = (incomeByMonth.get(maand) ?? []).reduce((s, r) => s + r.amount, 0);
+  const monthProfit = moneybird.invoiced + maandOverig - invoiceCostsSum - fixedTotal;
   const billable = clients.filter((c) => c.status !== "gepauzeerd");
   const target = Number(agency?.monthly_target ?? 0);
 
@@ -163,6 +194,12 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
                 <span className="text-muted text-[12px]">Nog open </span>
                 <strong className="font-mono text-amber-300">{fmtEur(moneybird.open)}</strong>
               </span>
+              {maandOverig > 0 && (
+                <span>
+                  <span className="text-muted text-[12px]">Overig </span>
+                  <strong className="font-mono text-emerald-400">+{fmtEur(maandOverig)}</strong>
+                </span>
+              )}
               <span>
                 <span className="text-muted text-[12px]">Kosten </span>
                 <strong className="font-mono text-red-400">{fmtEur(invoiceCostsSum + fixedTotal)}</strong>
@@ -174,24 +211,33 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
             </div>
           </div>
 
-          {/* Maandkiezer: klik door de maanden vanaf januari */}
-          <div className="flex flex-wrap gap-1.5 mb-4">
-            {months.map((m) => {
+          {/* Maandvergelijking: omzet/winst per maand, klik om te openen */}
+          <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1">
+            {months.map((m, i) => {
               const label = new Date(`${m}-01`).toLocaleDateString("nl-NL", { month: "short" });
               const activeMonth = m === maand;
+              const { winst } = profitOf(m);
+              const prev = i > 0 ? profitOf(months[i - 1]).winst : null;
+              const arrow = prev === null ? "" : winst >= prev ? "↑" : "↓";
               return (
                 <Link
                   key={m}
                   href={m === thisMonth ? "/platform/finance" : `/platform/finance?maand=${m}`}
-                  className={`rounded-full px-3 py-1 text-[12px] transition-all ${
-                    activeMonth ? "bg-accent text-background font-bold" : "border border-white/[0.08] text-muted hover:border-accent/30 hover:text-accent"
+                  className={`shrink-0 rounded-xl px-3 py-1.5 text-center transition-all border ${
+                    activeMonth ? "border-accent/50 bg-accent/[0.08]" : "border-white/[0.06] hover:border-accent/30"
                   }`}
                 >
-                  {label} {m.slice(0, 4) !== String(now.getFullYear()) ? m.slice(2, 4) : ""}
+                  <div className="text-[11px] font-mono uppercase text-muted">{label}</div>
+                  <div className={`text-[12.5px] font-mono ${winst >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                    {fmtEur(winst)} {arrow && <span className={winst >= (prev ?? 0) ? "text-emerald-400" : "text-red-400"}>{arrow}</span>}
+                  </div>
                 </Link>
               );
             })}
           </div>
+
+          <OtherIncome month={maand} initial={incomeByMonth.get(maand) ?? []} />
+          <div className="mb-4" />
           {moneybird.error ? (
             <p className="text-[13px] text-amber-300">{moneybird.error}</p>
           ) : moneybird.invoices.length === 0 ? (
@@ -209,7 +255,13 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
                   </div>
                   <div className="flex flex-wrap items-center gap-3 shrink-0 justify-end">
                     <span className="font-mono text-sm">{fmtEur(inv.totalExcl)}</span>
-                    <InvoiceCost invoiceId={inv.id} totalExcl={inv.totalExcl} initialCost={invoiceCostById.get(inv.id) ?? 0} />
+                    <InvoiceCost
+                      invoiceId={inv.id}
+                      invoiceLabel={inv.contact}
+                      totalExcl={inv.totalExcl}
+                      initialCost={invoiceCostById.get(inv.id) ?? 0}
+                      initialBreakdown={breakdownById.get(inv.id) ?? null}
+                    />
                     <Badge color={invoiceStateColor[inv.state] ?? "#6B7280"}>
                       {invoiceStateLabel[inv.state] ?? inv.state}
                     </Badge>
@@ -246,12 +298,23 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
               const m = c.monthlyValue - c.editorCost;
               return (
                 <div key={c.id} className="grid grid-cols-12 gap-2 items-center px-3 py-2.5 rounded-xl hover:bg-white/[0.02] transition-colors">
-                  <div className="col-span-12 md:col-span-4 flex items-center gap-2.5">
-                    <Avatar initials={c.initials} size={30} />
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium truncate">{c.name}</div>
-                      <div className="text-[11px] text-muted">{c.packageName ?? "—"}</div>
-                    </div>
+                  <div className="col-span-12 md:col-span-4">
+                    <ClientFinanceDialog
+                      clientId={c.id}
+                      name={c.name}
+                      monthlyValue={c.monthlyValue}
+                      packageName={c.packageName}
+                      videosPerMonth={c.videosPerMonth}
+                      editorCost={c.editorCost}
+                    >
+                      <div className="flex items-center gap-2.5 cursor-pointer">
+                        <Avatar initials={c.initials} size={30} />
+                        <div className="min-w-0">
+                          <div className="text-sm font-medium truncate">{c.name} <span className="text-muted">✎</span></div>
+                          <div className="text-[11px] text-muted">{c.packageName ?? "— klik om in te stellen"}</div>
+                        </div>
+                      </div>
+                    </ClientFinanceDialog>
                   </div>
                   <span className="col-span-4 md:col-span-2 text-right font-mono text-sm">{fmtEur(c.monthlyValue)}</span>
                   <span className="col-span-4 md:col-span-2 text-right font-mono text-sm text-muted">{fmtEur(c.editorCost)}</span>
