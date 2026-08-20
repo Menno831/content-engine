@@ -58,7 +58,7 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
   const clientCols =
     "id,name,ig_handle,status,monthly_value,package,videos_per_month,editor_cost,payment_status,created_at,soul_character_id,reference_image_url,brand_prompt,brand_primary,brand_secondary";
   let [clientsRes, contentRes, leadsRes, metricsRes] = await Promise.all([
-    supabase.from("clients").select(`${clientCols},content_mix`),
+    supabase.from("clients").select(`${clientCols},content_mix,manager,hidden,health,health_note`),
     supabase
       .from("content")
       .select("id,client_id,title,hook,format,stage,published_at,permalink,posting_date,deadline,brief_url,editor_id"),
@@ -120,6 +120,10 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
       videosPerMonth: Number(c.videos_per_month ?? 0),
       contentMix: c.content_mix ?? null,
       editorCost: Number(c.editor_cost ?? 0),
+      manager: (c.manager as string) ?? null,
+      hidden: Boolean(c.hidden ?? false),
+      health: (c.health as string) ?? null,
+      healthNote: (c.health_note as string) ?? null,
       paymentStatus: (c.payment_status ?? "open") as Client["paymentStatus"],
       createdThisMonth: inThisMonth(c.created_at),
       soulCharacter: c.soul_character_id ?? null,
@@ -219,8 +223,9 @@ export async function getClient(id: string): Promise<Client | null> {
 
   const supabase = await createClient();
   if (!supabase) return null;
-  const baseCols =
+  const legacyCols =
     "id,name,ig_handle,yt_channel_id,status,monthly_value,package,videos_per_month,editor_cost,payment_status,soul_character_id,reference_image_url,brand_prompt,brand_identity,brand_story,brand_strategy,brand_voice,notes,brand_primary,brand_secondary";
+  const baseCols = `${legacyCols},manager,hidden,health,health_note,start_date,tiktok_handle`;
   // Nieuwe kolommen apart: als een migratie nog niet gedraaid is mag het
   // klantprofiel niet stuk — dan vallen we terug op de basiskolommen.
   let { data: c, error } = await supabase
@@ -229,7 +234,7 @@ export async function getClient(id: string): Promise<Client | null> {
     .eq("id", id)
     .maybeSingle();
   if (error) {
-    ({ data: c } = await supabase.from("clients").select(baseCols).eq("id", id).maybeSingle());
+    ({ data: c } = await supabase.from("clients").select(legacyCols).eq("id", id).maybeSingle());
   }
   if (!c) return null;
 
@@ -259,6 +264,12 @@ export async function getClient(id: string): Promise<Client | null> {
     notes: c.notes ?? null,
     brandPrimary: c.brand_primary ?? null,
     brandSecondary: c.brand_secondary ?? null,
+    manager: (c as Record<string, unknown>).manager as string ?? null,
+    hidden: Boolean((c as Record<string, unknown>).hidden ?? false),
+    health: (c as Record<string, unknown>).health as string ?? null,
+    healthNote: (c as Record<string, unknown>).health_note as string ?? null,
+    startDate: (c as Record<string, unknown>).start_date as string ?? null,
+    tiktokHandle: (c as Record<string, unknown>).tiktok_handle as string ?? null,
     ytChannel: c.yt_channel_id ?? null,
   };
 }

@@ -5,14 +5,17 @@ import { getWorkspaceData, getTodaysBrief } from "@/lib/data";
 import { getTodos } from "@/lib/notifications";
 import { getSessionContext } from "@/lib/auth";
 import { getOutreachTodoCount } from "@/lib/prospects";
+import { getMeetings, getEodReports } from "@/lib/workspace";
 import { redirect } from "next/navigation";
 
 export default async function Dashboard() {
-  const [{ clients, content: contentCards, leads, demo }, todos, ctx, outreachTodo] = await Promise.all([
+  const [{ clients, content: contentCards, leads, demo }, todos, ctx, outreachTodo, meetings, eods] = await Promise.all([
     getWorkspaceData(),
     getTodos(),
     getSessionContext(),
     getOutreachTodoCount(),
+    getMeetings({ fromToday: true, limit: 20 }).catch(() => []),
+    getEodReports(20).catch(() => []),
   ]);
 
   // Editor-login: het dashboard is agency-cijfers — door naar het board.
@@ -26,6 +29,10 @@ export default async function Dashboard() {
   const brief = await getTodaysBrief();
   const activeClients = clients.filter((c) => c.status === "actief").length;
   const totalLeads = clients.reduce((s, c) => s + c.leadsThisMonth, 0);
+
+  // Datums voor de 'Vandaag'-rij (server-side, één keer per request).
+  const today = new Date().toISOString().slice(0, 10);
+  const in3days = new Date(Date.now() + 3 * 86_400_000).toISOString().slice(0, 10);
 
   const stageCounts = (Object.keys(stageMeta) as PipelineStage[]).map((st) => ({
     st,
@@ -54,16 +61,14 @@ export default async function Dashboard() {
     );
   }
 
-  // Datums voor de 'Vandaag'-actierij (server-side, één keer per request).
-  const today = new Date().toISOString().slice(0, 10);
-  const in3days = new Date(Date.now() + 3 * 86_400_000).toISOString().slice(0, 10);
-
   return (
     <>
-      <PageHeader
-        eyebrow="Overzicht"
-        title="Dashboard"
-        subtitle="Wat er speelt over al je klanten — content, leads en omzet op één plek."
+      <GreetingHeader name={ctx.profile?.full_name ?? null} />
+
+      <TodayStrip
+        meetings={meetings.filter((m) => m.startsAt.slice(0, 10) === today)}
+        eodDone={eods.some((e) => e.date === today && e.userId === ctx.user?.id)}
+        eodCount={eods.filter((e) => e.date === today).length}
       />
 
       {/* Vandaag: wat moet er NU gebeuren (commandopost) */}
@@ -285,6 +290,10 @@ function ClientOverview({
   const waitingApproval = content.filter((c) => c.stage === "client_approval");
   const totalReach = posted.reduce((s, c) => s + (c.reach ?? c.views ?? 0), 0);
 
+  // Datums voor de 'Vandaag'-rij (server-side, één keer per request).
+  const today = new Date().toISOString().slice(0, 10);
+  const in3days = new Date(Date.now() + 3 * 86_400_000).toISOString().slice(0, 10);
+
   const stageCounts = (Object.keys(stageMeta) as PipelineStage[]).map((st) => ({
     st,
     count: content.filter((c) => c.stage === st).length,
@@ -357,5 +366,83 @@ function ClientOverview({
         </Card>
       </div>
     </>
+  );
+}
+
+
+// Persoonlijke kop: begroeting op het uur van de dag + datum.
+function GreetingHeader({ name }: { name: string | null }) {
+  const hour = new Date().getHours();
+  const greeting = hour < 6 ? "Nog wakker" : hour < 12 ? "Goedemorgen" : hour < 18 ? "Goedemiddag" : "Goedenavond";
+  const first = (name ?? "").split(" ")[0];
+  return (
+    <div className="mb-6">
+      <h1 className="font-display font-extrabold text-3xl">
+        {greeting}
+        {first ? `, ${first}` : ""}
+      </h1>
+      <p className="text-muted text-sm mt-1">
+        {new Date().toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+      </p>
+    </div>
+  );
+}
+
+// Wat er vandaag speelt: calls van vandaag + of de dag al afgesloten is.
+function TodayStrip({
+  meetings,
+  eodDone,
+  eodCount,
+}: {
+  meetings: { id: string; title: string; startsAt: string; clientName: string | null }[];
+  eodDone: boolean;
+  eodCount: number;
+}) {
+  return (
+    <div className="grid md:grid-cols-2 gap-4 mb-6">
+      <Card className="p-5">
+        <div className="flex items-center justify-between mb-3">
+          <div className="font-display font-bold">Calls vandaag</div>
+          <Link href="/platform/agenda" className="text-[12px] text-accent hover:text-accent-hover transition-colors">
+            Agenda →
+          </Link>
+        </div>
+        {meetings.length === 0 ? (
+          <p className="text-[13px] text-muted">Geen calls gepland vandaag.</p>
+        ) : (
+          <div className="space-y-1.5">
+            {meetings.map((m) => (
+              <div key={m.id} className="flex items-center gap-3 text-[13px]">
+                <span className="font-mono text-accent shrink-0">
+                  {new Date(m.startsAt).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })}
+                </span>
+                <span className="truncate">{m.title}</span>
+                {m.clientName && <span className="text-muted text-[12px] shrink-0">{m.clientName}</span>}
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+
+      <Card className={`p-5 ${eodDone ? "" : "border-accent/25 bg-accent/[0.04]"}`}>
+        <div className="flex items-center justify-between mb-3">
+          <div className="font-display font-bold">Dag afsluiten</div>
+          <span className="text-[12px] text-muted">{eodCount} vandaag ingediend</span>
+        </div>
+        {eodDone ? (
+          <p className="text-[13px] text-emerald-400">Jouw EOD staat er ✓</p>
+        ) : (
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-[13px] text-muted">Nog niet ingevuld.</p>
+            <Link
+              href="/platform/eod"
+              className="rounded-lg bg-accent hover:bg-accent-hover text-background font-bold text-[12.5px] px-3 py-1.5 transition-colors shrink-0"
+            >
+              EOD invullen
+            </Link>
+          </div>
+        )}
+      </Card>
+    </div>
   );
 }

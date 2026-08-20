@@ -48,6 +48,15 @@ export interface Client {
   brandPrimary?: string | null;
   brandSecondary?: string | null;
   ytChannel?: string | null; // YouTube kanaal-id of @handle (voor de sync)
+  tiktokHandle?: string | null;
+  /** Wie beheert deze klant (CSM). */
+  manager?: string | null;
+  /** Uit de klantenlijst gehaald zonder te verwijderen. */
+  hidden?: boolean;
+  /** goed | let_op | risico */
+  health?: string | null;
+  healthNote?: string | null;
+  startDate?: string | null;
 }
 
 export const clients: Client[] = [

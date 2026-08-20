@@ -30,43 +30,45 @@ export interface NavGroup {
 // regel hieronder terugzetten. Non-actief: Daily Brief, Studio, Boost,
 // Prompts, AI Visuals, Brand Studio, Boards, Analytics.
 const agencyGroups: NavGroup[] = [
-  { title: "Overzicht", items: [{ href: "/platform", label: "Dashboard", icon: icons.dashboard, exact: true }] },
+  {
+    title: "Home",
+    items: [
+      { href: "/platform", label: "Overzicht", icon: icons.dashboard, exact: true },
+      { href: "/platform/clients", label: "Klanten", icon: icons.clients },
+      { href: "/platform/todos", label: "Taken", icon: icons.check },
+      { href: "/platform/agenda", label: "Agenda", icon: icons.calendar },
+      { href: "/platform/eod", label: "EOD", icon: icons.thumb },
+    ],
+  },
   {
     title: "Content",
     items: [
-      { href: "/platform/pipeline", label: "Content pipeline", icon: icons.pipeline },
+      { href: "/platform/pipeline", label: "Productieboard", icon: icons.pipeline },
       { href: "/platform/scripts", label: "Scripts", icon: icons.reports },
       { href: "/platform/calendar", label: "Kalender", icon: icons.calendar },
       { href: "/platform/approvals", label: "Approvals", icon: icons.check },
-      { href: "/platform/todos", label: "Taken", icon: icons.check },
     ],
   },
   {
-    title: "Research",
+    title: "Groei",
     items: [
-      { href: "/platform/discover", label: "Discover", icon: icons.analytics },
-    ],
-  },
-  {
-    title: "Sales & groei",
-    items: [
+      { href: "/platform/finance", label: "Finance", icon: icons.money },
       { href: "/platform/leads", label: "Leads", icon: icons.leads },
       { href: "/platform/outreach", label: "Outreach", icon: icons.rocket },
     ],
   },
   {
-    title: "Inzicht",
+    title: "Tools",
     items: [
-      { href: "/platform/finance", label: "Finance", icon: icons.money },
-      { href: "/platform/editors", label: "Editors", icon: icons.studio },
+      { href: "/platform/discover", label: "Discover", icon: icons.analytics },
       { href: "/platform/reports", label: "Rapporten", icon: icons.reports },
     ],
   },
   {
-    title: "Klanten & beheer",
+    title: "Team",
     items: [
-      { href: "/platform/clients", label: "Klanten", icon: icons.clients },
       { href: "/platform/team", label: "Team", icon: icons.leads },
+      { href: "/platform/editors", label: "Editors", icon: icons.studio },
       { href: "/platform/settings", label: "Instellingen", icon: icons.settings },
     ],
   },
@@ -100,6 +102,7 @@ const editorGroups: NavGroup[] = [
     items: [
       { href: "/platform/pipeline", label: "Production board", icon: icons.pipeline },
       { href: "/platform/todos", label: "My tasks", icon: icons.check },
+      { href: "/platform/eod", label: "End of day", icon: icons.thumb },
     ],
   },
 ];

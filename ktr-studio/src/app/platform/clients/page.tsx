@@ -15,10 +15,32 @@ const statusColor: Record<ClientStatus, string> = {
   gepauzeerd: "#6B7280",
 };
 
-export default async function Clients() {
+export default async function Clients({ searchParams }: { searchParams: Promise<{ status?: string; manager?: string; verborgen?: string }> }) {
   await redirectEditorToBoard();
-  const { clients, demo } = await getWorkspaceData();
-  const mrr = clients.filter((c) => c.status !== "gepauzeerd").reduce((s, c) => s + c.monthlyValue, 0);
+  const sp = await searchParams;
+  const { clients: all, demo } = await getWorkspaceData();
+
+  const showHidden = sp.verborgen === "1";
+  const hiddenCount = all.filter((c) => c.hidden).length;
+  const managers = [...new Set(all.map((c) => c.manager).filter(Boolean) as string[])].sort();
+
+  // Gepauzeerde klanten apart: die wachten op een ja/nee, niet op werk.
+  const paused = all.filter((c) => c.status === "gepauzeerd" && !c.hidden);
+  const attention = all.filter((c) => !c.hidden && (c.health === "risico" || c.health === "let_op"));
+
+  const clients = all
+    .filter((c) => (showHidden ? true : !c.hidden))
+    .filter((c) => (sp.status ? c.status === sp.status : c.status !== "gepauzeerd"))
+    .filter((c) => (sp.manager ? c.manager === sp.manager : true));
+
+  const mrr = all.filter((c) => c.status !== "gepauzeerd").reduce((s, c) => s + c.monthlyValue, 0);
+  const qs = (patch: Record<string, string | undefined>) => {
+    const p = new URLSearchParams();
+    const merged = { status: sp.status, manager: sp.manager, verborgen: sp.verborgen, ...patch };
+    for (const [k, v] of Object.entries(merged)) if (v) p.set(k, v);
+    const q = p.toString();
+    return q ? `/platform/clients?${q}` : "/platform/clients";
+  };
 
   return (
     <>
@@ -63,7 +85,68 @@ export default async function Clients() {
         </div>
       </Card>
 
-      <Eyebrow>Alle klanten</Eyebrow>
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-1.5 mb-4">
+        <Chip href={qs({ status: undefined })} active={!sp.status} label="Actief & onboarding" />
+        <Chip href={qs({ status: "actief" })} active={sp.status === "actief"} label="Alleen actief" />
+        <Chip href={qs({ status: "onboarding" })} active={sp.status === "onboarding"} label="Onboarding" />
+        <Chip href={qs({ status: "gepauzeerd" })} active={sp.status === "gepauzeerd"} label={`Gepauzeerd (${paused.length})`} />
+        {managers.length > 0 && <span className="w-px h-5 bg-white/[0.08] mx-1" />}
+        {managers.map((m) => (
+          <Chip key={m} href={qs({ manager: sp.manager === m ? undefined : m })} active={sp.manager === m} label={m} />
+        ))}
+        {hiddenCount > 0 && (
+          <>
+            <span className="w-px h-5 bg-white/[0.08] mx-1" />
+            <Chip
+              href={qs({ verborgen: showHidden ? undefined : "1" })}
+              active={showHidden}
+              label={showHidden ? "Verberg verborgen" : `Toon verborgen (${hiddenCount})`}
+            />
+          </>
+        )}
+      </div>
+
+      {/* Klanten die aandacht nodig hebben (health uit het Health-tabblad) */}
+      {attention.length > 0 && (
+        <Card className="p-5 mb-4 border-amber-400/20 bg-amber-400/[0.04]">
+          <div className="font-display font-bold mb-2">Vraagt aandacht</div>
+          <div className="flex flex-wrap gap-2">
+            {attention.map((c) => (
+              <Link
+                key={c.id}
+                href={`/platform/clients/${c.id}/health`}
+                className="flex items-center gap-2 rounded-xl border border-white/[0.08] hover:border-accent/30 px-3 py-1.5 text-[13px] transition-all"
+              >
+                <span className="w-2 h-2 rounded-full" style={{ background: c.health === "risico" ? "#F87171" : "#FBBF24" }} />
+                {c.name}
+                {c.healthNote && <span className="text-muted text-[12px] truncate max-w-[220px]">— {c.healthNote}</span>}
+              </Link>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Gepauzeerd: wachten op een beslissing */}
+      {paused.length > 0 && !sp.status && (
+        <Card className="p-5 mb-4">
+          <div className="font-display font-bold mb-1">Reactivatielijst</div>
+          <p className="text-[12.5px] text-muted mb-3">{paused.length} gepauzeerde klant(en) — oppakken of afsluiten.</p>
+          <div className="flex flex-wrap gap-2">
+            {paused.map((c) => (
+              <Link
+                key={c.id}
+                href={`/platform/clients/${c.id}/health`}
+                className="rounded-xl border border-white/[0.08] hover:border-accent/30 hover:text-accent px-3 py-1.5 text-[13px] transition-all"
+              >
+                {c.name}
+              </Link>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      <Eyebrow>{clients.length} klant{clients.length === 1 ? "" : "en"}</Eyebrow>
       {!demo && clients.length === 0 ? (
         <div className="mt-2">
           <NotConnected provider="Klanten">
@@ -78,8 +161,15 @@ export default async function Clients() {
               <Link href={`/platform/clients/${c.id}`} className="flex items-center gap-3 group">
                 <Avatar initials={c.initials} size={44} />
                 <div>
-                  <div className="font-medium group-hover:text-accent transition-colors">{c.name}</div>
-                  <div className="text-[12px] text-muted">{c.handle}</div>
+                  <div className="font-medium group-hover:text-accent transition-colors">
+                    {c.health === "risico" && <span className="text-red-400 mr-1">●</span>}
+                    {c.health === "let_op" && <span className="text-amber-300 mr-1">●</span>}
+                    {c.name}
+                  </div>
+                  <div className="text-[12px] text-muted">
+                    {c.handle}
+                    {c.manager && ` · ${c.manager}`}
+                  </div>
                 </div>
               </Link>
               <Badge color={statusColor[c.status]}>
@@ -121,5 +211,19 @@ export default async function Clients() {
         ))}
       </div>
     </>
+  );
+}
+
+
+function Chip({ href, active, label }: { href: string; active: boolean; label: string }) {
+  return (
+    <Link
+      href={href}
+      className={`rounded-full px-3 py-1.5 text-[12px] transition-all ${
+        active ? "bg-accent text-background font-bold" : "border border-white/[0.08] text-muted hover:border-accent/30 hover:text-accent"
+      }`}
+    >
+      {label}
+    </Link>
   );
 }
