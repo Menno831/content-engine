@@ -27,19 +27,24 @@ Supabase SQL Editor gedraaid, Vercel via de lokaal ingelogde CLI.)
    op lopen: vidIQ, Metricool, Instagram-app-exports. ManyChat-koppeling voor
    reply-detectie op outreach (auto "geen reactie"-scan) is een latere stap.
 
-## Nog over te nemen van AgencyBase (referentie-screenshots 19 aug)
-Wél gebouwd: klant-werkstation met tabs, EOD, Agenda/calls, stories-tracking,
-links per klant, health/manager/verbergen, klantfilters, nieuwe sidebar.
-Nog niet gebouwd (bewust, geen databron of nut nu):
-- **Messages** — gedeelde inbox voor IG-DM's; wacht op een ManyChat/IG-koppeling.
-- **Forms** — publieke leadformulieren (nu: intake-wizard per klant).
-- **Contracts** — contracten + ondertekenen.
-- **Advertising** — ads-uitgaven en ROAS.
-- **Revenue-tab per klant** — omzet per klant staat nu op Finance.
-- **Kanban/Gantt/Calendar-weergaven** op het productieboard (nu tabel).
-- **Sub-boards per klant** (Ads / Carrousel / Long-Form als losse tabbladen).
+## Wat er nog niet werkt (20 aug 2026)
+Alles uit de AgencyBase-referentie is nu gebouwd, behalve deze twee — beide
+wachten op iets buiten de code:
+- **Messages (gedeelde IG-DM-inbox)** — kan niet zonder Instagram Messaging
+  API (Meta-app met `instagram_manage_messages`, review vereist) of een
+  ManyChat-abonnement met inbox-API. Nu al wel: leads uit ManyChat komen
+  binnen via `/api/manychat`, en DM's versturen gaat handmatig vanaf Outreach.
+- **Gantt-weergave** op het productieboard — tabel en kanban staan er;
+  Gantt voegt weinig toe bij weekplanning en kost een externe dependency.
+
+Wacht verder alleen nog op keys van Menno: `RESEND_API_KEY` (alle mails),
+`YOUTUBE_API_KEY` (YouTube-stats en YT-competitors), en `MONEYBIRD_API_TOKEN`
+netjes opnieuw zetten.
 
 ## Afgerond (18-20 aug 2026)
+- **Klant-werkstation** met tabs Pipeline/Stats/Stories/Leads/Revenue/Links/
+  Calls/Health/Profiel; EOD, Agenda, leadformulieren (publieke `/f/<token>`),
+  contracten, advertentie-rendement, kanban + sub-boards per formaat.
 - **Moneybird-check**: "invalid header value"-fout gefixt (token-sanering + token
   nooit meer in de foutmelding) en live geverifieerd: Finance toont facturen
   (€6.377 gefactureerd deze maand).
