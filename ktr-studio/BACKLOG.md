@@ -14,12 +14,10 @@ of netwerktoegang vraagt hoort in RUNBOOK.md, niet hier.
 4. ✅ (18 aug) Kalender: chips zijn nu klikbaar voor owner/team → zelfde
    bewerkdialoog als het bord (datum verzetten, links, verwijderen);
    klant/editor-rollen zien de kalender alleen-lezen.
-5. Settings: koppelingen-status tonen — per integratie (Resend, RapidAPI,
-   YouTube, Moneybird, Asana, Anthropic) alleen "ingesteld / ontbreekt"
-   (boolean op de server, nooit de waarde zelf).
+5. ✅ (18 aug) Settings → "Koppelingen": per integratie aan/ontbreekt, met de
+   env-naam en waar je 'm haalt. Waarden nooit zichtbaar (server-side boolean).
 6. Approvals: lege staten + klantrol nalopen; teksten kloppend maken.
-7. Team-pagina: bestaande logins tonen (naam, rol, e-mail) zodat je ziet wie
-   er al toegang heeft.
+7. ✅ (18 aug) Team-pagina toont bestaande logins met rol (via team-beheer).
 8. Editors-pagina: pay-per-video en on-time/te-laat statistiek nalopen tegen de
    nieuwe delivered_at-flow.
 9. Mobiel: bewerkdialoog en board-grid op klein scherm nalopen (overflow,

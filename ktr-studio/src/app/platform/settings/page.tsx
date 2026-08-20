@@ -2,6 +2,7 @@ import { redirectEditorToBoard } from "@/lib/guard";
 import { PageHeader } from "../_components";
 import { getSessionContext } from "@/lib/auth";
 import { SettingsForm } from "./SettingsForm";
+import { Integrations } from "./Integrations";
 
 export default async function SettingsPage() {
   await redirectEditorToBoard();
@@ -18,6 +19,7 @@ export default async function SettingsPage() {
         subtitle="Stel je merknaam, accentkleur en maanddoel in. Dit kleurt het hele platform — ook de klantportalen."
       />
       <SettingsForm brandName={brandName} accent={accent} monthlyTarget={monthlyTarget} />
+      <Integrations />
     </>
   );
 }
