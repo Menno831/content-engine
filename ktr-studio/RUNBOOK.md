@@ -27,7 +27,19 @@ Supabase SQL Editor gedraaid, Vercel via de lokaal ingelogde CLI.)
    op lopen: vidIQ, Metricool, Instagram-app-exports. ManyChat-koppeling voor
    reply-detectie op outreach (auto "geen reactie"-scan) is een latere stap.
 
-## Afgerond (18 aug 2026)
+## Nog over te nemen van AgencyBase (referentie-screenshots 19 aug)
+Wél gebouwd: klant-werkstation met tabs, EOD, Agenda/calls, stories-tracking,
+links per klant, health/manager/verbergen, klantfilters, nieuwe sidebar.
+Nog niet gebouwd (bewust, geen databron of nut nu):
+- **Messages** — gedeelde inbox voor IG-DM's; wacht op een ManyChat/IG-koppeling.
+- **Forms** — publieke leadformulieren (nu: intake-wizard per klant).
+- **Contracts** — contracten + ondertekenen.
+- **Advertising** — ads-uitgaven en ROAS.
+- **Revenue-tab per klant** — omzet per klant staat nu op Finance.
+- **Kanban/Gantt/Calendar-weergaven** op het productieboard (nu tabel).
+- **Sub-boards per klant** (Ads / Carrousel / Long-Form als losse tabbladen).
+
+## Afgerond (18-20 aug 2026)
 - **Moneybird-check**: "invalid header value"-fout gefixt (token-sanering + token
   nooit meer in de foutmelding) en live geverifieerd: Finance toont facturen
   (€6.377 gefactureerd deze maand).
