@@ -1,9 +1,8 @@
 import { Card, Badge, Avatar } from "../../../_components";
-import { getClient, getClientOrders, getClientTranscripts } from "@/lib/data";
+import { getClient, getClientTranscripts } from "@/lib/data";
 import { fmtEur } from "../../../_data";
 import { BrandDocs } from "../../BrandDocs";
 import { TranscriptsCard } from "../../TranscriptsCard";
-import { OrdersCard } from "../../OrdersCard";
 import { DeleteClientButton } from "../../DeleteClientButton";
 import { ChannelsEditor } from "../../ChannelsEditor";
 
@@ -15,11 +14,7 @@ const statusColor: Record<string, string> = {
 
 export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [c, orders, transcripts] = await Promise.all([
-    getClient(id),
-    getClientOrders(id),
-    getClientTranscripts(id),
-  ]);
+  const [c, transcripts] = await Promise.all([getClient(id), getClientTranscripts(id)]);
 
   if (!c) return null;
 
@@ -61,7 +56,6 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
           )}
         </Card>
 
-        <OrdersCard clientId={c.id} orders={orders} />
         <DeleteClientButton clientId={c.id} clientName={c.name} />
         </div>
 

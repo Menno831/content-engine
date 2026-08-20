@@ -140,6 +140,8 @@ export interface Lead {
   value: number;
   setter: string;
   date: string;
+  /** Ruwe aanmaakdatum (ISO), voor groeperen per maand. */
+  createdISO?: string | null;
   nextFollowup?: string | null; // ISO date — wanneer opvolgen
   followupNote?: string | null;
 }

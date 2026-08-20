@@ -55,6 +55,14 @@ const agencyGroups: NavGroup[] = [
       { href: "/platform/finance", label: "Finance", icon: icons.money },
       { href: "/platform/leads", label: "Leads", icon: icons.leads },
       { href: "/platform/outreach", label: "Outreach", icon: icons.rocket },
+      { href: "/platform/advertising", label: "Advertenties", icon: icons.target },
+    ],
+  },
+  {
+    title: "Zaken",
+    items: [
+      { href: "/platform/forms", label: "Formulieren", icon: icons.check },
+      { href: "/platform/contracts", label: "Contracten", icon: icons.reports },
     ],
   },
   {

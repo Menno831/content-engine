@@ -170,6 +170,7 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
     date: l.created_at
       ? new Date(l.created_at).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })
       : "—",
+    createdISO: l.created_at ?? null,
     nextFollowup: l.next_followup ?? null,
     followupNote: l.followup_note ?? null,
   }));

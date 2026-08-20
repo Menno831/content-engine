@@ -36,8 +36,13 @@ const formatColor: Record<string, string> = {
   Short: "#34D399",
 };
 
-export default async function Pipeline({ searchParams }: { searchParams: Promise<{ client?: string; view?: string; all?: string }> }) {
+export default async function Pipeline({
+  searchParams,
+}: {
+  searchParams: Promise<{ client?: string; view?: string; all?: string; weergave?: string; format?: string }>;
+}) {
   const sp = await searchParams;
+  const kanban = sp.weergave === "kanban";
   const [{ content: allContent, clients, demo }, ctx] = await Promise.all([getWorkspaceData(), getSessionContext()]);
   const isClient = ctx.profile?.role === "client";
 
@@ -68,6 +73,9 @@ export default async function Pipeline({ searchParams }: { searchParams: Promise
   // Klantfilter via ?client=<id> (kaarten dragen de klantnaam).
   const activeClient = clients.find((c) => c.id === sp.client);
   let contentCards = activeClient ? namedContent.filter((c) => c.client === activeClient.name) : namedContent;
+
+  // Formaatfilter (sub-board): alleen Longform, Clip, Story...
+  if (sp.format) contentCards = contentCards.filter((c) => c.format === sp.format);
 
   // Editor-login met gekoppelde editor: alleen de eigen kaarten — en als
   // de editor aan klant(en) gekoppeld is, alleen de borden van die klanten
@@ -114,6 +122,25 @@ export default async function Pipeline({ searchParams }: { searchParams: Promise
         hints: Object.fromEntries(stageOrder.map((s) => [s, stageMeta[s].hint])) as Record<string, string>,
       };
 
+  // Welke formats komen er überhaupt voor — geen lege sub-boards tonen.
+  const formatsInUse = [...new Set(allContent.map((c) => c.format).filter(Boolean))].sort();
+
+  // Links bouwen met behoud van de actieve filters.
+  const boardHref = (patch: Record<string, string | undefined>) => {
+    const p = new URLSearchParams();
+    const merged: Record<string, string | undefined> = {
+      client: sp.client,
+      view: sp.view,
+      all: sp.all,
+      weergave: sp.weergave,
+      format: sp.format,
+      ...patch,
+    };
+    for (const [k, v] of Object.entries(merged)) if (v) p.set(k, v);
+    const q = p.toString();
+    return q ? `/platform/pipeline?${q}` : "/platform/pipeline";
+  };
+
   // Toggle-links behouden het actieve klantfilter.
   const clientQS = sp.client ? `?client=${sp.client}` : "";
   const editorViewQS = sp.client ? `?client=${sp.client}&view=editor` : "?view=editor";
@@ -154,7 +181,53 @@ export default async function Pipeline({ searchParams }: { searchParams: Promise
 
       <ClientFilter clients={clients.map((c) => ({ id: c.id, name: c.name }))} allLabel={t.allLabel} />
 
-      {/* Verticaal board: fases als rijen onder elkaar (scrollen i.p.v. zijwaarts) */}
+      {/* Sub-boards per formaat + tabel/kanban-weergave */}
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-5">
+        <div className="flex flex-wrap gap-1.5">
+          <FilterLink
+            href={boardHref({ format: undefined })}
+            active={!sp.format}
+            label={isEditor ? "All formats" : "Alle formats"}
+          />
+          {formatsInUse.map((f) => (
+            <FilterLink key={f} href={boardHref({ format: sp.format === f ? undefined : f })} active={sp.format === f} label={f} />
+          ))}
+        </div>
+        <div className="flex gap-1.5">
+          <FilterLink href={boardHref({ weergave: undefined })} active={!kanban} label="☰ Tabel" />
+          <FilterLink href={boardHref({ weergave: "kanban" })} active={kanban} label="▥ Kanban" />
+        </div>
+      </div>
+
+      {kanban ? (
+        <div className="flex gap-4 overflow-x-auto pb-4 -mx-1 px-1">
+          {stageOrder.map((stage) => {
+            const cards = contentCards.filter((c) => c.stage === stage);
+            return (
+              <div key={stage} className="w-[300px] shrink-0">
+                <div className="flex items-center justify-between mb-3 px-1">
+                  <span className="font-display font-bold text-sm">{stageMeta[stage].label}</span>
+                  <span className="font-mono text-[11px] text-muted">{cards.length}</span>
+                </div>
+                <div className="space-y-3 min-h-[120px] rounded-2xl bg-white/[0.015] border border-white/[0.04] p-2.5">
+                  {cards.map((card) => (
+                    <ContentCardItem
+                      key={card.id}
+                      card={card}
+                      color={formatColor[card.format] ?? "#9CA3AF"}
+                      editors={editorOptions}
+                      demo={demo}
+                      isEditor={isEditor}
+                    />
+                  ))}
+                  {cards.length === 0 && <div className="text-center text-[12px] text-muted py-6">Leeg</div>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+      /* Verticaal board: fases als rijen onder elkaar (scrollen i.p.v. zijwaarts) */
       <div className="space-y-8">
         {stageOrder.map((stage) => {
           let cards = contentCards.filter((c) => c.stage === stage);
@@ -219,6 +292,20 @@ export default async function Pipeline({ searchParams }: { searchParams: Promise
           );
         })}
       </div>
+      )}
     </>
+  );
+}
+
+function FilterLink({ href, active, label }: { href: string; active: boolean; label: string }) {
+  return (
+    <Link
+      href={href}
+      className={`rounded-full px-3 py-1.5 text-[12px] transition-all ${
+        active ? "bg-accent text-background font-bold" : "border border-white/[0.08] text-muted hover:border-accent/30 hover:text-accent"
+      }`}
+    >
+      {label}
+    </Link>
   );
 }
