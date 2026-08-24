@@ -28,12 +28,15 @@ export function GanttBoard({
   const [weeks, setWeeks] = useState(6);
 
   const model = useMemo(() => {
-    // Vensterstart: maandag van deze week.
+    // Vensterstart: maandag van vórige week. Die extra week geschiedenis
+    // is bewust: kaarten die net over tijd zijn moeten in beeld blijven,
+    // anders verdwijnt juist het werk waar je achteraan moet.
     const today = startOfDay(new Date());
     const monday = new Date(today);
-    monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+    monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7) - 7);
     const from = monday.getTime();
-    const to = from + weeks * 7 * DAY;
+    const dayCount = (weeks + 1) * 7;
+    const to = from + dayCount * DAY;
 
     const rows = cards
       .map((c) => {
@@ -53,7 +56,6 @@ export function GanttBoard({
       .filter((r): r is NonNullable<typeof r> => r != null)
       .sort((a, b) => a.start - b.start);
 
-    const dayCount = weeks * 7;
     const dayCols = Array.from({ length: dayCount }, (_, i) => new Date(from + i * DAY));
 
     return { from, to, rows, dayCols, dayCount, today: today.getTime() };
@@ -79,8 +81,8 @@ export function GanttBoard({
     return (
       <div className="rounded-2xl border border-dashed border-white/[0.08] p-10 text-center">
         <p className="text-muted text-sm max-w-md mx-auto">
-          Geen kaarten met een datum in de komende {weeks} weken. Zet een deadline of postingdatum op een kaart, dan
-          verschijnt hij hier op de tijdlijn.
+          Geen kaarten met een datum in dit venster. Zet een deadline of postingdatum op een kaart, dan verschijnt
+          hij hier op de tijdlijn.
         </p>
       </div>
     );
@@ -91,7 +93,7 @@ export function GanttBoard({
       <div className="flex items-center justify-between gap-3 mb-3">
         <p className="text-[12px] text-muted">
           Balk loopt van <span className="text-foreground">aanleveren</span> tot{" "}
-          <span className="text-foreground">live</span>. {rows.length} kaarten in beeld.
+          <span className="text-foreground">live</span>. {rows.length} kaarten in beeld, inclusief vorige week.
         </p>
         <div className="flex gap-1.5">
           {[4, 6, 12].map((w) => (

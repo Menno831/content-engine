@@ -28,20 +28,21 @@ Supabase SQL Editor gedraaid, Vercel via de lokaal ingelogde CLI.)
    reply-detectie op outreach (auto "geen reactie"-scan) is een latere stap.
 
 ## Wat er nog niet werkt (20 aug 2026)
-Alles uit de AgencyBase-referentie is nu gebouwd, behalve deze twee — beide
-wachten op iets buiten de code:
+Alles uit de AgencyBase-referentie is nu gebouwd, op één ding na, en dat
+wacht op iets buiten de code:
 - **Messages (gedeelde IG-DM-inbox)** — kan niet zonder Instagram Messaging
   API (Meta-app met `instagram_manage_messages`, review vereist) of een
   ManyChat-abonnement met inbox-API. Nu al wel: leads uit ManyChat komen
   binnen via `/api/manychat`, en DM's versturen gaat handmatig vanaf Outreach.
-- **Gantt-weergave** op het productieboard — tabel en kanban staan er;
-  Gantt voegt weinig toe bij weekplanning en kost een externe dependency.
 
 Wacht verder alleen nog op keys van Menno: `RESEND_API_KEY` (alle mails),
 `YOUTUBE_API_KEY` (YouTube-stats en YT-competitors), en `MONEYBIRD_API_TOKEN`
 netjes opnieuw zetten.
 
 ## Afgerond (18-20 aug 2026)
+- **Tijdlijn (Gantt)** op het productieboard: balk van aanleveren tot live,
+  4/6/12 weken, altijd één week geschiedenis mee zodat kaarten die over tijd
+  zijn zichtbaar blijven (rode rand).
 - **Klant-werkstation** met tabs Pipeline/Stats/Stories/Leads/Revenue/Links/
   Calls/Health/Profiel; EOD, Agenda, leadformulieren (publieke `/f/<token>`),
   contracten, advertentie-rendement, kanban + sub-boards per formaat.
