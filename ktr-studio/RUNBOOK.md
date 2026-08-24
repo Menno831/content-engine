@@ -49,6 +49,9 @@ Settings → Data Export). Voor automatische eigen-kanalen-data later: GA4-API
 (website) en LinkedIn heeft geen bruikbare API — dat blijft handmatig.
 
 ## Afgerond (18-24 aug 2026)
+- **Outreach-toplaag (migratie 032 — gedraaid):** ster per prospect, filter
+  met het Seth/Jack-playbook (voice notes, case, zelfde dag call), 18
+  hoogste-potentie prospects voorgeselecteerd.
 - **Opruimronde na de review:** één `requireTeam()`-helper voor alle
   team-acties, DM-prompt en weekanalyse gedeeld tussen cron en knoppen
   (geen dubbele prompts meer die uit elkaar groeien), één `todayStr()`
