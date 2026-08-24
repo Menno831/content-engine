@@ -58,11 +58,25 @@ export async function generateText({ template, input, model = "smart" }: Generat
     messages: [{ role: "user" as const, content: filled }],
   };
 
-  const response = await client.messages.create(
-    isSmart
-      ? { ...base, thinking: { type: "adaptive" }, output_config: { effort: "medium" } }
-      : base
-  );
+  // Trapsgewijs: eerst de volle Opus-call, bij een API-weigering
+  // (bv. onbekende parameter of model niet beschikbaar op deze key)
+  // terugvallen op een kale call en daarna op het snelle model —
+  // liever een iets simpeler antwoord dan een kapotte pagina.
+  let response;
+  try {
+    response = await client.messages.create(
+      isSmart
+        ? { ...base, thinking: { type: "adaptive" }, output_config: { effort: "medium" } }
+        : base
+    );
+  } catch (e1) {
+    if (!isSmart) throw e1;
+    try {
+      response = await client.messages.create(base);
+    } catch {
+      response = await client.messages.create({ ...base, model: MODEL_FAST });
+    }
+  }
 
   const text = response.content
     .filter((b): b is Anthropic.TextBlock => b.type === "text")

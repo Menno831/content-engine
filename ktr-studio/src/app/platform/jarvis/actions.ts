@@ -61,7 +61,14 @@ export async function askJarvisAction(question: string): Promise<JarvisReply> {
     `Menno vraagt nu: ${q}`,
   ].join("\n");
 
-  const { text, mock } = await generateText({ template: CHAT_TEMPLATE, input: context, model: "smart" });
+  let text = "";
+  let mock = false;
+  try {
+    ({ text, mock } = await generateText({ template: CHAT_TEMPLATE, input: context, model: "smart" }));
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "onbekende fout";
+    return { error: `Mijn brein hapert even: ${msg.slice(0, 200)}. Probeer het zo opnieuw.` };
+  }
   if (mock) {
     return {
       error:
