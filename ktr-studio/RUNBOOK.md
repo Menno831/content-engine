@@ -18,10 +18,14 @@ Supabase SQL Editor gedraaid, Vercel via de lokaal ingelogde CLI.)
    achter elkaar geplakt); de code vangt dit sinds 18 aug op, maar netjes opnieuw
    zetten blijft beter. Na het zetten: redeploy zonder build-cache.
 
-3. **Outreach-berichten herschrijven** (na akkoord Menno over de toon): de 265
-   prospects hebben nog DM's in negging-stijl; nieuwe principes staan vast
-   (YouTube-first, positief, gratis waarde eerst, geen zwaktes benoemen).
-   Per prospect ook de "waarom fit" vanuit hun YouTube onderbouwen.
+3. **Outreach-berichten** — grotendeels afgehandeld op 24 aug: de 165
+   wachtrij-DM's stonden al in de goede stijl (positief-nieuwsgierig, geen
+   negging), en de 100 audit-prospects hebben nu 86 handgeschreven
+   concept-DM's in diezelfde stijl in het berichtveld (13 overgeslagen omdat
+   ze al met een bericht in de wachtrij staan, 1 was al gemarkeerd als
+   dubbel). De oude negging-teksten staan alleen nog in de interne
+   notitie/waarom-fit-velden — die ziet de prospect nooit. Nog open:
+   per prospect de "waarom fit" vanuit hun YouTube onderbouwen (research).
 4. **Rapporten-databronnen**: IG-sync draait en vult content+metrics (3 klanten).
    YouTube wacht op `YOUTUBE_API_KEY`; alternatieve bronnen waar al abonnementen
    op lopen: vidIQ, Metricool, Instagram-app-exports. ManyChat-koppeling voor
