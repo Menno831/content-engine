@@ -103,6 +103,8 @@ export interface ContentCard {
   leads?: number;
   permalink?: string | null;
   dateISO?: string | null; // planningsdatum (posting_date of deadline) voor de kalender
+  deadlineISO?: string | null; // wanneer de editor moet aanleveren
+  postingISO?: string | null; // wanneer het live gaat
   briefUrl?: string | null; // files/brief-link (Frame.io, Drive) voor de editor
   editorId?: string | null; // toegewezen editor (voor het editor-board en de mails)
 }

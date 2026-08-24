@@ -6,6 +6,7 @@ import { getEditors } from "@/lib/editors";
 import { AddContentDialog } from "./AddContentDialog";
 import { QuickAddDialog } from "./QuickAddDialog";
 import { ContentCardItem } from "./ContentCardItem";
+import { GanttBoard } from "./GanttBoard";
 import { ClientFilter } from "../ClientFilter";
 import { ClientBoard } from "./ClientBoard";
 import { getSessionContext } from "@/lib/auth";
@@ -43,6 +44,7 @@ export default async function Pipeline({
 }) {
   const sp = await searchParams;
   const kanban = sp.weergave === "kanban";
+  const gantt = sp.weergave === "gantt";
   const [{ content: allContent, clients, demo }, ctx] = await Promise.all([getWorkspaceData(), getSessionContext()]);
   const isClient = ctx.profile?.role === "client";
 
@@ -196,10 +198,17 @@ export default async function Pipeline({
         <div className="flex gap-1.5">
           <FilterLink href={boardHref({ weergave: undefined })} active={!kanban} label="☰ Tabel" />
           <FilterLink href={boardHref({ weergave: "kanban" })} active={kanban} label="▥ Kanban" />
+          <FilterLink href={boardHref({ weergave: "gantt" })} active={gantt} label="⇥ Tijdlijn" />
         </div>
       </div>
 
-      {kanban ? (
+      {gantt ? (
+        <GanttBoard
+          cards={contentCards}
+          formatColor={formatColor}
+          stageLabels={Object.fromEntries(stageOrder.map((st) => [st, stageMeta[st].label]))}
+        />
+      ) : kanban ? (
         <div className="flex gap-4 overflow-x-auto pb-4 -mx-1 px-1">
           {stageOrder.map((stage) => {
             const cards = contentCards.filter((c) => c.stage === stage);

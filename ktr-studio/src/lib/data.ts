@@ -155,6 +155,8 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
       leads: leadsPerContent.get(x.id) ?? undefined,
       permalink: x.permalink ?? null,
       dateISO: x.posting_date ?? x.deadline ?? x.published_at ?? null,
+      deadlineISO: x.deadline ?? null,
+      postingISO: x.posting_date ?? null,
       briefUrl: x.brief_url ?? null,
     };
   });
