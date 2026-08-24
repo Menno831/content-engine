@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { getClient } from "@/lib/data";
+import { getSessionContext } from "@/lib/auth";
 import { Avatar, Badge } from "../../_components";
 import { fmtEur } from "../../_data";
 import { ClientTabs } from "./ClientTabs";
@@ -22,6 +24,12 @@ export default async function ClientLayout({
   children: React.ReactNode;
   params: Promise<{ id: string }>;
 }) {
+  // Het werkstation is voor de agency: editors horen op het board,
+  // klantlogins in hun eigen portaal — ook bij een directe URL.
+  const { profile } = await getSessionContext();
+  if (profile?.role === "editor") redirect("/platform/pipeline");
+  if (profile?.role === "client") redirect("/platform");
+
   const { id } = await params;
   const c = await getClient(id);
   if (!c) notFound();

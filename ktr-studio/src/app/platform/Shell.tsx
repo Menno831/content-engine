@@ -56,6 +56,7 @@ const agencyGroups: NavGroup[] = [
       { href: "/platform/leads", label: "Leads", icon: icons.leads },
       { href: "/platform/outreach", label: "Outreach", icon: icons.rocket },
       { href: "/platform/advertising", label: "Advertenties", icon: icons.target },
+      { href: "/platform/channels", label: "Eigen kanalen", icon: icons.analytics },
     ],
   },
   {
