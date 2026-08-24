@@ -169,9 +169,14 @@ export function ChannelsBoard({ initial }: { initial: StatRow[] }) {
   }
 
   function removeRow(id: string) {
+    const backup = rows;
     setRows((cur) => cur.filter((r) => r.id !== id));
     start(async () => {
-      await deleteChannelStatAction(id);
+      const r = await deleteChannelStatAction(id);
+      if (r.error) {
+        setError(r.error);
+        setRows(backup); // verwijderen mislukte — rij terugzetten
+      }
     });
   }
 

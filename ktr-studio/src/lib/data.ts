@@ -228,7 +228,7 @@ export async function getClient(id: string): Promise<Client | null> {
   if (!supabase) return null;
   const legacyCols =
     "id,name,ig_handle,yt_channel_id,status,monthly_value,package,videos_per_month,editor_cost,payment_status,soul_character_id,reference_image_url,brand_prompt,brand_identity,brand_story,brand_strategy,brand_voice,notes,brand_primary,brand_secondary";
-  const baseCols = `${legacyCols},manager,hidden,health,health_note,start_date,tiktok_handle`;
+  const baseCols = `${legacyCols},manager,hidden,health,health_note,start_date,tiktok_handle,moneybird_contact`;
   // Nieuwe kolommen apart: als een migratie nog niet gedraaid is mag het
   // klantprofiel niet stuk — dan vallen we terug op de basiskolommen.
   let { data: c, error } = await supabase
@@ -273,6 +273,7 @@ export async function getClient(id: string): Promise<Client | null> {
     healthNote: (c as Record<string, unknown>).health_note as string ?? null,
     startDate: (c as Record<string, unknown>).start_date as string ?? null,
     tiktokHandle: (c as Record<string, unknown>).tiktok_handle as string ?? null,
+    moneybirdContact: (c as Record<string, unknown>).moneybird_contact as string ?? null,
     ytChannel: c.yt_channel_id ?? null,
   };
 }

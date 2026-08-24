@@ -57,6 +57,8 @@ export interface Client {
   health?: string | null;
   healthNote?: string | null;
   startDate?: string | null;
+  /** Expliciete contactnaam in Moneybird (voor korte klantnamen). */
+  moneybirdContact?: string | null;
 }
 
 export const clients: Client[] = [

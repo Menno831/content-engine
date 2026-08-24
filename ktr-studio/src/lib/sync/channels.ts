@@ -48,7 +48,7 @@ async function fetchClarityVisitors(): Promise<{ visitors: number; views: number
 
 export async function syncOwnChannelsCore(agencyId?: string): Promise<ChannelSyncResult[]> {
   const admin = createAdminClient();
-  if (!admin) return [{ channel: "alle", ok: false, error: "geen_serverkey" }];
+  if (!admin) return [{ channel: "alle", ok: false, error: "serverkey ontbreekt (SUPABASE_SERVICE_ROLE_KEY) — sync kan niet draaien" }];
 
   let q = admin.from("agencies").select("id, own_ig_handle, own_yt_channel");
   if (agencyId) q = q.eq("id", agencyId);
@@ -58,7 +58,7 @@ export async function syncOwnChannelsCore(agencyId?: string): Promise<ChannelSyn
   const results: ChannelSyncResult[] = [];
 
   for (const a of agencies ?? []) {
-    const upsert = async (channel: string, values: { followers?: number | null; visitors?: number | null; views?: number | null }) => {
+    const upsert = async (channel: string, source: string, values: { followers?: number | null; visitors?: number | null; views?: number | null }) => {
       const { error } = await admin.from("channel_stats").upsert(
         {
           agency_id: a.id,
@@ -67,6 +67,7 @@ export async function syncOwnChannelsCore(agencyId?: string): Promise<ChannelSyn
           followers: values.followers ?? null,
           visitors: values.visitors ?? null,
           views: values.views ?? null,
+          source,
         },
         { onConflict: "agency_id,channel,stat_date" }
       );
@@ -76,7 +77,7 @@ export async function syncOwnChannelsCore(agencyId?: string): Promise<ChannelSyn
     if (a.own_ig_handle) {
       try {
         const r = await fetchInstagram(a.own_ig_handle as string);
-        await upsert("instagram", { followers: r.profile.followers || null, views: sumViews(r.media) });
+        await upsert("instagram", "instagram-sync", { followers: r.profile.followers || null, views: sumViews(r.media) });
         results.push({ channel: "instagram", ok: true });
       } catch (e) {
         results.push({
@@ -90,13 +91,20 @@ export async function syncOwnChannelsCore(agencyId?: string): Promise<ChannelSyn
     if (a.own_yt_channel) {
       try {
         const r = await fetchYouTube(a.own_yt_channel as string);
-        await upsert("youtube", { followers: r.profile.followers || null, views: sumViews(r.media) });
+        await upsert("youtube", "youtube-api", { followers: r.profile.followers || null, views: sumViews(r.media) });
         results.push({ channel: "youtube", ok: true });
       } catch (e) {
         results.push({
           channel: "youtube",
           ok: false,
-          error: e instanceof Error && e.message === "not_configured" ? "YOUTUBE_API_KEY ontbreekt" : e instanceof Error ? e.message : "sync mislukt",
+          error:
+            e instanceof Error && ["not_configured", "youtube_geen_key"].includes(e.message)
+              ? "YOUTUBE_API_KEY ontbreekt"
+              : e instanceof Error && e.message === "youtube_kanaal_niet_gevonden"
+                ? "YouTube-kanaal niet gevonden — check de kanaal-URL of het @handle"
+                : e instanceof Error
+                  ? e.message
+                  : "sync mislukt",
         });
       }
     }
@@ -104,7 +112,7 @@ export async function syncOwnChannelsCore(agencyId?: string): Promise<ChannelSyn
     try {
       const clarity = await fetchClarityVisitors();
       if (clarity) {
-        await upsert("website", { visitors: clarity.visitors, views: clarity.views });
+        await upsert("website", "clarity", { visitors: clarity.visitors, views: clarity.views });
         results.push({ channel: "website", ok: true });
       }
       // Geen token → stil overslaan; dat is de normale toestand tot de

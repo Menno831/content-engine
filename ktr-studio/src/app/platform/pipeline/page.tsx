@@ -214,7 +214,9 @@ export default async function Pipeline({
             const all = contentCards.filter((c) => c.stage === stage);
             // Zelfde archief-cap als de tabel: gepost werk blijft beperkt
             // tot de recentste kaarten, anders wordt de kolom eindeloos.
-            const cards = stage === "posted" && sp.all !== "1" ? all.slice(0, 15) : all;
+            // Nieuwste eerst — anders verstopt de cap juist het recente werk.
+            const sorted = stage === "posted" ? [...all].sort((a, b) => (b.dateISO ?? "").localeCompare(a.dateISO ?? "")) : all;
+            const cards = stage === "posted" && sp.all !== "1" ? sorted.slice(0, 15) : sorted;
             const hiddenCount = all.length - cards.length;
             return (
               <div key={stage} className="w-[300px] shrink-0">

@@ -52,17 +52,16 @@ export async function submitLeadFormAction(
   });
   if (error) return { error: "Versturen lukte niet. Probeer het zo nog eens." };
 
-  // Teller = echte telling in plaats van lezen-en-terugschrijven, zodat
-  // gelijktijdige inzendingen geen tellingen verliezen.
-  const { count } = await admin
-    .from("leads")
-    .select("id", { count: "exact", head: true })
-    .eq("client_id", form.client_id)
-    .eq("source_label", `Formulier: ${form.name}`);
-  await admin
-    .from("lead_forms")
-    .update({ submissions: count ?? Number(form.submissions ?? 0) + 1 })
-    .eq("id", form.id);
+  // Atomaire increment in de database (migratie 031) — race-vrij en
+  // onafhankelijk van labels of latere lead-bewerkingen. Valt terug op
+  // een gewone update zolang de migratie nog niet gedraaid is.
+  const { error: rpcError } = await admin.rpc("increment_form_submissions", { p_form_id: form.id });
+  if (rpcError) {
+    await admin
+      .from("lead_forms")
+      .update({ submissions: Number(form.submissions ?? 0) + 1 })
+      .eq("id", form.id);
+  }
 
   return { ok: true };
 }

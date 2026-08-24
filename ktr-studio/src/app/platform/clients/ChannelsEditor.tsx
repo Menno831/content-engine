@@ -11,24 +11,27 @@ export function ChannelsEditor({
   ytChannel,
   contentMix,
   asanaProject,
+  moneybirdContact,
 }: {
   clientId: string;
   igHandle: string;
   ytChannel: string;
   contentMix?: string;
   asanaProject?: string;
+  moneybirdContact?: string;
 }) {
   const [ig, setIg] = useState(igHandle);
   const [yt, setYt] = useState(ytChannel);
   const [mix, setMix] = useState(contentMix ?? "");
   const [asana, setAsana] = useState(asanaProject ?? "");
+  const [moneybird, setMoneybird] = useState(moneybirdContact ?? "");
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   function save() {
     setMsg(null);
     start(async () => {
-      const r = await updateClientChannelsAction(clientId, ig, yt, mix, asana);
+      const r = await updateClientChannelsAction(clientId, ig, yt, mix, asana, moneybird);
       setMsg(r.ok ? { ok: true, text: "Opgeslagen — klik nu op Sync." } : { ok: false, text: r.error ?? "Opslaan mislukt." });
     });
   }
@@ -63,6 +66,15 @@ export function ChannelsEditor({
             value={asana}
             onChange={(e) => setAsana(e.target.value)}
             placeholder="https://app.asana.com/… — voor klanten met eigen Asana"
+            className="w-full rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-sm outline-none focus:border-accent/40"
+          />
+        </label>
+        <label className="block">
+          <span className="block text-[10px] font-mono uppercase tracking-wider text-muted mb-1">Moneybird-contactnaam (voor Revenue)</span>
+          <input
+            value={moneybird}
+            onChange={(e) => setMoneybird(e.target.value)}
+            placeholder="bv. AB Collection BV — alleen nodig als facturen niet vanzelf matchen"
             className="w-full rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-sm outline-none focus:border-accent/40"
           />
         </label>

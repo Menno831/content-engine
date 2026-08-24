@@ -76,7 +76,7 @@ CONTEXT PROSPECT:
 
 Schrijf alleen de DM zelf, geen uitleg eromheen.`;
 
-const WEEKLY_TEMPLATE = `Je bent de strategisch adviseur van Menno Kater (content-agency, doel €100K/mnd). Hieronder de actuele cijfers als JSON. Schrijf een korte analyse in het Nederlands: wat valt op, wat is dé hefboom voor komende week, en één concreet dagelijks gedrag dat het verschil maakt. Maximaal 130 woorden, geen opsomming van de cijfers zelf, geen inleiding, direct de inhoud. Nuchter en direct, geen em-dashes.
+const WEEKLY_TEMPLATE = `Je bent de strategisch adviseur van Menno Kater (content-agency; het maanddoel staat als 'doel' in de JSON). Hieronder de actuele cijfers als JSON. Schrijf een korte analyse in het Nederlands: wat valt op, wat is dé hefboom voor komende week, en één concreet dagelijks gedrag dat het verschil maakt. Maximaal 130 woorden, geen opsomming van de cijfers zelf, geen inleiding, direct de inhoud. Nuchter en direct, geen em-dashes.
 
 {{onderwerp}}`;
 
@@ -95,9 +95,14 @@ export async function runWatchdog(): Promise<WatchdogResult> {
   for (const agency of agencies ?? []) {
     const agencyId = agency.id as string;
 
+    // Eén plan per agency: stap 1, 3 en de briefing kijken naar
+    // dezelfde cijfers en Moneybird wordt maar één keer bevraagd.
+    let agencyPlan: GrowthPlan | null = null;
+
     // ── 1. Signaleringen ─────────────────────────────────────────
     try {
-      const plan: GrowthPlan | null = await buildGrowthPlanWith(admin);
+      const plan: GrowthPlan | null = await buildGrowthPlanWith(admin, agencyId);
+      agencyPlan = plan;
 
       if (plan) {
         // De prioriteit-1-acties van het groeiplan zijn de signalen.
@@ -139,6 +144,7 @@ export async function runWatchdog(): Promise<WatchdogResult> {
         .is("message", null)
         .limit(10);
 
+      let drafted = 0;
       for (const p of pending ?? []) {
         const context = [
           `Naam: ${p.name}`,
@@ -161,14 +167,16 @@ export async function runWatchdog(): Promise<WatchdogResult> {
           .update({ message: text.trim(), message_generated_at: new Date().toISOString() })
           .eq("id", p.id)
           .is("message", null); // nooit een handgeschreven bericht overschrijven
-        if (!error) result.dmDrafts += 1;
+        if (error) result.errors.push(`dm-concept opslaan (${p.name}): ${error.message}`);
+        else drafted += 1;
       }
+      result.dmDrafts += drafted;
 
-      if (result.dmDrafts > 0) {
+      if (drafted > 0) {
         await notifyOnce(
           admin,
           agencyId,
-          `${result.dmDrafts} concept-DM's klaargezet`,
+          `${drafted} concept-DM's klaargezet`,
           "De AI schreef concepten voor prospects zonder bericht. Lees ze na en verstuur zelf wat goed voelt.",
           "/platform/outreach"
         );
@@ -182,7 +190,7 @@ export async function runWatchdog(): Promise<WatchdogResult> {
     try {
       const isMonday = new Date().getDay() === 1;
       if (isMonday) {
-        const plan = await buildGrowthPlanWith(admin);
+        const plan = agencyPlan ?? (await buildGrowthPlanWith(admin, agencyId));
         if (plan) {
           const { text, mock } = await generateText({
             template: WEEKLY_TEMPLATE,
@@ -211,7 +219,7 @@ export async function runWatchdog(): Promise<WatchdogResult> {
 
     // ── 4. Ochtendbriefing klaarzetten ───────────────────────────
     try {
-      const b = await getOrCreateBriefing(admin, agencyId);
+      const b = await getOrCreateBriefing(admin, agencyId, agencyPlan);
       if (b) result.briefing = true;
     } catch (e) {
       result.errors.push(`briefing: ${e instanceof Error ? e.message : "onbekend"}`);

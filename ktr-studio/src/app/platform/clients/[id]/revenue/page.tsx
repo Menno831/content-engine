@@ -21,9 +21,16 @@ const stateLabel: Record<string, string> = {
 
 // Namen matchen soepel: "Flows Marketing Solutions" ↔ "Flows Marketing".
 // Korte namen alleen exact, anders matcht "Max" ook "Maxima BV".
-function looksLikeClient(contact: string, clientName: string): boolean {
+// Staat er een expliciete Moneybird-contactnaam op de klant (Profiel →
+// kanalen), dan wint die altijd — dat is de uitweg voor korte namen
+// als "A&B" waar de heuristiek bewust niet op durft te matchen.
+function looksLikeClient(contact: string, clientName: string, moneybirdContact?: string | null): boolean {
   const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
   const a = norm(contact);
+  if (moneybirdContact?.trim()) {
+    const m = norm(moneybirdContact);
+    return Boolean(m) && (a === m || a.includes(m) || m.includes(a));
+  }
   const b = norm(clientName);
   if (!a || !b) return false;
   if (a === b) return true;
@@ -53,7 +60,7 @@ export default async function ClientRevenuePage({ params }: { params: Promise<{ 
 
   // Alleen facturen die bij deze klant horen.
   const perMonth = months.map((m, i) => {
-    const invoices = (monthsData[i]?.invoices ?? []).filter((inv) => looksLikeClient(inv.contact, c.name));
+    const invoices = (monthsData[i]?.invoices ?? []).filter((inv) => looksLikeClient(inv.contact, c.name, c.moneybirdContact));
     return {
       month: m,
       label: new Date(`${m}-01`).toLocaleDateString("nl-NL", { month: "short" }),

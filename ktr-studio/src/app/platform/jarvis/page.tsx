@@ -29,7 +29,7 @@ export default async function JarvisPage() {
       <PageHeader
         eyebrow="Home"
         title="Jarvis"
-        subtitle="Praat of typ — hij kent je cijfers, brieft je 's ochtends en denkt mee richting de €100K."
+        subtitle="Praat of typ — hij kent je cijfers, brieft je 's ochtends en denkt mee richting je maanddoel"
       />
       {demo ? (
         <p className="text-sm text-muted">Demo-modus — Jarvis werkt in de echte omgeving.</p>

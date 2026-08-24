@@ -38,16 +38,33 @@ export async function buildGrowthPlan(): Promise<GrowthPlan | null> {
 }
 
 // De cron gebruikt dezelfde engine met de service-client (geen sessie).
+// Met een sessie-client filtert RLS al op de eigen agency; de
+// service-client omzeilt RLS, dus dan is agencyId VERPLICHT om te
+// voorkomen dat agencies elkaars cijfers in hun plan krijgen.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function buildGrowthPlanWith(supabase: SupabaseClient<any, any, any>): Promise<GrowthPlan | null> {
+export async function buildGrowthPlanWith(supabase: SupabaseClient<any, any, any>, agencyId?: string): Promise<GrowthPlan | null> {
 
   const today = new Date().toLocaleDateString("sv-SE");
   const in60 = new Date(Date.now() + 60 * 86_400_000).toLocaleDateString("sv-SE");
   const daysAgo7 = new Date(Date.now() - 7 * 86_400_000).toISOString();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const scoped = (q: any) => (agencyId ? q.eq("agency_id", agencyId) : q);
+
+  // Klanten eerst: leads en content hebben geen agency_id-kolom en
+  // worden via de client-lijst van deze agency gefilterd.
+  interface ClientRow { id: string; name: string; status: string; monthly_value: number | null; health: string | null; hidden: boolean | null }
+  const { data: clients } = (await scoped(
+    supabase.from("clients").select("id,name,status,monthly_value,health,hidden")
+  )) as { data: ClientRow[] | null };
+  const clientIds = (clients ?? []).map((c) => c.id);
+
+  const agencyQuery = agencyId
+    ? supabase.from("agencies").select("goal_monthly").eq("id", agencyId).maybeSingle()
+    : supabase.from("agencies").select("goal_monthly").limit(1).maybeSingle();
+
   const [
     { data: agency },
-    { data: clients },
     { data: leads },
     { data: prospects },
     { data: content },
@@ -55,13 +72,12 @@ export async function buildGrowthPlanWith(supabase: SupabaseClient<any, any, any
     { data: channelStats },
     month,
   ] = await Promise.all([
-    supabase.from("agencies").select("goal_monthly").limit(1).maybeSingle(),
-    supabase.from("clients").select("id,name,status,monthly_value,health,hidden"),
-    supabase.from("leads").select("id,name,stage,value,next_followup,created_at"),
-    supabase.from("prospects").select("id,stage,dm_sent_at"),
-    supabase.from("content").select("id,stage,deadline,editor_id"),
-    supabase.from("contracts").select("id,title,status,ends_on"),
-    supabase.from("channel_stats").select("channel,stat_date").order("stat_date", { ascending: false }).limit(50),
+    agencyQuery,
+    supabase.from("leads").select("id,name,stage,value,next_followup,created_at").in("client_id", clientIds),
+    scoped(supabase.from("prospects").select("id,stage,dm_sent_at")) as Promise<{ data: { id: string; stage: string; dm_sent_at: string | null }[] | null }>,
+    supabase.from("content").select("id,stage,deadline,editor_id").in("client_id", clientIds),
+    scoped(supabase.from("contracts").select("id,title,status,ends_on")) as Promise<{ data: { id: string; title: string; status: string; ends_on: string | null }[] | null }>,
+    scoped(supabase.from("channel_stats").select("channel,stat_date")).order("stat_date", { ascending: false }).limit(50) as Promise<{ data: { channel: string; stat_date: string }[] | null }>,
     getMoneybirdMonth(),
   ]);
 

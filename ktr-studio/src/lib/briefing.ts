@@ -5,13 +5,13 @@
 // vloeiend verhaal. Eén briefing per dag, opgeslagen in `briefings`.
 // ════════════════════════════════════════════════════════════════
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { buildGrowthPlanWith } from "@/lib/growth";
+import { buildGrowthPlanWith, type GrowthPlan } from "@/lib/growth";
 import { generateText } from "@/lib/ai";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Db = SupabaseClient<any, any, any>;
 
-const BRIEFING_TEMPLATE = `Je bent Jarvis, de persoonlijke assistent van Menno Kater (content-agency, onderweg naar €100K/mnd). Hieronder staat de ruwe ochtendbriefing met echte cijfers. Herschrijf hem tot een korte gesproken briefing in het Nederlands: direct, energiek maar nuchter, alsof je hem 's ochtends even bijpraat. Begin met "Goedemorgen Menno". Noem alleen wat er echt staat, verzin niets. Maximaal 150 woorden, geen opsommingstekens, geen em-dashes.
+const BRIEFING_TEMPLATE = `Je bent Jarvis, de persoonlijke assistent van Menno Kater (content-agency; het maanddoel staat als bedrag in de briefing zelf). Hieronder staat de ruwe ochtendbriefing met echte cijfers. Herschrijf hem tot een korte gesproken briefing in het Nederlands: direct, energiek maar nuchter, alsof je hem 's ochtends even bijpraat. Begin met "Goedemorgen Menno". Noem alleen wat er echt staat, verzin niets. Maximaal 150 woorden, geen opsommingstekens, geen em-dashes.
 
 {{onderwerp}}`;
 
@@ -25,25 +25,42 @@ const fmtEur = (n: number) => `€${Math.round(n).toLocaleString("nl-NL")}`;
 
 // De feiten van vandaag, in leesbare regels. Dit is de bron van de
 // briefing én de fallback als AI niet beschikbaar is.
-export async function buildBriefingFacts(db: Db): Promise<string> {
+// agencyId is verplicht bij een service-client (RLS-bypass); met een
+// sessie-client filtert RLS zelf al. Een al gebouwd plan mag mee om
+// dubbele Moneybird/Supabase-rondes te voorkomen.
+export async function buildBriefingFacts(db: Db, agencyId?: string, prebuiltPlan?: GrowthPlan | null): Promise<string> {
   const today = new Date().toLocaleDateString("sv-SE");
   const tomorrow = new Date(Date.now() + 86_400_000).toLocaleDateString("sv-SE");
   const yesterday = new Date(Date.now() - 86_400_000).toLocaleDateString("sv-SE");
 
+  let meetingsQ = db
+    .from("meetings")
+    .select("title, starts_at, client_id")
+    .gte("starts_at", `${today}T00:00:00`)
+    .lt("starts_at", `${tomorrow}T00:00:00`)
+    .order("starts_at");
+  if (agencyId) meetingsQ = meetingsQ.eq("agency_id", agencyId);
+  let eodQ = db.from("eod_reports").select("full_name").eq("eod_date", yesterday);
+  if (agencyId) eodQ = eodQ.eq("agency_id", agencyId);
+
+  // content hangt aan clients, niet aan de agency — dus via de klantlijst.
+  let clientIds: string[] | null = null;
+  if (agencyId) {
+    const { data: cl } = await db.from("clients").select("id").eq("agency_id", agencyId);
+    clientIds = (cl ?? []).map((c) => c.id as string);
+  }
+  let dueQ = db
+    .from("content")
+    .select("title, stage")
+    .eq("deadline", today)
+    .not("stage", "in", '("posted","ready_for_posting")');
+  if (clientIds) dueQ = dueQ.in("client_id", clientIds);
+
   const [plan, { data: meetings }, { data: dueCards }, { data: eod }] = await Promise.all([
-    buildGrowthPlanWith(db),
-    db
-      .from("meetings")
-      .select("title, starts_at, client_id")
-      .gte("starts_at", `${today}T00:00:00`)
-      .lt("starts_at", `${tomorrow}T00:00:00`)
-      .order("starts_at"),
-    db
-      .from("content")
-      .select("title, stage")
-      .eq("deadline", today)
-      .not("stage", "in", '("posted","ready_for_posting")'),
-    db.from("eod_reports").select("full_name").eq("eod_date", yesterday),
+    prebuiltPlan !== undefined ? Promise.resolve(prebuiltPlan) : buildGrowthPlanWith(db, agencyId),
+    meetingsQ,
+    dueQ,
+    eodQ,
   ]);
 
   const lines: string[] = [];
@@ -82,7 +99,7 @@ export async function buildBriefingFacts(db: Db): Promise<string> {
 
 // Haal (of maak) de briefing van vandaag. Bestaat er al één zonder
 // AI-laag terwijl de key inmiddels werkt, dan upgraden we hem.
-export async function getOrCreateBriefing(db: Db, agencyId: string): Promise<Briefing | null> {
+export async function getOrCreateBriefing(db: Db, agencyId: string, prebuiltPlan?: GrowthPlan | null): Promise<Briefing | null> {
   const today = new Date().toLocaleDateString("sv-SE");
 
   const { data: existing } = await db
@@ -95,7 +112,7 @@ export async function getOrCreateBriefing(db: Db, agencyId: string): Promise<Bri
     return { date: existing.brief_date as string, content: existing.content as string, ai: true };
   }
 
-  const facts = await buildBriefingFacts(db);
+  const facts = await buildBriefingFacts(db, agencyId, prebuiltPlan);
 
   // AI-laag: mooi als het kan, feiten als fallback.
   let content = facts;

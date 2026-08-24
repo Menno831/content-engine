@@ -47,6 +47,7 @@ export async function saveChannelStatAction(input: {
       visitors,
       views,
       impressions,
+      source: "handmatig",
     },
     { onConflict: "agency_id,channel,stat_date" }
   );
@@ -59,8 +60,11 @@ export async function saveChannelStatAction(input: {
 export async function deleteChannelStatAction(id: string): Promise<ChannelResult> {
   const supabase = await supabaseServer();
   if (!supabase) return { error: "Supabase niet geconfigureerd." };
-  const { error } = await supabase.from("channel_stats").delete().eq("id", id);
-  if (error) return { error: error.message };
+  const { profile } = await getSessionContext();
+  if (profile?.role !== "owner" && profile?.role !== "team") return { error: "Alleen het team kan metingen verwijderen." };
+  const { data, error } = await supabase.from("channel_stats").delete().eq("id", id).select("id");
+  if (error) return { error: "Verwijderen lukte niet. Probeer het opnieuw." };
+  if (!data?.length) return { error: "Meting niet gevonden — ververs de pagina." };
   revalidatePath("/platform/channels");
   return { ok: true };
 }

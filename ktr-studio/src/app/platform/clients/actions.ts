@@ -495,7 +495,8 @@ export async function updateClientChannelsAction(
   igHandle: string,
   ytChannel: string,
   contentMix?: string,
-  asanaProject?: string
+  asanaProject?: string,
+  moneybirdContact?: string
 ): Promise<ActionResult> {
   const supabase = await supabaseServer();
   if (!supabase) return { error: "Supabase niet geconfigureerd." };
@@ -515,10 +516,11 @@ export async function updateClientChannelsAction(
     const m = asanaProject.match(/\d{6,}/);
     patch.asana_project_id = m ? m[0] : asanaProject.trim() || null;
   }
+  if (moneybirdContact !== undefined) patch.moneybird_contact = moneybirdContact.trim() || null;
 
   let { error } = await supabase.from("clients").update(patch).eq("id", clientId);
   // Migratie nog niet gedraaid? Dan in elk geval de kanalen opslaan.
-  if (error && /content_mix|asana_project_id/.test(error.message)) {
+  if (error && /content_mix|asana_project_id|moneybird_contact/.test(error.message)) {
     ({ error } = await supabase.from("clients").update(base).eq("id", clientId));
     if (!error) return { error: "Kanalen opgeslagen, maar draai eerst migratie 019+020 in Supabase voor video-mix en Asana." };
   }

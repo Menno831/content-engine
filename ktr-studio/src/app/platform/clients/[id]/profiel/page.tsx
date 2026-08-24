@@ -47,6 +47,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
             ytChannel={c.ytChannel ?? ""}
             contentMix={c.contentMix ?? ""}
             asanaProject={c.asanaProject ?? ""}
+            moneybirdContact={c.moneybirdContact ?? ""}
           />
           {c.notes && (
             <div className="mt-5 pt-4 border-t border-white/[0.06]">
