@@ -45,6 +45,12 @@ Settings → Data Export). Voor automatische eigen-kanalen-data later: GA4-API
 (website) en LinkedIn heeft geen bruikbare API — dat blijft handmatig.
 
 ## Afgerond (18-24 aug 2026)
+- **Jarvis** (`/platform/jarvis`, migratie 030 — gedraaid): spraak in/uit
+  (Web Speech nl-NL, geen key nodig), ochtendbriefing op echte cijfers
+  (regelgebaseerd, AI-laag zodra ANTHROPIC_API_KEY werkt; live geverifieerd),
+  chat met gespreksgeschiedenis (wacht op de key en zegt dat zelf), dagelijkse
+  briefing via de watchdog-cron. Watchdog doet nu ook een zelftest die kapotte
+  koppelingen als notificatie meldt.
 - **Automatiseringsmotor** (cron 07:30 `/api/cron/watchdog`): dagelijkse
   signalen in de bel (dedupe 3 dagen, werkt — geverifieerd), AI-concept-DM's
   voor de outreach-wachtrij (max 10/dag, nooit auto-verzenden) en maandag-
