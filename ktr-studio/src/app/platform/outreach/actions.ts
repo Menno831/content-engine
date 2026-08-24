@@ -81,3 +81,12 @@ export async function generateProspectDmAction(prospectId: string, force = false
   revalidatePath("/platform/outreach");
   return { ok: "concept klaargezet", message };
 }
+
+export async function setProspectTierAction(prospectId: string, tier: "top" | null): Promise<ProspectResult> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { error: "Supabase niet geconfigureerd." };
+  const { error } = await supabase.from("prospects").update({ tier }).eq("id", prospectId);
+  if (error) return { error: "Opslaan lukte niet — is migratie 032 al gedraaid?" };
+  revalidatePath("/platform/outreach");
+  return { ok: tier === "top" ? "toegevoegd aan de toplaag" : "terug naar de brede laag" };
+}

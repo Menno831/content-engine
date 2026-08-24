@@ -10,7 +10,7 @@ import { useState } from "react";
 import { Card, Avatar } from "../_components";
 import { fmtEur, type Prospect } from "../_data";
 import { ProspectStageControl } from "./ProspectStageControl";
-import { generateProspectDmAction } from "./actions";
+import { generateProspectDmAction, setProspectTierAction } from "./actions";
 
 function igHandle(v: string): string {
   return v.replace(/^https?:\/\/(www\.)?instagram\.com\//i, "").replace(/^@/, "").replace(/\/.*$/, "").trim();
@@ -29,6 +29,15 @@ export function ProspectCard({ prospect: p, demo }: { prospect: Prospect; demo: 
   const [generating, setGenerating] = useState(false);
   const [genError, setGenError] = useState("");
   const [message, setMessage] = useState(p.message);
+  const [tier, setTier] = useState(p.tier ?? null);
+
+  async function toggleTier(e: React.MouseEvent) {
+    e.stopPropagation();
+    const next = tier === "top" ? null : "top";
+    setTier(next); // direct zichtbaar; server volgt
+    const r = await setProspectTierAction(p.id, next as "top" | null);
+    if (r.error) setTier(tier); // terugdraaien bij fout
+  }
 
   async function writeDm() {
     setGenerating(true);
@@ -56,7 +65,7 @@ export function ProspectCard({ prospect: p, demo }: { prospect: Prospect; demo: 
   }
 
   return (
-    <Card hover className="p-3.5">
+    <Card hover className={`p-3.5 ${tier === "top" ? "border-amber-400/35" : ""}`}>
       {/* Ingeklapt: naam, waarde en de kanaal-links — meer niet. */}
       <button onClick={() => setOpen((o) => !o)} className="w-full text-left">
         <div className="flex items-center gap-2.5">
@@ -64,6 +73,18 @@ export function ProspectCard({ prospect: p, demo }: { prospect: Prospect; demo: 
           <div className="min-w-0 flex-1">
             <div className="text-sm font-medium truncate">{p.name}</div>
           </div>
+          {!demo && (
+            <span
+              role="button"
+              onClick={toggleTier}
+              title={tier === "top" ? "Uit de toplaag halen" : "Naar de toplaag (persoonlijke aanpak)"}
+              className={`shrink-0 text-[15px] leading-none transition-colors ${
+                tier === "top" ? "text-amber-300" : "text-muted/40 hover:text-amber-300"
+              }`}
+            >
+              {tier === "top" ? "★" : "☆"}
+            </span>
+          )}
           <span className="font-mono text-[12px] text-emerald-400 shrink-0">{fmtEur(p.potentialValue)}</span>
           <span className="text-[11px] text-muted shrink-0">{open ? "▾" : "▸"}</span>
         </div>
@@ -94,6 +115,16 @@ export function ProspectCard({ prospect: p, demo }: { prospect: Prospect; demo: 
 
       {!open ? null : (
       <div className="mt-2.5">
+      {tier === "top" && (
+        <div className="rounded-lg bg-amber-400/[0.07] border border-amber-400/20 px-2.5 py-2 mb-2">
+          <div className="text-[10px] font-mono uppercase tracking-wider text-amber-300 mb-0.5">★ Toplaag</div>
+          <div className="text-[11.5px] text-foreground/80 leading-relaxed">
+            Persoonlijke aanpak: bekijk eerst echt hun kanaal. Opener mag uit het veld hieronder,
+            maar zodra er antwoord komt schakel je naar voice notes en noem je de 12K→80K-case.
+            Interesse? Zelfde dag call boeken.
+          </div>
+        </div>
+      )}
       {p.weakness && (
         <div className="rounded-lg bg-white/[0.03] border border-white/[0.05] px-2.5 py-2 mb-2">
           <div className="text-[10px] font-mono uppercase tracking-wider text-muted mb-0.5">Waarom fit</div>

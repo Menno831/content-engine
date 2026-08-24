@@ -293,6 +293,8 @@ export interface Prospect {
   message?: string | null;
   /** Wanneer de DM verstuurd is — voedt de "vandaag verstuurd"-teller. */
   dmSentAt?: string | null;
+  /** 'top' = toplaag: persoonlijke Seth/Jack-behandeling i.p.v. standaard-opener. */
+  tier?: string | null;
 }
 
 export const prospects: Prospect[] = [

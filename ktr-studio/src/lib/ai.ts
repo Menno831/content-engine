@@ -8,8 +8,10 @@
 // ════════════════════════════════════════════════════════════════
 import Anthropic from "@anthropic-ai/sdk";
 
-const MODEL_SMART = "claude-opus-4-8";
-const MODEL_FAST = "claude-haiku-4-5";
+// Actuele API-model-ID's (aug 2026): Opus 5 voor het zware werk,
+// Haiku 4.5 (met datumsuffix, zoals de API 'm verwacht) voor snel werk.
+const MODEL_SMART = "claude-opus-5";
+const MODEL_FAST = "claude-haiku-4-5-20251001";
 
 export type AiModel = "smart" | "fast";
 
