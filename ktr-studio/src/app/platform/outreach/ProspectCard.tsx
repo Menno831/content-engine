@@ -10,6 +10,7 @@ import { useState } from "react";
 import { Card, Avatar } from "../_components";
 import { fmtEur, type Prospect } from "../_data";
 import { ProspectStageControl } from "./ProspectStageControl";
+import { generateProspectDmAction } from "./actions";
 
 function igHandle(v: string): string {
   return v.replace(/^https?:\/\/(www\.)?instagram\.com\//i, "").replace(/^@/, "").replace(/\/.*$/, "").trim();
@@ -25,13 +26,28 @@ export function ProspectCard({ prospect: p, demo }: { prospect: Prospect; demo: 
   const [copied, setCopied] = useState(false);
   const [showMsg, setShowMsg] = useState(false);
   const [open, setOpen] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [genError, setGenError] = useState("");
+  const [message, setMessage] = useState(p.message);
+
+  async function writeDm() {
+    setGenerating(true);
+    setGenError("");
+    const r = await generateProspectDmAction(p.id);
+    setGenerating(false);
+    if (r.error) setGenError(r.error);
+    else if (r.message) {
+      setMessage(r.message);
+      setShowMsg(true);
+    }
+  }
 
   const handle = p.instagram ? igHandle(p.instagram) : null;
 
   async function copyMessage() {
-    if (!p.message) return;
+    if (!message) return;
     try {
-      await navigator.clipboard.writeText(p.message);
+      await navigator.clipboard.writeText(message!);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -85,8 +101,22 @@ export function ProspectCard({ prospect: p, demo }: { prospect: Prospect; demo: 
         </div>
       )}
 
+      {/* Nog geen bericht: laat de AI een concept schrijven in Menno's stem */}
+      {!message && !demo && (
+        <div className="mb-2">
+          <button
+            onClick={writeDm}
+            disabled={generating}
+            className="w-full rounded-lg border border-accent/25 bg-accent/10 hover:bg-accent/20 disabled:opacity-60 text-accent font-bold text-[11.5px] py-1.5 transition-colors"
+          >
+            {generating ? "Schrijven…" : "✨ Schrijf concept-DM"}
+          </button>
+          {genError && <p className="mt-1 text-[11px] text-red-400">{genError}</p>}
+        </div>
+      )}
+
       {/* DM-bericht: kopiëren + direct de DM openen */}
-      {p.message && (
+      {message && (
         <div className="mb-2">
           <div className="flex gap-1.5">
             <button
@@ -111,7 +141,7 @@ export function ProspectCard({ prospect: p, demo }: { prospect: Prospect; demo: 
           </button>
           {showMsg && (
             <p className="mt-1 rounded-lg bg-black/30 border border-white/[0.06] px-2.5 py-2 text-[12px] text-foreground/85 leading-relaxed whitespace-pre-wrap">
-              {p.message}
+              {message}
             </p>
           )}
         </div>

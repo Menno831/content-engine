@@ -3,6 +3,8 @@ import { redirectEditorToBoard } from "@/lib/guard";
 import { PageHeader, Card, Eyebrow, Badge } from "../_components";
 import { fmtEur } from "../_data";
 import { buildGrowthPlan } from "@/lib/growth";
+import { createClient } from "@/lib/supabase/server";
+import { AnalysisCard } from "./AnalysisCard";
 
 const prioMeta: Record<number, { label: string; color: string }> = {
   1: { label: "Nu doen", color: "#F87171" },
@@ -15,6 +17,23 @@ const prioMeta: Record<number, { label: string; color: string }> = {
 export default async function GroeiPage() {
   await redirectEditorToBoard();
   const plan = await buildGrowthPlan();
+
+  // Laatste AI-weekanalyse (maandag-cron of handmatig ververst).
+  let note: string | null = null;
+  let noteDate: string | null = null;
+  const supabase = await createClient();
+  if (supabase) {
+    const { data } = await supabase
+      .from("growth_notes")
+      .select("note, created_at")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (data) {
+      note = data.note as string;
+      noteDate = new Date(data.created_at as string).toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long" });
+    }
+  }
 
   if (!plan) {
     return (
@@ -69,6 +88,8 @@ export default async function GroeiPage() {
           {plan.gap === 0 && <span className="text-emerald-400">Doel gehaald — tijd voor een nieuw doel 🎉</span>}
         </div>
       </Card>
+
+      <AnalysisCard note={note} date={noteDate} />
 
       {/* Next steps */}
       <div className="mb-3 flex items-center justify-between">

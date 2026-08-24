@@ -8,6 +8,7 @@
 import { DEMO_MODE, isSupabaseConfigured } from "@/lib/config";
 import { createClient } from "@/lib/supabase/server";
 import { getMoneybirdMonth } from "@/lib/integrations/moneybird";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export interface GrowthAction {
   priority: 1 | 2 | 3; // 1 = nu doen
@@ -33,6 +34,12 @@ export async function buildGrowthPlan(): Promise<GrowthPlan | null> {
   if (DEMO_MODE || !isSupabaseConfigured) return null;
   const supabase = await createClient();
   if (!supabase) return null;
+  return buildGrowthPlanWith(supabase);
+}
+
+// De cron gebruikt dezelfde engine met de service-client (geen sessie).
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function buildGrowthPlanWith(supabase: SupabaseClient<any, any, any>): Promise<GrowthPlan | null> {
 
   const today = new Date().toLocaleDateString("sv-SE");
   const in60 = new Date(Date.now() + 60 * 86_400_000).toLocaleDateString("sv-SE");
