@@ -4,14 +4,22 @@ import { PageHeader, Stat, icons } from "../_components";
 import { getProspects } from "@/lib/prospects";
 import { DEMO_MODE, isSupabaseConfigured } from "@/lib/config";
 import { prospectStageMeta, fmtEur, type ProspectStage } from "../_data";
+import Link from "next/link";
 import { AddProspectDialog } from "./AddProspectDialog";
 import { ProspectCard } from "./ProspectCard";
 
 const stageOrder: ProspectStage[] = ["te_contacteren", "dm_verstuurd", "in_gesprek", "audit_verstuurd", "geen_reactie"];
 
-export default async function OutreachPage() {
+export default async function OutreachPage({ searchParams }: { searchParams: Promise<{ laag?: string }> }) {
   await redirectEditorToBoard();
-  const prospects = await getProspects();
+  const sp = await searchParams;
+  const topOnly = sp.laag === "top";
+  const all = await getProspects();
+  const topCount = all.filter((p) => p.tier === "top").length;
+  // Toplaag-filter; binnen elke kolom staan toplaag-prospects bovenaan.
+  const prospects = (topOnly ? all.filter((p) => p.tier === "top") : all).sort(
+    (a, b) => Number(b.tier === "top") - Number(a.tier === "top")
+  );
   const demo = DEMO_MODE || !isSupabaseConfigured;
 
   const pipelineValue = prospects
@@ -40,6 +48,41 @@ export default async function OutreachPage() {
         <Stat label="In gesprek" value={String(inGesprek)} icon={icons.send} />
         <Stat label="Audit verstuurd" value={String(auditSent)} icon={icons.check} />
       </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <div className="flex gap-1.5">
+          <Link
+            href="/platform/outreach"
+            className={`rounded-full px-3 py-1.5 text-[12px] transition-all ${
+              !topOnly ? "bg-accent text-background font-bold" : "border border-white/[0.08] text-muted hover:border-accent/30 hover:text-accent"
+            }`}
+          >
+            Alle ({all.length})
+          </Link>
+          <Link
+            href="/platform/outreach?laag=top"
+            className={`rounded-full px-3 py-1.5 text-[12px] transition-all ${
+              topOnly ? "bg-amber-400 text-background font-bold" : "border border-white/[0.08] text-muted hover:border-amber-400/40 hover:text-amber-300"
+            }`}
+          >
+            ★ Toplaag ({topCount})
+          </Link>
+        </div>
+        <p className="text-[11.5px] text-muted">★ op een kaart = persoonlijke aanpak in plaats van de standaard-opener</p>
+      </div>
+
+      {topOnly && (
+        <div className="rounded-2xl border border-amber-400/20 bg-amber-400/[0.05] px-5 py-4 mb-5">
+          <div className="font-display font-extrabold mb-2">Het toplaag-playbook (zoals Seth en Jack het bij jou deden)</div>
+          <ol className="space-y-1 text-[13px] text-foreground/85 list-decimal list-inside">
+            <li><strong>Kijk eerst echt.</strong> Tien minuten hun YouTube en reels — vind het ene ding dat opvalt.</li>
+            <li><strong>Opener = oprechte vraag</strong> over dat ene ding. Geen pitch, geen cijfers over hun kanaal.</li>
+            <li><strong>Bij antwoord: voice notes.</strong> Tekst voelt als outreach, een voice note voelt als een mens.</li>
+            <li><strong>De case in één bijzin:</strong> hoe we een klant van 12K naar 80K per maand brachten. Niet als slide.</li>
+            <li><strong>Interesse? Zelfde dag de call boeken.</strong> Vraag hun mail en zet hem meteen klaar.</li>
+          </ol>
+        </div>
+      )}
 
       <div className="flex gap-4 overflow-x-auto pb-4 -mx-1 px-1">
         {stageOrder.map((stage) => {
