@@ -118,6 +118,13 @@ export default async function EditorsPage({ searchParams }: { searchParams: Prom
                   {pay.deduction > 0 && <Row label={`Deductie (${e.lateVideos}× te laat)`} value={`− ${fmtEur(pay.deduction)}`} red />}
                   <Row label="Uit te betalen" value={fmtEur(pay.net)} strong />
                 </div>
+
+                <Link
+                  href={`/platform/contracts?nda=${encodeURIComponent(e.name)}`}
+                  className="mt-4 block text-center rounded-lg border border-accent/25 bg-accent/10 hover:bg-accent/20 text-accent font-bold text-[12px] py-2 transition-colors"
+                >
+                  📄 NDA sturen
+                </Link>
               </Card>
             );
           })}
