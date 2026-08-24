@@ -211,12 +211,16 @@ export default async function Pipeline({
       ) : kanban ? (
         <div className="flex gap-4 overflow-x-auto pb-4 -mx-1 px-1">
           {stageOrder.map((stage) => {
-            const cards = contentCards.filter((c) => c.stage === stage);
+            const all = contentCards.filter((c) => c.stage === stage);
+            // Zelfde archief-cap als de tabel: gepost werk blijft beperkt
+            // tot de recentste kaarten, anders wordt de kolom eindeloos.
+            const cards = stage === "posted" && sp.all !== "1" ? all.slice(0, 15) : all;
+            const hiddenCount = all.length - cards.length;
             return (
               <div key={stage} className="w-[300px] shrink-0">
                 <div className="flex items-center justify-between mb-3 px-1">
                   <span className="font-display font-bold text-sm">{stageMeta[stage].label}</span>
-                  <span className="font-mono text-[11px] text-muted">{cards.length}</span>
+                  <span className="font-mono text-[11px] text-muted">{all.length}</span>
                 </div>
                 <div className="space-y-3 min-h-[120px] rounded-2xl bg-white/[0.015] border border-white/[0.04] p-2.5">
                   {cards.map((card) => (
@@ -230,6 +234,14 @@ export default async function Pipeline({
                     />
                   ))}
                   {cards.length === 0 && <div className="text-center text-[12px] text-muted py-6">Leeg</div>}
+                  {hiddenCount > 0 && (
+                    <Link
+                      href={boardHref({ all: "1" })}
+                      className="block text-center text-[12px] text-muted hover:text-accent py-2 transition-colors"
+                    >
+                      +{hiddenCount} oudere tonen
+                    </Link>
+                  )}
                 </div>
               </div>
             );

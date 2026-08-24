@@ -107,7 +107,8 @@ export function ChannelsBoard({ initial }: { initial: StatRow[] }) {
   const [error, setError] = useState("");
   const [savedFor, setSavedFor] = useState<string | null>(null);
   const [pending, start] = useTransition();
-  const today = new Date().toISOString().slice(0, 10);
+  // Lokale datum, niet UTC — anders staat de invoer 's nachts op gisteren.
+  const today = new Date().toLocaleDateString("sv-SE");
 
   // Invoerstaat per kanaal: datum + losse velden.
   const [draft, setDraft] = useState<Record<string, Record<string, string>>>(

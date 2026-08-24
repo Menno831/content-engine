@@ -20,11 +20,14 @@ const stateLabel: Record<string, string> = {
 };
 
 // Namen matchen soepel: "Flows Marketing Solutions" ↔ "Flows Marketing".
+// Korte namen alleen exact, anders matcht "Max" ook "Maxima BV".
 function looksLikeClient(contact: string, clientName: string): boolean {
   const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
   const a = norm(contact);
   const b = norm(clientName);
   if (!a || !b) return false;
+  if (a === b) return true;
+  if (Math.min(a.length, b.length) < 5) return false;
   return a.includes(b) || b.includes(a);
 }
 
@@ -35,8 +38,10 @@ export default async function ClientRevenuePage({ params }: { params: Promise<{ 
   if (!c) return null;
 
   const now = new Date();
+  // Vanaf januari van het lopende jaar — zo blijft "dit jaar" kloppen
+  // en groeit het aantal Moneybird-calls niet elk jaar door.
   const months: string[] = [];
-  for (let d = new Date(2026, 0, 1); d <= now; d.setMonth(d.getMonth() + 1)) {
+  for (let d = new Date(now.getFullYear(), 0, 1); d <= now; d.setMonth(d.getMonth() + 1)) {
     months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
   }
   const thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;

@@ -14,7 +14,8 @@ export interface FormRow {
   submissions: number;
 }
 
-const SITE = "https://content-engine-kr5c.vercel.app";
+// Zelfde origin als waar je nu ingelogd bent — blijft goed na een domeinwissel.
+const site = () => (typeof window === "undefined" ? "" : window.location.origin);
 
 export function FormsBoard({ initial, clients }: { initial: FormRow[]; clients: { id: string; label: string }[] }) {
   const [forms, setForms] = useState(initial);
@@ -65,7 +66,7 @@ export function FormsBoard({ initial, clients }: { initial: FormRow[]; clients: 
   }
 
   async function copyLink(token: string) {
-    await navigator.clipboard.writeText(`${SITE}/f/${token}`);
+    await navigator.clipboard.writeText(`${site()}/f/${token}`);
     setCopied(token);
     setTimeout(() => setCopied(null), 1500);
   }

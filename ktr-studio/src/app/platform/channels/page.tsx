@@ -18,7 +18,9 @@ export default async function ChannelsPage() {
       const { data, error } = await supabase
         .from("channel_stats")
         .select("id,channel,stat_date,followers,visitors,views,impressions")
-        .order("stat_date", { ascending: true })
+        // Nieuwste eerst + limiet: als er ooit >1000 metingen staan,
+        // vallen de OUDSTE weg, niet de recente.
+        .order("stat_date", { ascending: false })
         .limit(1000);
       if (error) migrationMissing = true;
       else {

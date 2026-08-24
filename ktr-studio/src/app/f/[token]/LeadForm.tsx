@@ -14,7 +14,7 @@ export function LeadForm({
   askPhone: boolean;
   askInstagram: boolean;
 }) {
-  const [form, setForm] = useState({ name: "", email: "", phone: "", instagram: "", note: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", instagram: "", note: "", website: "" });
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
   const [pending, start] = useTransition();
@@ -45,6 +45,16 @@ export function LeadForm({
 
   return (
     <div className="space-y-3">
+      {/* Honeypot: onzichtbaar voor mensen, bots vullen het wel in. */}
+      <input
+        value={form.website}
+        onChange={(e) => setForm({ ...form, website: e.target.value })}
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="absolute -left-[9999px] top-auto h-px w-px opacity-0"
+      />
       <input
         value={form.name}
         onChange={(e) => setForm({ ...form, name: e.target.value })}

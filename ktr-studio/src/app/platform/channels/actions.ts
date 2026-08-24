@@ -26,18 +26,26 @@ export async function saveChannelStatAction(input: {
   if (!CHANNELS.includes(input.channel)) return { error: "Onbekend kanaal." };
   if (!/^\d{4}-\d{2}-\d{2}$/.test(input.date)) return { error: "Kies een datum." };
 
-  const nums = [input.followers, input.visitors, input.views, input.impressions];
-  if (nums.every((n) => n == null)) return { error: "Vul minstens één cijfer in." };
+  // Bigint-kolommen: rond af zodat "12,5" geen rauwe databasefout geeft.
+  const clean = (n: number | null | undefined) =>
+    n == null || Number.isNaN(n) ? null : Math.round(n);
+  const followers = clean(input.followers);
+  const visitors = clean(input.visitors);
+  const views = clean(input.views);
+  const impressions = clean(input.impressions);
+  if ([followers, visitors, views, impressions].every((n) => n == null)) {
+    return { error: "Vul minstens één cijfer in." };
+  }
 
   const { error } = await supabase.from("channel_stats").upsert(
     {
       agency_id: agency.id,
       channel: input.channel,
       stat_date: input.date,
-      followers: input.followers ?? null,
-      visitors: input.visitors ?? null,
-      views: input.views ?? null,
-      impressions: input.impressions ?? null,
+      followers,
+      visitors,
+      views,
+      impressions,
     },
     { onConflict: "agency_id,channel,stat_date" }
   );
