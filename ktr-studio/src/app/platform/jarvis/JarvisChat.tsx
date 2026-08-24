@@ -41,10 +41,52 @@ function getRecognition(): SpeechRecognitionLike | null {
   return r;
 }
 
-function pickDutchVoice(): SpeechSynthesisVoice | null {
-  if (typeof window === "undefined" || !window.speechSynthesis) return null;
-  const voices = window.speechSynthesis.getVoices();
-  return voices.find((v) => v.lang.startsWith("nl") && /google|natural|premium/i.test(v.name)) ?? voices.find((v) => v.lang.startsWith("nl")) ?? null;
+// Standaard de meest "Jarvis-achtige" stem: een Nederlandse mannenstem
+// (Xander op macOS, anders Google Nederlands), iets verlaagd van toon.
+function defaultVoiceName(voices: SpeechSynthesisVoice[]): string | null {
+  const nl = voices.filter((v) => v.lang.startsWith("nl"));
+  const male = nl.find((v) => /xander|claes|frank|maarten/i.test(v.name));
+  return (male ?? nl.find((v) => /google/i.test(v.name)) ?? nl[0])?.name ?? null;
+}
+
+// Arc-reactor-opstartgeluid: een originele synth-sweep via WebAudio —
+// geen sample, geen bestaand deuntje, gewoon een power-up.
+function playBootSound() {
+  try {
+    const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const ctx = new Ctx();
+    const t0 = ctx.currentTime;
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0.0001, t0);
+    master.gain.exponentialRampToValueAtTime(0.18, t0 + 0.25);
+    master.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.6);
+    master.connect(ctx.destination);
+
+    const sweep = ctx.createOscillator();
+    sweep.type = "sawtooth";
+    sweep.frequency.setValueAtTime(70, t0);
+    sweep.frequency.exponentialRampToValueAtTime(880, t0 + 1.1);
+    const sweepGain = ctx.createGain();
+    sweepGain.gain.value = 0.5;
+    sweep.connect(sweepGain).connect(master);
+    sweep.start(t0);
+    sweep.stop(t0 + 1.2);
+
+    const shimmer = ctx.createOscillator();
+    shimmer.type = "sine";
+    shimmer.frequency.setValueAtTime(1760, t0 + 0.9);
+    const shimmerGain = ctx.createGain();
+    shimmerGain.gain.setValueAtTime(0.0001, t0 + 0.9);
+    shimmerGain.gain.exponentialRampToValueAtTime(0.12, t0 + 1.05);
+    shimmerGain.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.55);
+    shimmer.connect(shimmerGain).connect(master);
+    shimmer.start(t0 + 0.9);
+    shimmer.stop(t0 + 1.6);
+
+    setTimeout(() => ctx.close(), 2000);
+  } catch {
+    // geluid is nice-to-have — nooit blokkeren
+  }
 }
 
 export function JarvisChat({ initial }: { initial: Msg[] }) {
@@ -53,6 +95,10 @@ export function JarvisChat({ initial }: { initial: Msg[] }) {
   const [listening, setListening] = useState(false);
   const [speakEnabled, setSpeakEnabled] = useState(true);
   const [micAvailable, setMicAvailable] = useState(true);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [voiceName, setVoiceName] = useState<string>("");
+  const [showMusic, setShowMusic] = useState(false);
+  const bootedRef = useRef(false);
   const [error, setError] = useState("");
   const [pending, start] = useTransition();
   const recRef = useRef<SpeechRecognitionLike | null>(null);
@@ -60,9 +106,30 @@ export function JarvisChat({ initial }: { initial: Msg[] }) {
 
   useEffect(() => {
     setMicAvailable(getRecognition() != null);
-    // Stemmenlijst laadt async — alvast opwarmen.
-    window.speechSynthesis?.getVoices();
+    // Stemmenlijst laadt async — bijwerken zodra hij er is.
+    const load = () => {
+      const all = window.speechSynthesis?.getVoices() ?? [];
+      const usable = all.filter((v) => v.lang.startsWith("nl") || v.lang.startsWith("en"));
+      setVoices(usable);
+      setVoiceName((cur) => {
+        if (cur) return cur;
+        const saved = localStorage.getItem("jarvis-stem");
+        if (saved && usable.some((v) => v.name === saved)) return saved;
+        return defaultVoiceName(usable) ?? "";
+      });
+    };
+    load();
+    window.speechSynthesis?.addEventListener?.("voiceschanged", load);
+    return () => window.speechSynthesis?.removeEventListener?.("voiceschanged", load);
   }, []);
+
+  // Eén keer per sessie het opstartgeluid, bij de eerste interactie
+  // (browsers blokkeren geluid vóór een klik).
+  function bootOnce() {
+    if (bootedRef.current) return;
+    bootedRef.current = true;
+    playBootSound();
+  }
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -73,15 +140,20 @@ export function JarvisChat({ initial }: { initial: Msg[] }) {
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = "nl-NL";
-    const voice = pickDutchVoice();
-    if (voice) u.voice = voice;
-    u.rate = 1.05;
+    const voice = voices.find((v) => v.name === voiceName) ?? null;
+    if (voice) {
+      u.voice = voice;
+      u.lang = voice.lang;
+    }
+    u.rate = 1.0;
+    u.pitch = 0.85; // iets lager: het butler-register
     window.speechSynthesis.speak(u);
   }
 
   function send(text: string) {
     const q = text.trim();
     if (!q || pending) return;
+    bootOnce();
     setInput("");
     setError("");
     setMessages((cur) => [...cur, { role: "user", content: q }]);
@@ -99,6 +171,7 @@ export function JarvisChat({ initial }: { initial: Msg[] }) {
 
   function briefMe() {
     if (pending) return;
+    bootOnce();
     setError("");
     setMessages((cur) => [...cur, { role: "user", content: "Brief me" }]);
     start(async () => {
@@ -112,6 +185,7 @@ export function JarvisChat({ initial }: { initial: Msg[] }) {
   }
 
   function toggleMic() {
+    bootOnce();
     if (listening) {
       recRef.current?.stop();
       setListening(false);
@@ -138,6 +212,21 @@ export function JarvisChat({ initial }: { initial: Msg[] }) {
 
   return (
     <div className="max-w-3xl">
+      {showMusic && (
+        <div className="mb-4 rounded-2xl overflow-hidden border border-white/[0.08]">
+          {/* Officiële YouTube-speler — zo blijft het legaal en simpel. */}
+          <iframe
+            width="100%"
+            height="170"
+            src="https://www.youtube.com/embed?listType=search&list=Black%20Sabbath%20Iron%20Man%20official"
+            title="Iron Man — Black Sabbath (YouTube)"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="block"
+          />
+        </div>
+      )}
+
       {/* Gesprek */}
       <Card className="p-4 mb-4 min-h-[380px] max-h-[58vh] overflow-y-auto">
         {messages.length === 0 && (
@@ -209,26 +298,74 @@ export function JarvisChat({ initial }: { initial: Msg[] }) {
         </button>
       </div>
 
-      <div className="flex items-center justify-between mt-3">
-        <button
-          onClick={briefMe}
-          disabled={pending}
-          className="rounded-xl border border-accent/25 bg-accent/10 hover:bg-accent/20 text-accent font-bold text-[13px] px-4 py-2 transition-colors disabled:opacity-50"
-        >
-          ☀️ Brief me
-        </button>
-        <label className="flex items-center gap-2 text-[12.5px] text-muted cursor-pointer">
-          <input
-            type="checkbox"
-            checked={speakEnabled}
-            onChange={(e) => {
-              setSpeakEnabled(e.target.checked);
-              if (!e.target.checked) window.speechSynthesis?.cancel();
+      <div className="flex flex-wrap items-center justify-between gap-3 mt-3">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={briefMe}
+            disabled={pending}
+            className="rounded-xl border border-accent/25 bg-accent/10 hover:bg-accent/20 text-accent font-bold text-[13px] px-4 py-2 transition-colors disabled:opacity-50"
+          >
+            ☀️ Brief me
+          </button>
+          <button
+            onClick={() => {
+              bootOnce();
+              setShowMusic((m) => !m);
             }}
-            className="accent-[var(--accent)] w-4 h-4"
-          />
-          Lees antwoorden voor
-        </label>
+            title="Iron Man — Black Sabbath"
+            className={`rounded-xl px-4 py-2 text-[13px] font-bold transition-colors ${
+              showMusic
+                ? "bg-accent text-background"
+                : "border border-white/[0.08] text-muted hover:border-accent/30 hover:text-accent"
+            }`}
+          >
+            🎵 Iron Man
+          </button>
+        </div>
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-1.5 text-[12.5px] text-muted">
+            Stem
+            <select
+              value={voiceName}
+              onChange={(e) => {
+                setVoiceName(e.target.value);
+                localStorage.setItem("jarvis-stem", e.target.value);
+                // Meteen even horen hoe hij klinkt.
+                setTimeout(() => {
+                  const u = new SpeechSynthesisUtterance("Tot uw dienst, meneer Kater.");
+                  const v = window.speechSynthesis.getVoices().find((x) => x.name === e.target.value);
+                  if (v) {
+                    u.voice = v;
+                    u.lang = v.lang;
+                  }
+                  u.pitch = 0.85;
+                  window.speechSynthesis.cancel();
+                  window.speechSynthesis.speak(u);
+                }, 50);
+              }}
+              className="rounded-lg border border-white/[0.08] bg-white/[0.02] px-2 py-1.5 text-[12px] outline-none focus:border-accent/40 max-w-[160px]"
+            >
+              {voices.length === 0 && <option value="" className="bg-card">standaard</option>}
+              {voices.map((v) => (
+                <option key={v.name} value={v.name} className="bg-card">
+                  {v.name.replace(/^(Microsoft|Google)\s*/i, "")} ({v.lang})
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex items-center gap-2 text-[12.5px] text-muted cursor-pointer">
+            <input
+              type="checkbox"
+              checked={speakEnabled}
+              onChange={(e) => {
+                setSpeakEnabled(e.target.checked);
+                if (!e.target.checked) window.speechSynthesis?.cancel();
+              }}
+              className="accent-[var(--accent)] w-4 h-4"
+            />
+            Voorlezen
+          </label>
+        </div>
       </div>
     </div>
   );
