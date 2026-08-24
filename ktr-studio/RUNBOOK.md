@@ -45,6 +45,10 @@ Settings → Data Export). Voor automatische eigen-kanalen-data later: GA4-API
 (website) en LinkedIn heeft geen bruikbare API — dat blijft handmatig.
 
 ## Afgerond (18-24 aug 2026)
+- **Ondertekenbare documenten** (migratie 031 — gedraaid): NDA-sjabloon voor
+  editors + klant-overeenkomst op Contracten, publieke ondertekenpagina
+  `/sign/<token>` met naam+tijdstempel, status springt automatisch op
+  getekend. End-to-end live getest (aanmaken → tekenen → getekend → opgeruimd).
 - **Review-fixes ronde 2 (migratie 031 — gedraaid):** groeiplan/briefing per
   agency gescoped (cross-tenant datamix gedicht), agencies-updatepolicy zodat
   "Bronnen opslaan" op Eigen kanalen echt werkt, kanaal-metingen dragen een
