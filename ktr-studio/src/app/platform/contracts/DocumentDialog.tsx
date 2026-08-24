@@ -11,14 +11,17 @@ import { createDocumentAction } from "./actions";
 export function DocumentDialog({
   clients,
   onCreated,
+  prefillName,
 }: {
   clients: { id: string; label: string }[];
   onCreated: (row: { title: string; party: string | null; clientId: string | null; value: number; recurring: boolean; token: string }) => void;
+  /** Vanuit de Editors-pagina: dialoog direct open met de naam ingevuld. */
+  prefillName?: string;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(Boolean(prefillName));
   const [step, setStep] = useState<1 | 2>(1);
   const [tpl, setTpl] = useState<"nda" | "klant">("nda");
-  const [naam, setNaam] = useState("");
+  const [naam, setNaam] = useState(prefillName ?? "");
   const [email, setEmail] = useState("");
   const [bedrijf, setBedrijf] = useState("");
   const [pakket, setPakket] = useState("");

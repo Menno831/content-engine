@@ -57,6 +57,14 @@ Vraag de echte waarden aan Menno (nooit committen; `.env.local` is gitignored).
 
 ## Functionele kaart (waar zit wat)
 
+- **Jarvis** `platform/jarvis` + `lib/briefing.ts` — spraak-assistent (Web Speech nl-NL), levende deeltjesbol, ochtendbriefing (ook op het dashboard), chat op echte cijfers (wacht op ANTHROPIC-key)
+- **Groeiplan** `platform/groei` + `lib/growth.ts` — doelmeter naar agencies.goal_monthly + regelgebaseerde next-steps; AI-weekanalyse in growth_notes
+- **Watchdog** `lib/watchdog.ts` + cron `/api/cron/watchdog` (07:30) — signalen in de bel (dedupe 3 dgn), AI-concept-DM's (max 10/dag, nooit auto-verzenden), zelftest kapotte koppelingen, dagelijkse briefing
+- **Eigen kanalen** `platform/channels` + `lib/sync/channels.ts` + cron `/api/cron/sync-channels` (07:00) — website/IG/LinkedIn/YT-snapshots, IG-sync werkt
+- **Documenten** `platform/contracts` + `lib/legal.ts` + publiek `/sign/[token]` — NDA/klant-overeenkomst met digitale ondertekening; NDA-knop ook op Editors
+- **Klant-werkstation** `platform/clients/[id]/*` — tabs Pipeline/Stats/Stories/Leads/Revenue/Links/Calls/Health/Profiel
+- **Leadformulieren** `platform/forms` + publiek `/f/[token]` — inzendingen worden leads (honeypot-beveiligd)
+
 - **Dashboard** `platform/page.tsx` — commandopost ("Vandaag"-rij) + KPI's + brief-teaser
 - **Daily Brief** `platform/brief` + `lib/brief.ts` + cron `/api/cron/daily-brief` — dagelijkse ideeën per klant
 - **Studio** `platform/studio` — transcript/onderwerp → ideeën → killer scripts → knop naar productieboard

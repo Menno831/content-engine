@@ -7,6 +7,8 @@ import { getTodos } from "@/lib/notifications";
 import { getSessionContext } from "@/lib/auth";
 import { getOutreachTodoCount } from "@/lib/prospects";
 import { getMeetings, getEodReports } from "@/lib/workspace";
+import { getOrCreateBriefing, type Briefing } from "@/lib/briefing";
+import { createClient as supabaseServer } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
 export default async function Dashboard() {
@@ -28,6 +30,15 @@ export default async function Dashboard() {
   }
 
   const brief = await getTodaysBrief();
+
+  // De ochtendbriefing van Jarvis — dezelfde als op de Jarvis-pagina.
+  let briefing: Briefing | null = null;
+  try {
+    const sb = await supabaseServer();
+    if (sb && ctx.agency) briefing = await getOrCreateBriefing(sb, ctx.agency.id);
+  } catch {
+    briefing = null;
+  }
   const activeClients = clients.filter((c) => c.status === "actief").length;
   const totalLeads = clients.reduce((s, c) => s + c.leadsThisMonth, 0);
 
@@ -71,6 +82,24 @@ export default async function Dashboard() {
         eodDone={eods.some((e) => e.date === today && e.userId === ctx.user?.id)}
         eodCount={eods.filter((e) => e.date === today).length}
       />
+
+      {briefing && (
+        <Card className="p-5 mb-6 border-sky-400/15 bg-sky-400/[0.03]">
+          <div className="flex items-start justify-between gap-3 mb-2">
+            <div className="flex items-center gap-2.5">
+              <span className="grid place-items-center w-9 h-9 rounded-xl bg-sky-400/15 text-sky-300">☀️</span>
+              <div>
+                <div className="font-display font-bold">Briefing van vandaag</div>
+                <div className="text-[12px] text-muted">{briefing.ai ? "Door Jarvis geschreven" : "Op basis van je echte cijfers"}</div>
+              </div>
+            </div>
+            <Link href="/platform/jarvis" className="text-[13px] text-accent hover:text-accent-hover whitespace-nowrap">
+              🎙 Praat met Jarvis
+            </Link>
+          </div>
+          <p className="text-[13.5px] leading-relaxed text-foreground/85 whitespace-pre-wrap">{briefing.content}</p>
+        </Card>
+      )}
 
       {/* Vandaag: wat moet er NU gebeuren (commandopost) */}
       <ActionRow

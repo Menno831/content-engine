@@ -5,7 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import { DEMO_MODE, isSupabaseConfigured } from "@/lib/config";
 import { ContractsBoard, type ContractRow } from "./ContractsBoard";
 
-export default async function ContractsPage() {
+export default async function ContractsPage({ searchParams }: { searchParams: Promise<{ nda?: string }> }) {
+  const sp = await searchParams;
   await redirectEditorToBoard();
   const demo = DEMO_MODE || !isSupabaseConfigured;
   const { clients } = await getWorkspaceData();
@@ -55,7 +56,7 @@ export default async function ContractsPage() {
           Draai migratie 026 in Supabase (tabel <code>contracts</code>) — daarna werkt deze pagina direct.
         </div>
       ) : (
-        <ContractsBoard initial={rows} clients={clients.map((c) => ({ id: c.id, label: c.name }))} />
+        <ContractsBoard initial={rows} clients={clients.map((c) => ({ id: c.id, label: c.name }))} ndaPrefill={sp.nda ?? null} />
       )}
     </>
   );

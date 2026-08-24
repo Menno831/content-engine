@@ -30,7 +30,15 @@ const STATUSES = [
   { id: "verlopen", label: "Verlopen", color: "#F87171" },
 ];
 
-export function ContractsBoard({ initial, clients }: { initial: ContractRow[]; clients: { id: string; label: string }[] }) {
+export function ContractsBoard({
+  initial,
+  clients,
+  ndaPrefill,
+}: {
+  initial: ContractRow[];
+  clients: { id: string; label: string }[];
+  ndaPrefill?: string | null;
+}) {
   const [rows, setRows] = useState(initial);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
@@ -140,6 +148,7 @@ export function ContractsBoard({ initial, clients }: { initial: ContractRow[]; c
         <div className="flex gap-2 shrink-0">
           <DocumentDialog
             clients={clients}
+            prefillName={ndaPrefill ?? undefined}
             onCreated={(d) =>
               setRows((cur) => [
                 {

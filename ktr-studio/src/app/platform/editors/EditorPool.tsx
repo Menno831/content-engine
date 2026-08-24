@@ -64,6 +64,12 @@ export function EditorPool({ editors, clients }: { editors: Editor[]; clients: C
                     )}
                     <div className="text-muted">{fmtEur(e.payPerVideo)} / video · {e.videosThisMonth} deze maand</div>
                   </div>
+                  <a
+                    href={`/platform/contracts?nda=${encodeURIComponent(e.name)}`}
+                    className="block text-center rounded-lg border border-accent/25 bg-accent/10 hover:bg-accent/20 text-accent font-bold text-[12px] py-1.5 mb-2 transition-colors"
+                  >
+                    📄 NDA sturen
+                  </a>
                   <select
                     value={g.status}
                     onChange={(ev) => {
