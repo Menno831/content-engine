@@ -37,9 +37,14 @@ wacht op iets buiten de code:
 
 Wacht verder alleen nog op keys van Menno: `RESEND_API_KEY` (alle mails),
 `YOUTUBE_API_KEY` (YouTube-stats en YT-competitors), en `MONEYBIRD_API_TOKEN`
-netjes opnieuw zetten.
+netjes opnieuw zetten. Voor automatische eigen-kanalen-data later: GA4-API
+(website) en LinkedIn heeft geen bruikbare API — dat blijft handmatig.
 
-## Afgerond (18-20 aug 2026)
+## Afgerond (18-24 aug 2026)
+- **Eigen kanalen** (`/platform/channels`, migratie 027 — gedraaid): website,
+  Instagram, LinkedIn en YouTube met dag-snapshots, delta's en sparklines;
+  invoer per kanaal, live getest. Rollen-guard op het klant-werkstation
+  (editor → board, klantlogin → portaal, ook bij directe URL).
 - **Tijdlijn (Gantt)** op het productieboard: balk van aanleveren tot live,
   4/6/12 weken, altijd één week geschiedenis mee zodat kaarten die over tijd
   zijn zichtbaar blijven (rode rand).
