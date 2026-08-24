@@ -34,6 +34,7 @@ const agencyGroups: NavGroup[] = [
     title: "Home",
     items: [
       { href: "/platform", label: "Overzicht", icon: icons.dashboard, exact: true },
+      { href: "/platform/jarvis", label: "Jarvis", icon: icons.spark },
       { href: "/platform/clients", label: "Klanten", icon: icons.clients },
       { href: "/platform/todos", label: "Taken", icon: icons.check },
       { href: "/platform/agenda", label: "Agenda", icon: icons.calendar },

@@ -14,11 +14,15 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { buildGrowthPlanWith, type GrowthPlan } from "@/lib/growth";
 import { generateText } from "@/lib/ai";
+import { getOrCreateBriefing } from "@/lib/briefing";
+import { moneybirdConfigured, getMoneybirdMonth } from "@/lib/integrations/moneybird";
 
 export interface WatchdogResult {
   notifications: number;
   dmDrafts: number;
   weeklyNote: boolean;
+  briefing: boolean;
+  selftest: string[];
   errors: string[];
 }
 
@@ -77,7 +81,7 @@ const WEEKLY_TEMPLATE = `Je bent de strategisch adviseur van Menno Kater (conten
 {{onderwerp}}`;
 
 export async function runWatchdog(): Promise<WatchdogResult> {
-  const result: WatchdogResult = { notifications: 0, dmDrafts: 0, weeklyNote: false, errors: [] };
+  const result: WatchdogResult = { notifications: 0, dmDrafts: 0, weeklyNote: false, briefing: false, selftest: [], errors: [] };
   const admin = createAdminClient();
   if (!admin) {
     result.errors.push("geen serverkey");
@@ -203,6 +207,47 @@ export async function runWatchdog(): Promise<WatchdogResult> {
       }
     } catch (e) {
       result.errors.push(`weekanalyse: ${e instanceof Error ? e.message : "onbekend"}`);
+    }
+
+    // ── 4. Ochtendbriefing klaarzetten ───────────────────────────
+    try {
+      const b = await getOrCreateBriefing(admin, agencyId);
+      if (b) result.briefing = true;
+    } catch (e) {
+      result.errors.push(`briefing: ${e instanceof Error ? e.message : "onbekend"}`);
+    }
+
+    // ── 5. Zelftest: kapotte koppelingen zelf detecteren en melden ─
+    try {
+      const defects: string[] = [];
+
+      // Anthropic: een mini-testcall — leeg/kapot is een defect dat
+      // AI-DM's, weekanalyse, briefing-AI, Studio en Boost blokkeert.
+      try {
+        const { mock } = await generateText({ template: "Antwoord met exact: ok", input: "", model: "fast" });
+        if (mock) defects.push("ANTHROPIC_API_KEY ontbreekt of is leeg — AI staat uit (Studio, Boost, DM-concepten, weekanalyse)");
+      } catch {
+        defects.push("ANTHROPIC_API_KEY is kapot (API weigert) — zet de key opnieuw in Vercel");
+      }
+
+      if (!moneybirdConfigured()) {
+        defects.push("MONEYBIRD_API_TOKEN ontbreekt — Finance toont geen facturen");
+      } else {
+        const m = await getMoneybirdMonth();
+        if (!m.configured) defects.push("Moneybird-koppeling faalt — controleer token en administratie-id");
+      }
+
+      if (!process.env.RAPIDAPI_KEY) defects.push("RAPIDAPI_KEY ontbreekt — Instagram-sync staat uit");
+      if (!process.env.YOUTUBE_API_KEY) defects.push("YOUTUBE_API_KEY ontbreekt — YouTube-stats en eigen-kanaal-sync wachten");
+      if (!process.env.RESEND_API_KEY) defects.push("RESEND_API_KEY ontbreekt — editor- en rapportmails staan uit");
+
+      result.selftest = defects;
+      for (const d of defects) {
+        const sent = await notifyOnce(admin, agencyId, `Zelftest: ${d.split(" — ")[0]}`, d, "/platform/settings");
+        if (sent) result.notifications += 1;
+      }
+    } catch (e) {
+      result.errors.push(`zelftest: ${e instanceof Error ? e.message : "onbekend"}`);
     }
   }
 
