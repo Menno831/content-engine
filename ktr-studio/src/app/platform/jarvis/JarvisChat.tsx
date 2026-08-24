@@ -217,8 +217,8 @@ export function JarvisChat({ initial }: { initial: Msg[] }) {
           {/* Officiële YouTube-speler — zo blijft het legaal en simpel. */}
           <iframe
             width="100%"
-            height="170"
-            src="https://www.youtube.com/embed?listType=search&list=Black%20Sabbath%20Iron%20Man%20official"
+            height="200"
+            src="https://www.youtube.com/embed/qRcYjJQ0JHg?autoplay=1"
             title="Iron Man — Black Sabbath (YouTube)"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
