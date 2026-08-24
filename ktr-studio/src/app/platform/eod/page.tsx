@@ -1,4 +1,5 @@
 import { PageHeader, Card, Avatar, Badge } from "../_components";
+import { todayStr } from "@/lib/dates";
 import { getEodReports } from "@/lib/workspace";
 import { getSessionContext } from "@/lib/auth";
 import { DEMO_MODE, isSupabaseConfigured } from "@/lib/config";
@@ -10,7 +11,7 @@ export default async function EodPage() {
   const demo = DEMO_MODE || !isSupabaseConfigured;
   const [ctx, reports] = await Promise.all([getSessionContext(), demo ? [] : getEodReports(40)]);
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayStr();
   const mine = reports.find((r) => r.userId === ctx.user?.id && r.date === today) ?? null;
   const todays = reports.filter((r) => r.date === today);
   const earlier = reports.filter((r) => r.date !== today);

@@ -20,22 +20,20 @@ export default async function ChannelsPage() {
     const supabase = await createClient();
     if (supabase) {
       const { agency } = await getSessionContext();
-      if (agency) {
-        const { data: a } = await supabase
-          .from("agencies")
-          .select("own_ig_handle, own_yt_channel")
-          .eq("id", agency.id)
-          .maybeSingle();
-        igHandle = (a?.own_ig_handle as string) ?? "";
-        ytChannel = (a?.own_yt_channel as string) ?? "";
-      }
-      const { data, error } = await supabase
-        .from("channel_stats")
-        .select("id,channel,stat_date,followers,visitors,views,impressions")
-        // Nieuwste eerst + limiet: als er ooit >1000 metingen staan,
-        // vallen de OUDSTE weg, niet de recente.
-        .order("stat_date", { ascending: false })
-        .limit(1000);
+      const [{ data: a }, { data, error }] = await Promise.all([
+        agency
+          ? supabase.from("agencies").select("own_ig_handle, own_yt_channel").eq("id", agency.id).maybeSingle()
+          : Promise.resolve({ data: null }),
+        supabase
+          .from("channel_stats")
+          .select("id,channel,stat_date,followers,visitors,views,impressions")
+          // Nieuwste eerst + limiet: de UI toont ~12 punten per kanaal,
+          // dus 400 rijen is ruim; de OUDSTE vallen weg, niet de recente.
+          .order("stat_date", { ascending: false })
+          .limit(400),
+      ]);
+      igHandle = (a?.own_ig_handle as string) ?? "";
+      ytChannel = (a?.own_yt_channel as string) ?? "";
       if (error) migrationMissing = true;
       else {
         rows = (data ?? []).map((r) => ({

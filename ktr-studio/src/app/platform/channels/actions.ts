@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient as supabaseServer } from "@/lib/supabase/server";
 import { getSessionContext } from "@/lib/auth";
+import { requireTeam } from "@/lib/guard";
 import { syncOwnChannelsCore, type ChannelSyncResult } from "@/lib/sync/channels";
 
 export interface ChannelResult {
@@ -58,11 +59,9 @@ export async function saveChannelStatAction(input: {
 }
 
 export async function deleteChannelStatAction(id: string): Promise<ChannelResult> {
-  const supabase = await supabaseServer();
-  if (!supabase) return { error: "Supabase niet geconfigureerd." };
-  const { profile } = await getSessionContext();
-  if (profile?.role !== "owner" && profile?.role !== "team") return { error: "Alleen het team kan metingen verwijderen." };
-  const { data, error } = await supabase.from("channel_stats").delete().eq("id", id).select("id");
+  const ctx = await requireTeam();
+  if ("error" in ctx) return { error: ctx.error };
+  const { data, error } = await ctx.supabase.from("channel_stats").delete().eq("id", id).select("id");
   if (error) return { error: "Verwijderen lukte niet. Probeer het opnieuw." };
   if (!data?.length) return { error: "Meting niet gevonden — ververs de pagina." };
   revalidatePath("/platform/channels");
@@ -70,19 +69,16 @@ export async function deleteChannelStatAction(id: string): Promise<ChannelResult
 }
 
 export async function saveOwnChannelsAction(igHandle: string, ytChannel: string): Promise<ChannelResult> {
-  const supabase = await supabaseServer();
-  if (!supabase) return { error: "Supabase niet geconfigureerd." };
-  const { agency, profile } = await getSessionContext();
-  if (!agency) return { error: "Geen agency — log opnieuw in." };
-  if (profile?.role !== "owner" && profile?.role !== "team") return { error: "Alleen het team kan bronnen instellen." };
+  const ctx = await requireTeam();
+  if ("error" in ctx) return { error: ctx.error };
 
-  const { error } = await supabase
+  const { error } = await ctx.supabase
     .from("agencies")
     .update({
       own_ig_handle: igHandle.trim().replace(/^@/, "") || null,
       own_yt_channel: ytChannel.trim() || null,
     })
-    .eq("id", agency.id);
+    .eq("id", ctx.agency.id);
   if (error) return { error: error.message };
 
   revalidatePath("/platform/channels");
@@ -90,11 +86,10 @@ export async function saveOwnChannelsAction(igHandle: string, ytChannel: string)
 }
 
 export async function syncOwnChannelsAction(): Promise<ChannelResult & { results?: ChannelSyncResult[] }> {
-  const { agency, profile } = await getSessionContext();
-  if (!agency) return { error: "Geen agency — log opnieuw in." };
-  if (profile?.role !== "owner" && profile?.role !== "team") return { error: "Alleen het team kan syncen." };
+  const ctx = await requireTeam();
+  if ("error" in ctx) return { error: ctx.error };
 
-  const results = await syncOwnChannelsCore(agency.id);
+  const results = await syncOwnChannelsCore(ctx.agency.id);
   revalidatePath("/platform/channels");
   return { ok: true, results };
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { todayStr } from "@/lib/dates";
 import { setFollowupAction } from "./actions";
 
 // Compacte follow-up editor op een lead-kaart: datum + korte notitie.
@@ -19,7 +20,7 @@ export function FollowupControl({
   const [n, setN] = useState(note ?? "");
   const [pending, start] = useTransition();
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayStr();
   const due = date && date <= today;
 
   function save() {

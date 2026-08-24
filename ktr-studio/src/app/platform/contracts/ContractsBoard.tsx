@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { todayStr } from "@/lib/dates";
 import { Card, Badge } from "../_components";
 import { fmtEur } from "../_data";
 import { createContractAction, updateContractStatusAction, deleteContractAction } from "./actions";
@@ -100,8 +101,8 @@ export function ContractsBoard({ initial, clients }: { initial: ContractRow[]; c
     });
   }
 
-  const today = new Date().toISOString().slice(0, 10);
-  const in60 = new Date(Date.now() + 60 * 86_400_000).toISOString().slice(0, 10);
+  const today = todayStr();
+  const in60 = todayStr(60);
   const expiring = rows.filter((r) => r.status === "getekend" && r.endsOn && r.endsOn >= today && r.endsOn <= in60);
   const signedValue = rows.filter((r) => r.status === "getekend" && r.recurring).reduce((s, r) => s + r.value, 0);
   const openValue = rows.filter((r) => r.status === "verstuurd").reduce((s, r) => s + r.value, 0);

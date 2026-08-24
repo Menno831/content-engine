@@ -5,6 +5,7 @@
 // vloeiend verhaal. Eén briefing per dag, opgeslagen in `briefings`.
 // ════════════════════════════════════════════════════════════════
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { todayStr } from "@/lib/dates";
 import { buildGrowthPlanWith, type GrowthPlan } from "@/lib/growth";
 import { generateText } from "@/lib/ai";
 
@@ -29,9 +30,9 @@ const fmtEur = (n: number) => `€${Math.round(n).toLocaleString("nl-NL")}`;
 // sessie-client filtert RLS zelf al. Een al gebouwd plan mag mee om
 // dubbele Moneybird/Supabase-rondes te voorkomen.
 export async function buildBriefingFacts(db: Db, agencyId?: string, prebuiltPlan?: GrowthPlan | null): Promise<string> {
-  const today = new Date().toLocaleDateString("sv-SE");
-  const tomorrow = new Date(Date.now() + 86_400_000).toLocaleDateString("sv-SE");
-  const yesterday = new Date(Date.now() - 86_400_000).toLocaleDateString("sv-SE");
+  const today = todayStr();
+  const tomorrow = todayStr(1);
+  const yesterday = todayStr(-1);
 
   let meetingsQ = db
     .from("meetings")
@@ -100,7 +101,7 @@ export async function buildBriefingFacts(db: Db, agencyId?: string, prebuiltPlan
 // Haal (of maak) de briefing van vandaag. Bestaat er al één zonder
 // AI-laag terwijl de key inmiddels werkt, dan upgraden we hem.
 export async function getOrCreateBriefing(db: Db, agencyId: string, prebuiltPlan?: GrowthPlan | null): Promise<Briefing | null> {
-  const today = new Date().toLocaleDateString("sv-SE");
+  const today = todayStr();
 
   const { data: existing } = await db
     .from("briefings")

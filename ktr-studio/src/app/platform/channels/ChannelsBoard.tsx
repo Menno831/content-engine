@@ -8,6 +8,8 @@
 // ════════════════════════════════════════════════════════════════
 
 import { useMemo, useState, useTransition } from "react";
+import { todayStr } from "@/lib/dates";
+import { useRouter } from "next/navigation";
 import { Card, Badge } from "../_components";
 import { saveChannelStatAction, deleteChannelStatAction } from "./actions";
 
@@ -103,12 +105,13 @@ function Sparkline({ points, color }: { points: number[]; color: string }) {
 }
 
 export function ChannelsBoard({ initial }: { initial: StatRow[] }) {
-  const [rows, setRows] = useState(initial);
+  const rows = initial;
   const [error, setError] = useState("");
   const [savedFor, setSavedFor] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  const router = useRouter();
   // Lokale datum, niet UTC — anders staat de invoer 's nachts op gisteren.
-  const today = new Date().toLocaleDateString("sv-SE");
+  const today = todayStr();
 
   // Invoerstaat per kanaal: datum + losse velden.
   const [draft, setDraft] = useState<Record<string, Record<string, string>>>(
@@ -147,36 +150,19 @@ export function ChannelsBoard({ initial }: { initial: StatRow[] }) {
         setError("");
         setSavedFor(channelId);
         setTimeout(() => setSavedFor(null), 1500);
-        const date = d.date || today;
-        setRows((cur) => {
-          const without = cur.filter((x) => !(x.channel === channelId && x.date === date));
-          return [
-            ...without,
-            {
-              id: `tmp-${channelId}-${date}`,
-              channel: channelId,
-              date,
-              followers: payload.followers ?? null,
-              visitors: payload.visitors ?? null,
-              views: payload.views ?? null,
-              impressions: payload.impressions ?? null,
-            },
-          ];
-        });
-        setDraft((cur) => ({ ...cur, [channelId]: { date } }));
+        setDraft((cur) => ({ ...cur, [channelId]: { date: d.date || today } }));
+        // Server-state opnieuw laden: zo krijgt de nieuwe rij zijn echte
+        // id en is hij direct te verwijderen (geen tmp-rijen meer).
+        router.refresh();
       }
     });
   }
 
   function removeRow(id: string) {
-    const backup = rows;
-    setRows((cur) => cur.filter((r) => r.id !== id));
     start(async () => {
       const r = await deleteChannelStatAction(id);
-      if (r.error) {
-        setError(r.error);
-        setRows(backup); // verwijderen mislukte — rij terugzetten
-      }
+      if (r.error) setError(r.error);
+      router.refresh();
     });
   }
 
@@ -274,8 +260,7 @@ export function ChannelsBoard({ initial }: { initial: StatRow[] }) {
                         ))}
                         <button
                           onClick={() => removeRow(s.id)}
-                          disabled={s.id.startsWith("tmp-")}
-                          className="opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all disabled:opacity-0"
+                          className="opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all"
                         >
                           ✕
                         </button>

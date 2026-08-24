@@ -1,3 +1,6 @@
+// Scrape + YouTube + Clarity per agency kan lang duren.
+export const maxDuration = 120;
+
 import { NextRequest, NextResponse } from "next/server";
 import { syncOwnChannelsCore } from "@/lib/sync/channels";
 

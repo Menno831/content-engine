@@ -45,6 +45,13 @@ Settings → Data Export). Voor automatische eigen-kanalen-data later: GA4-API
 (website) en LinkedIn heeft geen bruikbare API — dat blijft handmatig.
 
 ## Afgerond (18-24 aug 2026)
+- **Opruimronde na de review:** één `requireTeam()`-helper voor alle
+  team-acties, DM-prompt en weekanalyse gedeeld tussen cron en knoppen
+  (geen dubbele prompts meer die uit elkaar groeien), één `todayStr()`
+  (lokale datum) door het hele platform i.p.v. UTC/lokaal door elkaar,
+  Eigen-kanalen-bord ververst via de server (geen tmp-rijen meer),
+  channels-pagina parallel + zuinige limiet, maxDuration op de
+  kanalen-cron. Migraties 027-031 in Supabase geverifieerd: staan allemaal.
 - **Ondertekenbare documenten** (migratie 031 — gedraaid): NDA-sjabloon voor
   editors + klant-overeenkomst op Contracten, publieke ondertekenpagina
   `/sign/<token>` met naam+tijdstempel, status springt automatisch op

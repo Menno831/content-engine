@@ -66,17 +66,9 @@ export async function generateProspectDmAction(prospectId: string, force = false
   if (!p) return { error: "Prospect niet gevonden." };
   if (p.message && !force) return { error: "Er staat al een bericht — verwijder het eerst of genereer opnieuw." };
 
-  const { DM_TEMPLATE } = await import("@/lib/watchdog");
+  const { DM_TEMPLATE, prospectDmContext } = await import("@/lib/watchdog");
   const { generateText } = await import("@/lib/ai");
-  const context = [
-    `Naam: ${p.name}`,
-    p.instagram ? `Instagram: ${p.instagram}` : null,
-    p.youtube ? `YouTube: ${p.youtube}` : null,
-    p.weakness ? `Observatie (alleen als positieve invalshoek gebruiken, niet benoemen als zwakte): ${p.weakness}` : null,
-    p.note ? `Notitie: ${p.note}` : null,
-  ].filter(Boolean).join("\n");
-
-  const { text, mock } = await generateText({ template: DM_TEMPLATE, input: context, model: "smart" });
+  const { text, mock } = await generateText({ template: DM_TEMPLATE, input: prospectDmContext(p), model: "smart" });
   if (mock) return { error: "AI-key ontbreekt in deze omgeving." };
 
   const message = text.trim();

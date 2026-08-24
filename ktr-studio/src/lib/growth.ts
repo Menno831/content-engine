@@ -6,6 +6,7 @@
 // het cijfer erbij.
 // ════════════════════════════════════════════════════════════════
 import { DEMO_MODE, isSupabaseConfigured } from "@/lib/config";
+import { todayStr } from "@/lib/dates";
 import { createClient } from "@/lib/supabase/server";
 import { getMoneybirdMonth } from "@/lib/integrations/moneybird";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -44,8 +45,8 @@ export async function buildGrowthPlan(): Promise<GrowthPlan | null> {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function buildGrowthPlanWith(supabase: SupabaseClient<any, any, any>, agencyId?: string): Promise<GrowthPlan | null> {
 
-  const today = new Date().toLocaleDateString("sv-SE");
-  const in60 = new Date(Date.now() + 60 * 86_400_000).toLocaleDateString("sv-SE");
+  const today = todayStr();
+  const in60 = todayStr(60);
   const daysAgo7 = new Date(Date.now() - 7 * 86_400_000).toISOString();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

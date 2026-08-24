@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { todayStr } from "@/lib/dates";
 import { stageMeta, fmtEur, fmtNum, type PipelineStage, type ContentCard } from "./_data";
 import { Card, Stat, PageHeader, Avatar, Badge, icons, Eyebrow } from "./_components";
 import { getWorkspaceData, getTodaysBrief } from "@/lib/data";
@@ -31,7 +32,7 @@ export default async function Dashboard() {
   const totalLeads = clients.reduce((s, c) => s + c.leadsThisMonth, 0);
 
   // Datums voor de 'Vandaag'-rij (server-side, één keer per request).
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayStr();
   const in3days = new Date(Date.now() + 3 * 86_400_000).toISOString().slice(0, 10);
 
   const stageCounts = (Object.keys(stageMeta) as PipelineStage[]).map((st) => ({
@@ -291,7 +292,7 @@ function ClientOverview({
   const totalReach = posted.reduce((s, c) => s + (c.reach ?? c.views ?? 0), 0);
 
   // Datums voor de 'Vandaag'-rij (server-side, één keer per request).
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayStr();
   const in3days = new Date(Date.now() + 3 * 86_400_000).toISOString().slice(0, 10);
 
   const stageCounts = (Object.keys(stageMeta) as PipelineStage[]).map((st) => ({

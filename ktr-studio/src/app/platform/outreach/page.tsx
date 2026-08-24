@@ -1,4 +1,5 @@
 import { redirectEditorToBoard } from "@/lib/guard";
+import { todayStr } from "@/lib/dates";
 import { PageHeader, Stat, icons } from "../_components";
 import { getProspects } from "@/lib/prospects";
 import { DEMO_MODE, isSupabaseConfigured } from "@/lib/config";
@@ -20,7 +21,7 @@ export default async function OutreachPage() {
   const auditSent = prospects.filter((p) => p.stage === "audit_verstuurd").length;
 
   // Dagteller: DM's die vandaag verstuurd zijn (dm_sent_at van vandaag).
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayStr();
   const sentToday = prospects.filter((p) => (p.dmSentAt ?? "").slice(0, 10) === today).length;
 
   return (

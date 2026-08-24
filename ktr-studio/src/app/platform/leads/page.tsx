@@ -1,4 +1,5 @@
 import { redirectEditorToBoard } from "@/lib/guard";
+import { todayStr } from "@/lib/dates";
 import { leadStageMeta, fmtEur, type LeadStage } from "../_data";
 import { PageHeader, Card, Stat, Avatar, icons } from "../_components";
 import { getWorkspaceData } from "@/lib/data";
@@ -25,7 +26,7 @@ export default async function Leads() {
   const contentOptions = content.map((c) => ({ id: c.id, label: c.title }));
 
   // Vandaag-of-eerder opvolgen, open leads -> actielijst per setter.
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayStr();
   const dueFollowups = leads.filter(
     (l) => l.nextFollowup && l.nextFollowup <= today && l.stage !== "closed" && l.stage !== "verloren"
   );

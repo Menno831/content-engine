@@ -9,6 +9,7 @@
 // geen kwaad.
 // ════════════════════════════════════════════════════════════════
 import { createAdminClient } from "@/lib/supabase/admin";
+import { todayStr } from "@/lib/dates";
 import { fetchInstagram } from "@/lib/integrations/instagram";
 import { fetchYouTube } from "@/lib/integrations/youtube";
 
@@ -54,7 +55,7 @@ export async function syncOwnChannelsCore(agencyId?: string): Promise<ChannelSyn
   if (agencyId) q = q.eq("id", agencyId);
   const { data: agencies } = await q;
 
-  const today = new Date().toLocaleDateString("sv-SE");
+  const today = todayStr();
   const results: ChannelSyncResult[] = [];
 
   for (const a of agencies ?? []) {

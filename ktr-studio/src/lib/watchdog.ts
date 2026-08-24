@@ -12,6 +12,7 @@
 //    bovenop het groeiplan, opgeslagen in growth_notes.
 // ════════════════════════════════════════════════════════════════
 import { createAdminClient } from "@/lib/supabase/admin";
+import { todayStr } from "@/lib/dates";
 import { buildGrowthPlanWith, type GrowthPlan } from "@/lib/growth";
 import { generateText } from "@/lib/ai";
 import { getOrCreateBriefing } from "@/lib/briefing";
@@ -80,6 +81,51 @@ const WEEKLY_TEMPLATE = `Je bent de strategisch adviseur van Menno Kater (conten
 
 {{onderwerp}}`;
 
+// De prompt-context voor een concept-DM — gedeeld door de nachtelijke
+// cron en de "Schrijf concept-DM"-knop, zodat beide dezelfde stijl leveren.
+export function prospectDmContext(p: {
+  name: string;
+  instagram?: string | null;
+  youtube?: string | null;
+  weakness?: string | null;
+  note?: string | null;
+}): string {
+  return [
+    `Naam: ${p.name}`,
+    p.instagram ? `Instagram: ${p.instagram}` : null,
+    p.youtube ? `YouTube: ${p.youtube}` : null,
+    p.weakness ? `Observatie (alleen als positieve invalshoek gebruiken, niet benoemen als zwakte): ${p.weakness}` : null,
+    p.note ? `Notitie: ${p.note}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+// De strategische analyse op het groeiplan — gedeeld door de
+// maandag-cron en de "Ververs analyse"-knop op Groei.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function writeGrowthAnalysis(db: any, agencyId: string, plan: GrowthPlan): Promise<{ note?: string; error?: string }> {
+  const { text, mock } = await generateText({
+    template: WEEKLY_TEMPLATE,
+    input: JSON.stringify({
+      doel: plan.goal,
+      mrr: plan.mrr,
+      gat: plan.gap,
+      gefactureerd_deze_maand: plan.invoicedThisMonth,
+      betaald: plan.paidThisMonth,
+      gemiddelde_retainer: plan.avgRetainer,
+      acties: plan.actions.map((a) => `${a.title} (${a.why})`),
+    }),
+    model: "smart",
+  });
+  if (mock) return { error: "ANTHROPIC_API_KEY niet beschikbaar in runtime" };
+
+  const note = text.trim();
+  const { error } = await db.from("growth_notes").insert({ agency_id: agencyId, note });
+  if (error) return { error: `opslaan: ${error.message}` };
+  return { note };
+}
+
 export async function runWatchdog(): Promise<WatchdogResult> {
   const result: WatchdogResult = { notifications: 0, dmDrafts: 0, weeklyNote: false, briefing: false, selftest: [], errors: [] };
   const admin = createAdminClient();
@@ -89,8 +135,8 @@ export async function runWatchdog(): Promise<WatchdogResult> {
   }
 
   const { data: agencies } = await admin.from("agencies").select("id");
-  const today = new Date().toLocaleDateString("sv-SE");
-  const in30 = new Date(Date.now() + 30 * 86_400_000).toLocaleDateString("sv-SE");
+  const today = todayStr();
+  const in30 = todayStr(30);
 
   for (const agency of agencies ?? []) {
     const agencyId = agency.id as string;
@@ -146,17 +192,7 @@ export async function runWatchdog(): Promise<WatchdogResult> {
 
       let drafted = 0;
       for (const p of pending ?? []) {
-        const context = [
-          `Naam: ${p.name}`,
-          p.instagram ? `Instagram: ${p.instagram}` : null,
-          p.youtube ? `YouTube: ${p.youtube}` : null,
-          p.weakness ? `Observatie (alleen als positieve invalshoek gebruiken, niet benoemen als zwakte): ${p.weakness}` : null,
-          p.note ? `Notitie: ${p.note}` : null,
-        ]
-          .filter(Boolean)
-          .join("\n");
-
-        const { text, mock } = await generateText({ template: DM_TEMPLATE, input: context, model: "smart" });
+        const { text, mock } = await generateText({ template: DM_TEMPLATE, input: prospectDmContext(p), model: "smart" });
         if (mock) {
           result.errors.push("dm-concepten: ANTHROPIC_API_KEY niet beschikbaar in runtime");
           break;
@@ -192,25 +228,9 @@ export async function runWatchdog(): Promise<WatchdogResult> {
       if (isMonday) {
         const plan = agencyPlan ?? (await buildGrowthPlanWith(admin, agencyId));
         if (plan) {
-          const { text, mock } = await generateText({
-            template: WEEKLY_TEMPLATE,
-            input: JSON.stringify({
-              doel: plan.goal,
-              mrr: plan.mrr,
-              gat: plan.gap,
-              gefactureerd_deze_maand: plan.invoicedThisMonth,
-              betaald: plan.paidThisMonth,
-              acties: plan.actions.map((a) => a.title),
-            }),
-            model: "smart",
-          });
-          if (mock) {
-            result.errors.push("weekanalyse: ANTHROPIC_API_KEY niet beschikbaar in runtime");
-          } else {
-            const { error } = await admin.from("growth_notes").insert({ agency_id: agencyId, note: text.trim() });
-            if (error) result.errors.push(`weekanalyse opslaan: ${error.message}`);
-            else result.weeklyNote = true;
-          }
+          const r = await writeGrowthAnalysis(admin, agencyId, plan);
+          if (r.error) result.errors.push(`weekanalyse: ${r.error}`);
+          else result.weeklyNote = true;
         }
       }
     } catch (e) {
