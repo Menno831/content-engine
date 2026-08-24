@@ -1,5 +1,6 @@
 "use server";
 
+import { randomBytes } from "crypto";
 import { revalidatePath } from "next/cache";
 import { createClient as supabaseServer } from "@/lib/supabase/server";
 import { getSessionContext } from "@/lib/auth";
@@ -62,4 +63,37 @@ export async function deleteContractAction(id: string): Promise<ContractResult> 
   if (error) return { error: error.message };
   revalidatePath("/platform/contracts");
   return { ok: true };
+}
+
+// Document (NDA of overeenkomst) aanmaken met ondertekenlink.
+export async function createDocumentAction(input: {
+  title: string;
+  body: string;
+  clientId: string | null;
+  party: string;
+  value: number;
+  recurring: boolean;
+}): Promise<ContractResult & { token?: string }> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { error: "Supabase niet geconfigureerd." };
+  const { agency } = await getSessionContext();
+  if (!agency) return { error: "Geen agency — log opnieuw in." };
+  if (!input.title.trim() || !input.body.trim()) return { error: "Titel en documenttekst zijn verplicht." };
+
+  const token = randomBytes(10).toString("base64url");
+  const { error } = await supabase.from("contracts").insert({
+    agency_id: agency.id,
+    client_id: input.clientId,
+    title: input.title.trim(),
+    party: input.party.trim() || null,
+    value: Number(input.value) || 0,
+    recurring: input.recurring,
+    status: "verstuurd",
+    doc_body: input.body,
+    sign_token: token,
+  });
+  if (error) return { error: error.message };
+
+  revalidatePath("/platform/contracts");
+  return { ok: true, token };
 }

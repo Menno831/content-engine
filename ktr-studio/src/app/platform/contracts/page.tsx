@@ -17,7 +17,7 @@ export default async function ContractsPage() {
     if (supabase) {
       const { data, error } = await supabase
         .from("contracts")
-        .select("id,title,client_id,party,value,recurring,status,starts_on,ends_on,doc_url")
+        .select("id,title,client_id,party,value,recurring,status,starts_on,ends_on,doc_url,sign_token,signed_name,signed_at")
         .order("created_at", { ascending: false });
       if (error) migrationMissing = true;
       else {
@@ -33,6 +33,9 @@ export default async function ContractsPage() {
           startsOn: (r.starts_on as string) ?? null,
           endsOn: (r.ends_on as string) ?? null,
           docUrl: (r.doc_url as string) ?? null,
+          signToken: (r.sign_token as string) ?? null,
+          signedName: (r.signed_name as string) ?? null,
+          signedAt: (r.signed_at as string) ?? null,
         }));
       }
     }

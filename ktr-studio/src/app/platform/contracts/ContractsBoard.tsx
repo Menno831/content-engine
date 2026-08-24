@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Card, Badge } from "../_components";
 import { fmtEur } from "../_data";
 import { createContractAction, updateContractStatusAction, deleteContractAction } from "./actions";
+import { DocumentDialog } from "./DocumentDialog";
 
 export interface ContractRow {
   id: string;
@@ -16,6 +17,9 @@ export interface ContractRow {
   startsOn: string | null;
   endsOn: string | null;
   docUrl: string | null;
+  signToken?: string | null;
+  signedName?: string | null;
+  signedAt?: string | null;
 }
 
 const STATUSES = [
@@ -132,12 +136,35 @@ export function ContractsBoard({ initial, clients }: { initial: ContractRow[]; c
 
       <div className="flex items-center justify-between gap-3 mb-4">
         <p className="text-[13px] text-muted">Welke afspraken lopen, wat ze waard zijn en wanneer ze aflopen.</p>
-        <button
-          onClick={() => setOpen(true)}
-          className="rounded-xl bg-accent hover:bg-accent-hover text-background font-bold text-sm px-4 py-2.5 transition-colors shrink-0"
-        >
-          + Contract
-        </button>
+        <div className="flex gap-2 shrink-0">
+          <DocumentDialog
+            clients={clients}
+            onCreated={(d) =>
+              setRows((cur) => [
+                {
+                  id: `tmp-doc-${cur.length}`,
+                  title: d.title,
+                  clientName: clients.find((c) => c.id === d.clientId)?.label ?? null,
+                  party: d.party,
+                  value: d.value,
+                  recurring: d.recurring,
+                  status: "verstuurd",
+                  startsOn: null,
+                  endsOn: null,
+                  docUrl: null,
+                  signToken: d.token,
+                },
+                ...cur,
+              ])
+            }
+          />
+          <button
+            onClick={() => setOpen(true)}
+            className="rounded-xl bg-accent hover:bg-accent-hover text-background font-bold text-sm px-4 py-2.5 transition-colors"
+          >
+            + Contract
+          </button>
+        </div>
       </div>
 
       {rows.length === 0 ? (
@@ -161,6 +188,12 @@ export function ContractsBoard({ initial, clients }: { initial: ContractRow[]; c
                       {r.clientName && <span className="text-[12px] text-muted">{r.clientName}</span>}
                     </div>
                     <div className="text-[12px] text-muted mt-0.5">
+                      {r.signedAt && (
+                        <span className="text-emerald-400">
+                          ✓ getekend door {r.signedName} op{" "}
+                          {new Date(r.signedAt).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })} ·{" "}
+                        </span>
+                      )}
                       {fmtEur(r.value)}
                       {r.recurring ? "/mnd" : " eenmalig"}
                       {r.party && ` · ${r.party}`}
@@ -169,7 +202,25 @@ export function ContractsBoard({ initial, clients }: { initial: ContractRow[]; c
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    {r.docUrl && (
+                    {r.signToken && !r.signedAt && (
+                      <button
+                        onClick={() => navigator.clipboard.writeText(`${window.location.origin}/sign/${r.signToken}`)}
+                        className="rounded-lg border border-accent/25 bg-accent/10 hover:bg-accent/20 text-accent px-2.5 py-1.5 text-[12px] font-bold transition-all"
+                      >
+                        ✍️ Kopieer ondertekenlink
+                      </button>
+                    )}
+                    {r.signToken && (
+                      <a
+                        href={`/sign/${r.signToken}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded-lg border border-white/[0.08] hover:border-accent/30 hover:text-accent px-2.5 py-1.5 text-[12px] text-muted transition-all"
+                      >
+                        ↗ Document
+                      </a>
+                    )}
+                    {!r.signToken && r.docUrl && (
                       <a
                         href={r.docUrl}
                         target="_blank"
