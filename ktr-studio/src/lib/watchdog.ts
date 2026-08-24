@@ -48,7 +48,8 @@ async function notifyOnce(
     body,
     link,
   });
-  return !error;
+  if (error) throw new Error(`notificatie mislukt: ${error.message}`);
+  return true;
 }
 
 // DM in Menno's stem, volgens de vaste regels. De AI krijgt de
@@ -146,7 +147,10 @@ export async function runWatchdog(): Promise<WatchdogResult> {
           .join("\n");
 
         const { text, mock } = await generateText({ template: DM_TEMPLATE, input: context, model: "smart" });
-        if (mock) break; // geen AI-key in deze omgeving — stil overslaan
+        if (mock) {
+          result.errors.push("dm-concepten: ANTHROPIC_API_KEY niet beschikbaar in runtime");
+          break;
+        }
 
         const { error } = await admin
           .from("prospects")
@@ -188,9 +192,12 @@ export async function runWatchdog(): Promise<WatchdogResult> {
             }),
             model: "smart",
           });
-          if (!mock) {
+          if (mock) {
+            result.errors.push("weekanalyse: ANTHROPIC_API_KEY niet beschikbaar in runtime");
+          } else {
             const { error } = await admin.from("growth_notes").insert({ agency_id: agencyId, note: text.trim() });
-            if (!error) result.weeklyNote = true;
+            if (error) result.errors.push(`weekanalyse opslaan: ${error.message}`);
+            else result.weeklyNote = true;
           }
         }
       }
