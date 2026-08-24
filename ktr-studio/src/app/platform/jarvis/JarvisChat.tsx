@@ -11,6 +11,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { Card } from "../_components";
 import { askJarvisAction, getBriefingAction } from "./actions";
+import { JarvisOrb, type OrbMode } from "./JarvisOrb";
 
 interface Msg {
   role: "user" | "assistant";
@@ -98,6 +99,7 @@ export function JarvisChat({ initial }: { initial: Msg[] }) {
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [voiceName, setVoiceName] = useState<string>("");
   const [showMusic, setShowMusic] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
   const bootedRef = useRef(false);
   const [error, setError] = useState("");
   const [pending, start] = useTransition();
@@ -147,6 +149,9 @@ export function JarvisChat({ initial }: { initial: Msg[] }) {
     }
     u.rate = 1.0;
     u.pitch = 0.85; // iets lager: het butler-register
+    u.onstart = () => setSpeaking(true);
+    u.onend = () => setSpeaking(false);
+    u.onerror = () => setSpeaking(false);
     window.speechSynthesis.speak(u);
   }
 
@@ -227,19 +232,18 @@ export function JarvisChat({ initial }: { initial: Msg[] }) {
         </div>
       )}
 
+      {/* Hij leeft: de bol volgt wat Jarvis doet */}
+      <Card className="mb-4 overflow-hidden">
+        <JarvisOrb mode={(listening ? "listening" : pending ? "thinking" : speaking ? "speaking" : "idle") as OrbMode} />
+      </Card>
+
       {/* Gesprek */}
-      <Card className="p-4 mb-4 min-h-[380px] max-h-[58vh] overflow-y-auto">
+      <Card className="p-4 mb-4 max-h-[46vh] overflow-y-auto">
         {messages.length === 0 && (
-          <div className="grid place-items-center h-[340px] text-center">
-            <div>
-              <div className="text-4xl mb-3">🎙</div>
-              <p className="text-sm text-muted max-w-sm">
-                Zeg of typ iets — of klik <strong className="text-foreground">Brief me</strong> voor je
-                ochtendbriefing. Vraag bijvoorbeeld: &ldquo;wat moet ik vandaag doen&rdquo; of &ldquo;hoe sta ik
-                ervoor deze maand&rdquo;.
-              </p>
-            </div>
-          </div>
+          <p className="text-[13px] text-muted text-center py-6 max-w-sm mx-auto">
+            Zeg of typ iets — of klik <strong className="text-foreground">Brief me</strong> voor je ochtendbriefing.
+            Vraag bijvoorbeeld: &ldquo;wat moet ik vandaag doen&rdquo; of &ldquo;hoe sta ik ervoor deze maand&rdquo;.
+          </p>
         )}
         <div className="space-y-3">
           {messages.map((m, i) => (
@@ -359,7 +363,10 @@ export function JarvisChat({ initial }: { initial: Msg[] }) {
               checked={speakEnabled}
               onChange={(e) => {
                 setSpeakEnabled(e.target.checked);
-                if (!e.target.checked) window.speechSynthesis?.cancel();
+                if (!e.target.checked) {
+                  window.speechSynthesis?.cancel();
+                  setSpeaking(false);
+                }
               }}
               className="accent-[var(--accent)] w-4 h-4"
             />
