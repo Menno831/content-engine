@@ -14,6 +14,8 @@ const prioMeta: Record<number, { label: string; color: string }> = {
 
 // Groeiplan: het doel, waar je staat, en wat de data zegt dat de
 // volgende stappen zijn. Elke ochtend anders, want de cijfers zijn anders.
+export const maxDuration = 60; // AI-calls mogen even duren
+
 export default async function GroeiPage() {
   await redirectEditorToBoard();
   const plan = await buildGrowthPlan();

@@ -119,7 +119,7 @@ export async function getOrCreateBriefing(db: Db, agencyId: string, prebuiltPlan
   let content = facts;
   let ai = false;
   try {
-    const { text, mock } = await generateText({ template: BRIEFING_TEMPLATE, input: facts, model: "smart" });
+    const { text, mock } = await generateText({ template: BRIEFING_TEMPLATE, input: facts, model: "fast" });
     if (!mock && text.trim()) {
       content = text.trim();
       ai = true;

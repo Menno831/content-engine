@@ -5,6 +5,8 @@ import { DEMO_MODE, isSupabaseConfigured } from "@/lib/config";
 import { JarvisChat } from "./JarvisChat";
 
 // Jarvis: praten of typen, briefings en meedenken op je echte cijfers.
+export const maxDuration = 60; // AI-calls mogen even duren
+
 export default async function JarvisPage() {
   await redirectEditorToBoard();
   const demo = DEMO_MODE || !isSupabaseConfigured;

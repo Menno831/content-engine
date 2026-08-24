@@ -11,6 +11,8 @@ import { getOrCreateBriefing, type Briefing } from "@/lib/briefing";
 import { createClient as supabaseServer } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
+export const maxDuration = 60; // AI-calls mogen even duren
+
 export default async function Dashboard() {
   const [{ clients, content: contentCards, leads, demo }, todos, ctx, outreachTodo, meetings, eods] = await Promise.all([
     getWorkspaceData(),
