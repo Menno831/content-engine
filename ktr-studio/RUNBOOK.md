@@ -24,8 +24,11 @@ Supabase SQL Editor gedraaid, Vercel via de lokaal ingelogde CLI.)
    concept-DM's in diezelfde stijl in het berichtveld (13 overgeslagen omdat
    ze al met een bericht in de wachtrij staan, 1 was al gemarkeerd als
    dubbel). De oude negging-teksten staan alleen nog in de interne
-   notitie/waarom-fit-velden — die ziet de prospect nooit. Nog open:
-   per prospect de "waarom fit" vanuit hun YouTube onderbouwen (research).
+   notitie/waarom-fit-velden — die ziet de prospect nooit. Afgerond op
+   24 aug: voor de toplaag is de "waarom fit" onderbouwd met echte
+   vidIQ-cijfers (subs/views/groei/output van 24 aug) en zijn de openers
+   aangescherpt op één concreet ding per kanaal; Jia Ruan uit de toplaag
+   (stond als geen fit in de wachtrij). Brede-laag-research blijft open.
 4. **Rapporten-databronnen**: IG-sync draait en vult content+metrics (3 klanten).
    YouTube wacht op `YOUTUBE_API_KEY`; alternatieve bronnen waar al abonnementen
    op lopen: vidIQ, Metricool, Instagram-app-exports. ManyChat-koppeling voor
