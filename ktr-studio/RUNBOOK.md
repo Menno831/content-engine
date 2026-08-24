@@ -36,8 +36,10 @@ wacht op iets buiten de code:
   binnen via `/api/manychat`, en DM's versturen gaat handmatig vanaf Outreach.
 
 Wacht verder alleen nog op keys van Menno: `RESEND_API_KEY` (alle mails),
-`YOUTUBE_API_KEY` (YouTube-stats en YT-competitors), en `MONEYBIRD_API_TOKEN`
-netjes opnieuw zetten. Voor automatische eigen-kanalen-data later: GA4-API
+`YOUTUBE_API_KEY` (YouTube-stats, YT-competitors én eigen-kanaal-sync),
+`MONEYBIRD_API_TOKEN` netjes opnieuw zetten, en optioneel `CLARITY_API_TOKEN`
+(website-bezoekers automatisch op Eigen kanalen; genereren in Clarity →
+Settings → Data Export). Voor automatische eigen-kanalen-data later: GA4-API
 (website) en LinkedIn heeft geen bruikbare API — dat blijft handmatig.
 
 ## Afgerond (18-24 aug 2026)
