@@ -35,7 +35,9 @@ wacht op iets buiten de code:
   ManyChat-abonnement met inbox-API. Nu al wel: leads uit ManyChat komen
   binnen via `/api/manychat`, en DM's versturen gaat handmatig vanaf Outreach.
 
-Wacht verder alleen nog op keys van Menno: `RESEND_API_KEY` (alle mails),
+Wacht verder alleen nog op keys van Menno: `ANTHROPIC_API_KEY` opnieuw zetten
+(staat in Vercel maar is leeg/kapot in runtime — blokkeert AI-DM-concepten,
+weekanalyse, Studio en Boost in echte modus), `RESEND_API_KEY` (alle mails),
 `YOUTUBE_API_KEY` (YouTube-stats, YT-competitors én eigen-kanaal-sync),
 `MONEYBIRD_API_TOKEN` netjes opnieuw zetten, en optioneel `CLARITY_API_TOKEN`
 (website-bezoekers automatisch op Eigen kanalen; genereren in Clarity →
@@ -43,6 +45,11 @@ Settings → Data Export). Voor automatische eigen-kanalen-data later: GA4-API
 (website) en LinkedIn heeft geen bruikbare API — dat blijft handmatig.
 
 ## Afgerond (18-24 aug 2026)
+- **Automatiseringsmotor** (cron 07:30 `/api/cron/watchdog`): dagelijkse
+  signalen in de bel (dedupe 3 dagen, werkt — geverifieerd), AI-concept-DM's
+  voor de outreach-wachtrij (max 10/dag, nooit auto-verzenden) en maandag-
+  weekanalyse op het groeiplan; beide AI-takken wachten op een werkende
+  ANTHROPIC_API_KEY en melden dat nu expliciet i.p.v. stil niets doen.
 - **Eigen kanalen** (`/platform/channels`, migratie 027 — gedraaid): website,
   Instagram, LinkedIn en YouTube met dag-snapshots, delta's en sparklines;
   invoer per kanaal, live getest. Rollen-guard op het klant-werkstation
