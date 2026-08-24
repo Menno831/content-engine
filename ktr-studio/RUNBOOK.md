@@ -45,6 +45,17 @@ Settings → Data Export). Voor automatische eigen-kanalen-data later: GA4-API
 (website) en LinkedIn heeft geen bruikbare API — dat blijft handmatig.
 
 ## Afgerond (18-24 aug 2026)
+- **Review-fixes ronde 2 (migratie 031 — gedraaid):** groeiplan/briefing per
+  agency gescoped (cross-tenant datamix gedicht), agencies-updatepolicy zodat
+  "Bronnen opslaan" op Eigen kanalen echt werkt, kanaal-metingen dragen een
+  bron (handmatig/sync), formulier-teller atomair, Moneybird-contactnaam-veld
+  per klant (Profiel → kanalen; nodig voor korte namen als A&B), kanban
+  sorteert nieuwste eerst, rol-check op meting-verwijderen.
+- ⚠️ **CRON_SECRET is nu verplicht:** de cron-endpoints (watchdog,
+  sync-channels) staan DICHT tot Menno `CRON_SECRET` in Vercel zet (ze waren
+  publiek aanroepbaar en konden AI-kosten maken). Genereer een willekeurige
+  waarde (bv. `openssl rand -hex 24`) en zet hem via `vercel env add
+  CRON_SECRET production`; Vercel stuurt hem daarna zelf mee aan de crons.
 - **Jarvis** (`/platform/jarvis`, migratie 030 — gedraaid): spraak in/uit
   (Web Speech nl-NL, geen key nodig), ochtendbriefing op echte cijfers
   (regelgebaseerd, AI-laag zodra ANTHROPIC_API_KEY werkt; live geverifieerd),
