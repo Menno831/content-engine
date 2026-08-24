@@ -3,6 +3,8 @@ import { PageHeader } from "../_components";
 import { createClient } from "@/lib/supabase/server";
 import { DEMO_MODE, isSupabaseConfigured } from "@/lib/config";
 import { ChannelsBoard, type StatRow } from "./ChannelsBoard";
+import { AutoSyncCard } from "./AutoSyncCard";
+import { getSessionContext } from "@/lib/auth";
 
 // Eigen kanalen: website, Instagram, LinkedIn en YouTube van Menno
 // zelf — los van de klanten. Handmatige snapshots, sync waar mogelijk.
@@ -12,9 +14,21 @@ export default async function ChannelsPage() {
 
   let rows: StatRow[] = [];
   let migrationMissing = false;
+  let igHandle = "";
+  let ytChannel = "";
   if (!demo) {
     const supabase = await createClient();
     if (supabase) {
+      const { agency } = await getSessionContext();
+      if (agency) {
+        const { data: a } = await supabase
+          .from("agencies")
+          .select("own_ig_handle, own_yt_channel")
+          .eq("id", agency.id)
+          .maybeSingle();
+        igHandle = (a?.own_ig_handle as string) ?? "";
+        ytChannel = (a?.own_yt_channel as string) ?? "";
+      }
       const { data, error } = await supabase
         .from("channel_stats")
         .select("id,channel,stat_date,followers,visitors,views,impressions")
@@ -51,7 +65,18 @@ export default async function ChannelsPage() {
           Draai migratie 027 in Supabase (tabel <code>channel_stats</code>) — daarna werkt deze pagina direct.
         </div>
       ) : (
-        <ChannelsBoard initial={rows} />
+        <>
+          <AutoSyncCard
+            igHandle={igHandle}
+            ytChannel={ytChannel}
+            keys={{
+              instagram: Boolean(process.env.RAPIDAPI_KEY),
+              youtube: Boolean(process.env.YOUTUBE_API_KEY),
+              clarity: Boolean(process.env.CLARITY_API_TOKEN),
+            }}
+          />
+          <ChannelsBoard initial={rows} />
+        </>
       )}
     </>
   );

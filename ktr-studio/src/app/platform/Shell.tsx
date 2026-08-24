@@ -52,6 +52,7 @@ const agencyGroups: NavGroup[] = [
   {
     title: "Groei",
     items: [
+      { href: "/platform/groei", label: "Groeiplan", icon: icons.rocket },
       { href: "/platform/finance", label: "Finance", icon: icons.money },
       { href: "/platform/leads", label: "Leads", icon: icons.leads },
       { href: "/platform/outreach", label: "Outreach", icon: icons.rocket },

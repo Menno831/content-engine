@@ -1,5 +1,7 @@
 {
-  "regions": ["fra1"],
+  "regions": [
+    "fra1"
+  ],
   "crons": [
     {
       "path": "/api/cron/sync-instagram",
@@ -8,6 +10,10 @@
     {
       "path": "/api/cron/daily-brief",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/sync-channels",
+      "schedule": "0 7 * * *"
     }
   ]
 }

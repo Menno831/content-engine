@@ -2,10 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "content-engine",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--", "-p", "3001"],
-      "port": 3001
+      "name": "ktr-studio-demo",
+      "runtimeExecutable": "env",
+      "runtimeArgs": ["NEXT_PUBLIC_DEMO_MODE=true", "npx", "next", "dev", "-p", "3111"],
+      "port": 3111
     }
   ]
 }

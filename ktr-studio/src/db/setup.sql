@@ -937,3 +937,14 @@ drop policy if exists "team all channel_stats" on channel_stats;
 create policy "team all channel_stats" on channel_stats
   for all using (agency_id = current_agency_id() and current_client_id() is null)
   with check (agency_id = current_agency_id() and current_client_id() is null);
+-- ════════════════════════════════════════════════════════════════
+-- Migratie 028: eigen kanalen automatisch syncen.
+-- De agency krijgt eigen bron-instellingen (IG-handle, YouTube-
+-- kanaal); de dagelijkse cron schrijft snapshots naar channel_stats.
+-- Website gaat via CLARITY_API_TOKEN (env), LinkedIn blijft handmatig.
+-- ════════════════════════════════════════════════════════════════
+
+alter table agencies add column if not exists own_ig_handle  text;
+alter table agencies add column if not exists own_yt_channel text;
+
+alter table agencies add column if not exists goal_monthly numeric not null default 100000;
