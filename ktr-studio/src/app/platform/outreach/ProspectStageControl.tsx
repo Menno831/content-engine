@@ -4,7 +4,7 @@ import { useTransition } from "react";
 import { updateProspectStageAction } from "./actions";
 import { prospectStageMeta, type ProspectStage } from "../_data";
 
-const ORDER: ProspectStage[] = ["te_contacteren", "dm_verstuurd", "in_gesprek", "audit_verstuurd", "geen_reactie"];
+const ORDER: ProspectStage[] = ["te_contacteren", "dm_verstuurd", "in_gesprek", "audit_verstuurd", "geen_reactie", "afgekeurd"];
 
 export function ProspectStageControl({ prospectId, stage }: { prospectId: string; stage: string }) {
   const [pending, startTransition] = useTransition();

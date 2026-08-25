@@ -8,7 +8,7 @@ import Link from "next/link";
 import { AddProspectDialog } from "./AddProspectDialog";
 import { ProspectCard } from "./ProspectCard";
 
-const stageOrder: ProspectStage[] = ["te_contacteren", "dm_verstuurd", "in_gesprek", "audit_verstuurd", "geen_reactie"];
+const stageOrder: ProspectStage[] = ["te_contacteren", "dm_verstuurd", "in_gesprek", "audit_verstuurd", "geen_reactie", "afgekeurd"];
 
 export default async function OutreachPage({ searchParams }: { searchParams: Promise<{ laag?: string }> }) {
   await redirectEditorToBoard();
@@ -23,7 +23,7 @@ export default async function OutreachPage({ searchParams }: { searchParams: Pro
   const demo = DEMO_MODE || !isSupabaseConfigured;
 
   const pipelineValue = prospects
-    .filter((p) => p.stage !== "geen_reactie")
+    .filter((p) => p.stage !== "geen_reactie" && p.stage !== "afgekeurd")
     .reduce((s, p) => s + p.potentialValue, 0);
   const inGesprek = prospects.filter((p) => p.stage === "in_gesprek").length;
   const auditSent = prospects.filter((p) => p.stage === "audit_verstuurd").length;

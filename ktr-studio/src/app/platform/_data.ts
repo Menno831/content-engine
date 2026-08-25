@@ -270,7 +270,7 @@ export function editorPayout(e: Editor) {
 }
 
 // ── Outreach-pijplijn (nieuwe klanten werven) ──────────────────────
-export type ProspectStage = "te_contacteren" | "dm_verstuurd" | "in_gesprek" | "audit_verstuurd" | "geen_reactie";
+export type ProspectStage = "te_contacteren" | "dm_verstuurd" | "in_gesprek" | "audit_verstuurd" | "geen_reactie" | "afgekeurd";
 
 export const prospectStageMeta: Record<ProspectStage, { label: string; color: string }> = {
   te_contacteren: { label: "Te contacteren", color: "#60A5FA" },
@@ -278,6 +278,7 @@ export const prospectStageMeta: Record<ProspectStage, { label: string; color: st
   in_gesprek: { label: "In gesprek", color: "#FBBF24" },
   audit_verstuurd: { label: "Audit verstuurd", color: "#34D399" },
   geen_reactie: { label: "Geen reactie", color: "#6B7280" },
+  afgekeurd: { label: "Afgekeurd (geen fit)", color: "#F87171" },
 };
 
 export interface Prospect {
@@ -288,6 +289,7 @@ export interface Prospect {
   weakness: string | null;
   stage: ProspectStage;
   potentialValue: number;
+  fitReason?: string | null;
   note: string | null;
   /** Kant-en-klaar DM-bericht — kopieer & verstuur vanaf de outreach-pagina. */
   message?: string | null;

@@ -10,7 +10,7 @@ const YT_KEY = process.env.YOUTUBE_API_KEY ?? "";
 // Welke query kunnen we op de API afvuren voor deze youtube-waarde?
 // (kanaal-id direct; @handle of kale handle via forHandle; vrije
 // tekst is niet betrouwbaar op te lossen — die slaan we over)
-function channelParam(youtube: string): { key: "id" | "forHandle"; value: string } | null {
+export function channelParam(youtube: string): { key: "id" | "forHandle"; value: string } | null {
   const s = (youtube ?? "").trim();
   const id = s.match(/(UC[A-Za-z0-9_-]{22})/);
   if (id) return { key: "id", value: id[1] };
