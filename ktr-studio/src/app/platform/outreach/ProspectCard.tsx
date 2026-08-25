@@ -20,12 +20,16 @@ function igHandle(v: string): string {
 
 function ytUrl(v: string): string {
   const t = v.trim();
-  if (/^https?:\/\//i.test(t)) return t;
+  // Volledige URL zonder ruis → direct gebruiken.
+  if (/^https?:\/\//i.test(t) && !/\s/.test(t)) return t;
+  // Zit er ergens een youtube.com/-verwijzing in (ook zonder protocol,
+  // ook met ruis eromheen)? Dan die als directe kanaallink pakken.
+  const m = t.match(/(?:www\.)?youtube\.com\/(@[\w.\-]+|channel\/UC[\w-]{21,22}|c\/[\w.\-]+)/i);
+  if (m) return `https://www.youtube.com/${m[1]}`;
   const h = t.replace(/^@/, "");
   if (/^UC[\w-]{21,22}$/.test(h)) return `https://youtube.com/channel/${h}`;
-  // Kale handle (geen spaties) → kanaal-link; vrije tekst zoals
-  // "Mike Buiten YouTube" → een zoeklink, die werkt altijd.
-  if (!/\s/.test(h)) return `https://youtube.com/@${h}`;
+  // Kale handle → kanaal-link; vrije tekst → zoeklink (werkt altijd).
+  if (/^[\w.\-]+$/.test(h)) return `https://youtube.com/@${h}`;
   return `https://www.youtube.com/results?search_query=${encodeURIComponent(t.replace(/\s*YouTube\s*$/i, ""))}`;
 }
 
