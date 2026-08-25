@@ -282,8 +282,15 @@ export async function runWatchdog(): Promise<WatchdogResult> {
       try {
         const { mock } = await generateText({ template: "Antwoord met exact: ok", input: "", model: "fast" });
         if (mock) defects.push("ANTHROPIC_API_KEY ontbreekt of is leeg — AI staat uit (Studio, Boost, DM-concepten, weekanalyse)");
-      } catch {
-        defects.push("ANTHROPIC_API_KEY is kapot (API weigert) — zet de key opnieuw in Vercel");
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "";
+        if (/credit balance/i.test(msg)) {
+          defects.push("Anthropic-tegoed is op — koop credits op platform.claude.com (Plans & Billing), dan draait alle AI direct");
+        } else if (/invalid/i.test(msg)) {
+          defects.push("ANTHROPIC_API_KEY is ongeldig — zet de key opnieuw in Vercel");
+        } else {
+          defects.push(`Anthropic-API weigert: ${msg.slice(0, 120)}`);
+        }
       }
 
       if (!moneybirdConfigured()) {
