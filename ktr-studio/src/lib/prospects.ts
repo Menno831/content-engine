@@ -30,13 +30,11 @@ export async function getProspects(): Promise<Prospect[]> {
   let data: any[] | null = null;
   const first = await supabase
     .from("prospects")
-    .select(`${base},message,dm_sent_at,tier`)
+    .select(`${base},message,dm_sent_at,tier,last_reply,last_reply_at,reply_draft`)
     .order("created_at", { ascending: false });
   if (first.error) {
-    // Migratie 023 (dm_sent_at) nog niet gedraaid? Probeer met alleen message;
-    // daarna desnoods puur de basiskolommen (pre-021).
-    // Migratie 032 (tier) of 023 (dm_sent_at) nog niet gedraaid.
-    const second = await supabase.from("prospects").select(`${base},message,dm_sent_at`).order("created_at", { ascending: false });
+    // Oudere database zonder de nieuwste migraties? Trapsgewijs terug.
+    const second = await supabase.from("prospects").select(`${base},message,dm_sent_at,tier`).order("created_at", { ascending: false });
     if (second.error) {
       const fallback = await supabase.from("prospects").select(base).order("created_at", { ascending: false });
       data = fallback.data;
@@ -59,6 +57,9 @@ export async function getProspects(): Promise<Prospect[]> {
     dmSentAt: p.dm_sent_at ?? null,
     message: p.message ?? null,
     tier: p.tier ?? null,
+    lastReply: p.last_reply ?? null,
+    lastReplyAt: p.last_reply_at ?? null,
+    replyDraft: p.reply_draft ?? null,
   }));
   /* eslint-enable @typescript-eslint/no-explicit-any */
 }

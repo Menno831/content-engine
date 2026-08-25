@@ -10,7 +10,7 @@ import { useState } from "react";
 import { Card, Avatar } from "../_components";
 import { fmtEur, type Prospect } from "../_data";
 import { ProspectStageControl } from "./ProspectStageControl";
-import { generateProspectDmAction, setProspectTierAction } from "./actions";
+import { generateProspectDmAction, setProspectTierAction, updateProspectStageAction } from "./actions";
 
 function igHandle(v: string): string {
   const h = v.replace(/^https?:\/\/(www\.)?instagram\.com\//i, "").replace(/^@/, "").replace(/\/.*$/, "").trim();
@@ -38,6 +38,8 @@ export function ProspectCard({ prospect: p, demo }: { prospect: Prospect; demo: 
   const [showMsg, setShowMsg] = useState(false);
   const [open, setOpen] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [dmOpened, setDmOpened] = useState(false);
+  const [marked, setMarked] = useState(false);
   const [genError, setGenError] = useState("");
   const [message, setMessage] = useState(p.message);
   const [tier, setTier] = useState(p.tier ?? null);
@@ -63,6 +65,25 @@ export function ProspectCard({ prospect: p, demo }: { prospect: Prospect; demo: 
   }
 
   const handle = p.instagram ? igHandle(p.instagram) : null;
+
+  // Eén klik: DM-venster open + bericht op het klembord. Daarna alleen
+  // nog plakken, lezen en versturen — en terug hier op ✓ drukken.
+  function openDmWithMessage() {
+    if (handle) window.open(`https://ig.me/m/${handle}`, "_blank", "noopener");
+    if (message) {
+      navigator.clipboard.writeText(message).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 4000);
+      }).catch(() => setShowMsg(true));
+    }
+    setDmOpened(true);
+    setShowMsg(true);
+  }
+
+  async function markSent() {
+    setMarked(true);
+    await updateProspectStageAction(p.id, "dm_verstuurd");
+  }
 
   async function copyMessage() {
     if (!message) return;
@@ -124,6 +145,31 @@ export function ProspectCard({ prospect: p, demo }: { prospect: Prospect; demo: 
         )}
       </div>
 
+      {/* Reply binnen? Altijd tonen, ook ingeklapt — dit vraagt actie. */}
+      {p.lastReply && (
+        <div className="mt-2 rounded-lg border border-sky-400/25 bg-sky-400/[0.06] px-2.5 py-2">
+          <div className="text-[10px] font-mono uppercase tracking-wider text-sky-300 mb-0.5">
+            💬 Reply{p.lastReplyAt ? ` · ${new Date(p.lastReplyAt).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}` : ""}
+          </div>
+          <p className="text-[12px] text-foreground/85 whitespace-pre-wrap">{p.lastReply}</p>
+          {p.replyDraft && (
+            <div className="mt-2 pt-2 border-t border-white/[0.06]">
+              <div className="text-[10px] font-mono uppercase tracking-wider text-muted mb-0.5">Conceptantwoord</div>
+              <p className="text-[12px] text-foreground/85 whitespace-pre-wrap">{p.replyDraft}</p>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(p.replyDraft!);
+                  if (handle) window.open(`https://ig.me/m/${handle}`, "_blank", "noopener");
+                }}
+                className="mt-1.5 w-full rounded-lg bg-sky-400/15 border border-sky-400/30 hover:bg-sky-400/25 text-sky-200 font-bold text-[11.5px] py-1.5 transition-colors"
+              >
+                ✉ Open DM + kopieer antwoord
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       {!open ? null : (
       <div className="mt-2.5">
       {tier === "top" && (
@@ -161,21 +207,33 @@ export function ProspectCard({ prospect: p, demo }: { prospect: Prospect; demo: 
       {message && (
         <div className="mb-2">
           <div className="flex gap-1.5">
-            <button
-              onClick={copyMessage}
-              className="flex-1 rounded-lg bg-accent/15 border border-accent/25 hover:bg-accent/25 text-accent font-bold text-[11.5px] py-1.5 transition-colors"
-            >
-              {copied ? "Gekopieerd ✓" : "📋 Kopieer bericht"}
-            </button>
-            {handle && (
-              <a
-                href={`https://ig.me/m/${handle}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 rounded-lg bg-accent hover:bg-accent-hover text-background font-bold text-[11.5px] py-1.5 text-center transition-colors"
+            {handle ? (
+              <button
+                onClick={openDmWithMessage}
+                className="flex-1 rounded-lg bg-accent hover:bg-accent-hover text-background font-bold text-[11.5px] py-1.5 transition-colors"
               >
-                ✉ Open DM
-              </a>
+                {copied ? "✓ Gekopieerd — plak in IG (⌘V)" : "✉ Open DM + kopieer bericht"}
+              </button>
+            ) : (
+              <button
+                onClick={copyMessage}
+                className="flex-1 rounded-lg bg-accent/15 border border-accent/25 hover:bg-accent/25 text-accent font-bold text-[11.5px] py-1.5 transition-colors"
+              >
+                {copied ? "Gekopieerd ✓" : "📋 Kopieer bericht"}
+              </button>
+            )}
+            {dmOpened && !marked && (
+              <button
+                onClick={markSent}
+                className="flex-1 rounded-lg border border-emerald-400/40 bg-emerald-400/10 hover:bg-emerald-400/20 text-emerald-300 font-bold text-[11.5px] py-1.5 transition-colors"
+              >
+                ✓ Verstuurd
+              </button>
+            )}
+            {marked && (
+              <span className="flex-1 grid place-items-center rounded-lg bg-emerald-400/10 text-emerald-300 font-bold text-[11.5px] py-1.5">
+                Verstuurd ✓ geteld
+              </span>
             )}
           </div>
           <button onClick={() => setShowMsg((s) => !s)} className="mt-1 text-[11px] text-muted hover:text-foreground transition-colors">

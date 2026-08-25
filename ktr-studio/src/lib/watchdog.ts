@@ -237,6 +237,34 @@ export async function runWatchdog(): Promise<WatchdogResult> {
       result.errors.push(`weekanalyse: ${e instanceof Error ? e.message : "onbekend"}`);
     }
 
+    // ── 3b. Outreach-hygiëne: 7 dagen stil na een DM → geen_reactie ─
+    try {
+      const cutoff = new Date(Date.now() - 7 * 86_400_000).toISOString();
+      const { data: stale } = await admin
+        .from("prospects")
+        .select("id")
+        .eq("agency_id", agencyId)
+        .eq("stage", "dm_verstuurd")
+        .lt("dm_sent_at", cutoff)
+        .is("last_reply_at", null);
+      if (stale?.length) {
+        await admin
+          .from("prospects")
+          .update({ stage: "geen_reactie" })
+          .in("id", stale.map((x) => x.id));
+        const sent = await notifyOnce(
+          admin,
+          agencyId,
+          `${stale.length} prospect${stale.length === 1 ? "" : "s"} na 7 dagen zonder reactie doorgezet`,
+          "Automatisch naar 'geen reactie' verplaatst — een follow-up-DM sturen kan altijd nog, dan schuiven ze vanzelf terug zodra ze antwoorden.",
+          "/platform/outreach"
+        );
+        if (sent) result.notifications += 1;
+      }
+    } catch (e) {
+      result.errors.push(`outreach-hygiëne: ${e instanceof Error ? e.message : "onbekend"}`);
+    }
+
     // ── 4. Ochtendbriefing klaarzetten ───────────────────────────
     try {
       const b = await getOrCreateBriefing(admin, agencyId, agencyPlan);

@@ -295,6 +295,11 @@ export interface Prospect {
   dmSentAt?: string | null;
   /** 'top' = toplaag: persoonlijke Seth/Jack-behandeling i.p.v. standaard-opener. */
   tier?: string | null;
+  /** Laatste binnengekomen reply (via de ManyChat-webhook). */
+  lastReply?: string | null;
+  lastReplyAt?: string | null;
+  /** AI-conceptantwoord op die reply — lezen, plakken, versturen. */
+  replyDraft?: string | null;
 }
 
 export const prospects: Prospect[] = [
