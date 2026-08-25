@@ -13,13 +13,20 @@ import { ProspectStageControl } from "./ProspectStageControl";
 import { generateProspectDmAction, setProspectTierAction } from "./actions";
 
 function igHandle(v: string): string {
-  return v.replace(/^https?:\/\/(www\.)?instagram\.com\//i, "").replace(/^@/, "").replace(/\/.*$/, "").trim();
+  const h = v.replace(/^https?:\/\/(www\.)?instagram\.com\//i, "").replace(/^@/, "").replace(/\/.*$/, "").trim();
+  // Geen geldige handle (spaties/leeg) → geen link tonen i.p.v. een kapotte.
+  return /^[\w.]+$/.test(h) ? h : "";
 }
 
 function ytUrl(v: string): string {
-  if (/^https?:\/\//i.test(v)) return v;
-  const h = v.replace(/^@/, "").trim();
-  return /^UC[\w-]{21,22}$/.test(h) ? `https://youtube.com/channel/${h}` : `https://youtube.com/@${h}`;
+  const t = v.trim();
+  if (/^https?:\/\//i.test(t)) return t;
+  const h = t.replace(/^@/, "");
+  if (/^UC[\w-]{21,22}$/.test(h)) return `https://youtube.com/channel/${h}`;
+  // Kale handle (geen spaties) → kanaal-link; vrije tekst zoals
+  // "Mike Buiten YouTube" → een zoeklink, die werkt altijd.
+  if (!/\s/.test(h)) return `https://youtube.com/@${h}`;
+  return `https://www.youtube.com/results?search_query=${encodeURIComponent(t.replace(/\s*YouTube\s*$/i, ""))}`;
 }
 
 export function ProspectCard({ prospect: p, demo }: { prospect: Prospect; demo: boolean }) {
