@@ -136,3 +136,12 @@ sessie niet dubbel werk doet.
 - **5 klanten verwijderd** op verzoek via de app: Ad Guardians, FX Minds, IB Groups,
   Jisk Hogenboom, Scale Academy. Over: Menno Kater, Arthur and Bryan, Jip Geuke,
   Verkoop je Zaak.
+
+## Ronde 25 aug 2026 (2) — Finance-uitbouw + outreach-IG
+
+- Finance: stat "Omzet deze maand" naast MRR (met concepten-delta), jaargrafiek
+  jan-dec (omzet / concepten gestippeld / prognose op MRR) + YTD omzet en winst,
+  kaart "Nog te versturen" met alle Moneybird-concepten (`getMoneybirdDrafts`).
+- Outreach: igHandle haalt nu de eerste @handle uit annotatie-tekst
+  ("@naam (~108K)") → 219 werkende IG-links, 0 kapot. Watchdog stap 3d vult
+  lege instagram-velden via YouTube-kanaalbeschrijvingen (max 25/run).
