@@ -59,11 +59,15 @@ export function ContentCardItem({
             {!demo && (
               <input
                 type="checkbox"
+                data-bulk-id={card.id}
                 checked={checked}
-                onChange={() => selection.toggle(card.id)}
-                onClick={(e) => e.stopPropagation()}
+                onChange={() => {}}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  selection.pick(card.id, e.shiftKey);
+                }}
                 className="w-4 h-4 shrink-0 accent-[#F97316] cursor-pointer"
-                title="Select for bulk action"
+                title="Select for bulk action (shift-click selects a range)"
               />
             )}
             <Badge color={color}>{card.format}</Badge>
