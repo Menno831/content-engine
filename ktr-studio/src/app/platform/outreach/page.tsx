@@ -6,7 +6,8 @@ import { DEMO_MODE, isSupabaseConfigured } from "@/lib/config";
 import { prospectStageMeta, fmtEur, type ProspectStage } from "../_data";
 import Link from "next/link";
 import { AddProspectDialog } from "./AddProspectDialog";
-import { ProspectCard } from "./ProspectCard";
+import { ProspectCard, igHandle } from "./ProspectCard";
+import { SprintMode } from "./SprintMode";
 
 const stageOrder: ProspectStage[] = ["te_contacteren", "dm_verstuurd", "in_gesprek", "audit_verstuurd", "geen_reactie", "afgekeurd"];
 
@@ -31,6 +32,13 @@ export default async function OutreachPage({ searchParams }: { searchParams: Pro
   // Dagteller: DM's die vandaag verstuurd zijn (dm_sent_at van vandaag).
   const today = todayStr();
   const sentToday = prospects.filter((p) => (p.dmSentAt ?? "").slice(0, 10) === today).length;
+
+  // Sprint-wachtrij: te contacteren, met concept-DM én werkende IG-handle.
+  // Toplaag eerst. Versturen blijft in Instagram zelf — de sprint zet alles klaar.
+  const sprintItems = all
+    .filter((p) => p.stage === "te_contacteren" && p.message && p.instagram && igHandle(p.instagram))
+    .sort((a, b) => Number(b.tier === "top") - Number(a.tier === "top"))
+    .map((p) => ({ id: p.id, name: p.name, handle: igHandle(p.instagram!), message: p.message!, top: p.tier === "top" }));
 
   return (
     <>
@@ -67,6 +75,7 @@ export default async function OutreachPage({ searchParams }: { searchParams: Pro
           >
             ★ Toplaag ({topCount})
           </Link>
+          <SprintMode items={sprintItems} />
         </div>
         <p className="text-[11.5px] text-muted">★ op een kaart = persoonlijke aanpak in plaats van de standaard-opener</p>
       </div>

@@ -12,7 +12,7 @@ import { fmtEur, type Prospect } from "../_data";
 import { ProspectStageControl } from "./ProspectStageControl";
 import { generateProspectDmAction, setProspectTierAction, updateProspectStageAction } from "./actions";
 
-function igHandle(v: string): string {
+export function igHandle(v: string): string {
   const h = v.replace(/^https?:\/\/(www\.)?instagram\.com\//i, "").replace(/^@/, "").replace(/\/.*$/, "").trim();
   if (/^[\w.]+$/.test(h)) return h;
   // Handle met annotatie eromheen ("@naam (~108K)" of twee handles met +):

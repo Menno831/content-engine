@@ -9,7 +9,7 @@ export interface ProspectResult {
   ok?: string;
 }
 
-const STAGES = ["te_contacteren", "dm_verstuurd", "in_gesprek", "audit_verstuurd", "geen_reactie"] as const;
+const STAGES = ["te_contacteren", "dm_verstuurd", "in_gesprek", "audit_verstuurd", "geen_reactie", "afgekeurd"] as const;
 
 export async function createProspectAction(_prev: ProspectResult, formData: FormData): Promise<ProspectResult> {
   const supabase = await supabaseServer();
