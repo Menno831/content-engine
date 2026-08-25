@@ -119,3 +119,20 @@ Clarity), ManyChat External Request in de default-flow, Resend-domein-DNS.
 ## Afvinken
 Werk deze lijst bij (verwijder afgeronde punten) en commit, zodat de volgende
 sessie niet dubbel werk doet.
+
+## Ronde 25 aug 2026 — Frame.io + bulk-acties + opschoning
+
+- **Frame.io-koppeling gebouwd** (`lib/frameio.ts` + watchdog stap 3c + migratie 034):
+  bewaker checkt dagelijks project 23f1a12a… op nieuwe uploads → melding in de bel
+  + Frame-link automatisch op de kaart met matchende titel. Eerste run registreert
+  bestaand archief stil. Project-id staat in `agencies.frameio_project_id` (gezet).
+  **Wacht op keys van Menno:** FRAMEIO_CLIENT_ID + FRAMEIO_CLIENT_SECRET in Vercel
+  (Adobe Developer Console → nieuw project → "Frame.io API" toevoegen →
+  Server-to-Server credential). Zelftest meldt dit tot de keys er staan.
+- **Bulk-selectie op het productieboard:** checkbox per kaart + zwevende balk
+  (Move to…/Delete/✕). Live getest: 2 kaarten bulk verplaatst.
+- **Filters opgeschoond:** "Alle klanten"-knop weg (chip nogmaals klikken = filter
+  uit), format-chips van het board verwijderd.
+- **5 klanten verwijderd** op verzoek via de app: Ad Guardians, FX Minds, IB Groups,
+  Jisk Hogenboom, Scale Academy. Over: Menno Kater, Arthur and Bryan, Jip Geuke,
+  Verkoop je Zaak.
