@@ -165,3 +165,15 @@ sessie niet dubbel werk doet.
   kaart schuift naar dm_verstuurd. 151 stonden klaar bij livegang.
 - Fix: stage 'afgekeurd' toegevoegd aan STAGES in outreach/actions.ts
   (terugzetten/handmatig afkeuren werkte anders niet).
+
+## Ronde 25 aug 2026 (5) — KTR DM Runner (extensie)
+
+- extension/: Chrome-extensie die bij "⚡ Run 10" in de sprint max 10 DM-tabs
+  opent (3s tempo) en het klaargezette bericht alvast in de composer typt
+  (insertText — methode gevalideerd op de echte IG-composer). Verstuurt zelf
+  NOOIT; vult ook nooit een niet-lege composer. Sprint toont de Run-knop
+  alleen als de extensie is geïnstalleerd (marker op <html>), en heeft een
+  "allemaal verstuurd → markeer 10"-afvinkstap.
+- Installatie door Menno (eenmalig): chrome://extensions → Ontwikkelaarsmodus
+  → Uitgepakt laden → map ~/content-engine/ktr-studio/extension (zie
+  extension/README.md).
