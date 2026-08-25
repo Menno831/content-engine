@@ -51,7 +51,14 @@ weekanalyse, Studio en Boost in echte modus), `RESEND_API_KEY` (alle mails),
 Settings → Data Export). Voor automatische eigen-kanalen-data later: GA4-API
 (website) en LinkedIn heeft geen bruikbare API — dat blijft handmatig.
 
-## Afgerond (18-24 aug 2026)
+## Afgerond (18-25 aug 2026)
+- **DM-flow één-klik** (25 aug): "Open DM + kopieer bericht" opent ig.me en
+  zet het bericht op het klembord; daarna ✓ Verstuurd-knop → dagteller.
+  **Reply-keten**: webhook `/api/manychat-reply` (secret in Vercel) matcht
+  prospect op handle, zet stage op in_gesprek, slaat reply op, schrijft
+  AI-conceptantwoord (zodra key werkt) en meldt in de bel; bewaker zet
+  7 dagen stilte automatisch op geen_reactie. End-to-end live getest.
+  ManyChat: Menno moet de External Request nog in zijn default-flow zetten.
 - **Outreach-toplaag (migratie 032 — gedraaid):** ster per prospect, filter
   met het Seth/Jack-playbook (voice notes, case, zelfde dag call), 18
   hoogste-potentie prospects voorgeselecteerd.
