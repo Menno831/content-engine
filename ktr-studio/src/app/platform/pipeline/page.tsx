@@ -183,6 +183,48 @@ export default async function Pipeline({
 
       <ClientFilter clients={clients.map((c) => ({ id: c.id, name: c.name }))} allLabel={t.allLabel} />
 
+      {/* Editor-weekplanning: dan moet dit af, dan dat — op volgorde. */}
+      {isEditor && (() => {
+        const today = new Date().toLocaleDateString("sv-SE");
+        const in7 = new Date(Date.now() + 7 * 86_400_000).toISOString().slice(0, 10);
+        const mine = contentCards
+          .filter((c) => c.stage !== "posted" && c.stage !== "ready_for_posting" && c.dateISO)
+          .sort((a, b) => (a.dateISO! < b.dateISO! ? -1 : 1));
+        const late = mine.filter((c) => c.dateISO!.slice(0, 10) < today);
+        const dueToday = mine.filter((c) => c.dateISO!.slice(0, 10) === today);
+        const week = mine.filter((c) => c.dateISO!.slice(0, 10) > today && c.dateISO!.slice(0, 10) <= in7);
+        const later = mine.filter((c) => c.dateISO!.slice(0, 10) > in7);
+        const Row = ({ c, tone }: { c: (typeof mine)[number]; tone: string }) => (
+          <div className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg bg-white/[0.02]">
+            <span className="min-w-0 truncate text-[13px]">
+              <span className={`font-mono text-[11px] mr-2 ${tone}`}>{c.due}</span>
+              {c.title}
+              <span className="text-muted"> · {c.format}</span>
+            </span>
+            {c.briefUrl && (
+              <a href={c.briefUrl} target="_blank" rel="noopener noreferrer" className="shrink-0 text-[12px] text-accent hover:text-accent-hover">
+                ↗ Files
+              </a>
+            )}
+          </div>
+        );
+        return (
+          <div className="mb-6 rounded-2xl border border-white/[0.06] bg-white/[0.015] p-4">
+            <div className="font-display font-extrabold mb-3">Your week — what's due when</div>
+            <div className="space-y-1.5">
+              {late.map((c) => <Row key={c.id} c={c} tone="text-red-400" />)}
+              {dueToday.map((c) => <Row key={c.id} c={c} tone="text-amber-300" />)}
+              {week.map((c) => <Row key={c.id} c={c} tone="text-emerald-300" />)}
+              {later.slice(0, 5).map((c) => <Row key={c.id} c={c} tone="text-muted" />)}
+              {mine.length === 0 && <p className="text-[13px] text-muted">Nothing scheduled — check the board below.</p>}
+            </div>
+            {late.length > 0 && (
+              <p className="mt-2 text-[12px] text-red-400">{late.length} overdue — start at the top.</p>
+            )}
+          </div>
+        );
+      })()}
+
       {/* Sub-boards per formaat + tabel/kanban-weergave */}
       <div className="flex flex-wrap items-center justify-between gap-2 mb-5">
         <div className="flex flex-wrap gap-1.5">

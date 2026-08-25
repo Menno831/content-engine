@@ -46,8 +46,8 @@ const agencyGroups: NavGroup[] = [
     items: [
       { href: "/platform/pipeline", label: "Productieboard", icon: icons.pipeline },
       { href: "/platform/scripts", label: "Scripts", icon: icons.reports },
-      { href: "/platform/calendar", label: "Kalender", icon: icons.calendar },
-      { href: "/platform/approvals", label: "Approvals", icon: icons.check },
+      // Non-actief (routes blijven werken): Kalender (tijdlijn dekt dit),
+      // Approvals — terugzetten = regel hieronder terugplaatsen.
     ],
   },
   {
@@ -57,7 +57,6 @@ const agencyGroups: NavGroup[] = [
       { href: "/platform/finance", label: "Finance", icon: icons.money },
       { href: "/platform/leads", label: "Leads", icon: icons.leads },
       { href: "/platform/outreach", label: "Outreach", icon: icons.rocket },
-      { href: "/platform/advertising", label: "Advertenties", icon: icons.target },
       { href: "/platform/channels", label: "Eigen kanalen", icon: icons.analytics },
     ],
   },
@@ -72,7 +71,6 @@ const agencyGroups: NavGroup[] = [
     title: "Tools",
     items: [
       { href: "/platform/discover", label: "Discover", icon: icons.analytics },
-      { href: "/platform/reports", label: "Rapporten", icon: icons.reports },
     ],
   },
   {
