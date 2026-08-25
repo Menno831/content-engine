@@ -42,14 +42,11 @@ wacht op iets buiten de code:
   ManyChat-abonnement met inbox-API. Nu al wel: leads uit ManyChat komen
   binnen via `/api/manychat`, en DM's versturen gaat handmatig vanaf Outreach.
 
-Wacht verder alleen nog op keys van Menno: `ANTHROPIC_API_KEY` opnieuw zetten
-(staat in Vercel maar is leeg/kapot in runtime — blokkeert AI-DM-concepten,
-weekanalyse, Studio en Boost in echte modus), `RESEND_API_KEY` (alle mails),
-`YOUTUBE_API_KEY` (YouTube-stats, YT-competitors én eigen-kanaal-sync),
-`MONEYBIRD_API_TOKEN` netjes opnieuw zetten, en optioneel `CLARITY_API_TOKEN`
-(website-bezoekers automatisch op Eigen kanalen; genereren in Clarity →
-Settings → Data Export). Voor automatische eigen-kanalen-data later: GA4-API
-(website) en LinkedIn heeft geen bruikbare API — dat blijft handmatig.
+Keys: ALLES GROEN (25 aug 2026) — Anthropic (incl. tegoed), YouTube, Resend,
+RapidAPI, Moneybird, Asana, CRON_SECRET, MANYCHAT_WEBHOOK_SECRET. Zelftest: 0
+defecten; eerste 10 AI-concept-DM's staan in de wachtrij. Alleen nog optioneel:
+CLARITY_API_TOKEN opnieuw (huidige geeft 403 — Data export activeren in
+Clarity), ManyChat External Request in de default-flow, Resend-domein-DNS.
 
 ## Afgerond (18-25 aug 2026)
 - **DM-flow één-klik** (25 aug): "Open DM + kopieer bericht" opent ig.me en
