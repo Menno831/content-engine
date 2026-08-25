@@ -11,15 +11,7 @@ import { Card, Avatar } from "../_components";
 import { fmtEur, type Prospect } from "../_data";
 import { ProspectStageControl } from "./ProspectStageControl";
 import { generateProspectDmAction, setProspectTierAction, updateProspectStageAction } from "./actions";
-
-export function igHandle(v: string): string {
-  const h = v.replace(/^https?:\/\/(www\.)?instagram\.com\//i, "").replace(/^@/, "").replace(/\/.*$/, "").trim();
-  if (/^[\w.]+$/.test(h)) return h;
-  // Handle met annotatie eromheen ("@naam (~108K)" of twee handles met +):
-  // pak de eerste @handle uit de tekst. Vrije tekst zonder @ blijft verborgen.
-  const m = v.match(/@([\w.]{2,30})/);
-  return m ? m[1] : "";
-}
+import { igHandle } from "./handle";
 
 function ytUrl(v: string): string {
   const t = v.trim();

@@ -6,7 +6,8 @@ import { DEMO_MODE, isSupabaseConfigured } from "@/lib/config";
 import { prospectStageMeta, fmtEur, type ProspectStage } from "../_data";
 import Link from "next/link";
 import { AddProspectDialog } from "./AddProspectDialog";
-import { ProspectCard, igHandle } from "./ProspectCard";
+import { ProspectCard } from "./ProspectCard";
+import { igHandle } from "./handle";
 import { SprintMode } from "./SprintMode";
 
 const stageOrder: ProspectStage[] = ["te_contacteren", "dm_verstuurd", "in_gesprek", "audit_verstuurd", "geen_reactie", "afgekeurd"];
