@@ -15,6 +15,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { todayStr } from "@/lib/dates";
 import { buildGrowthPlanWith, type GrowthPlan } from "@/lib/growth";
 import { generateText } from "@/lib/ai";
+import { frameioConfigured, listProjectFiles, matchesTitle } from "@/lib/frameio";
 import { getOrCreateBriefing } from "@/lib/briefing";
 import { moneybirdConfigured, getMoneybirdMonth } from "@/lib/integrations/moneybird";
 
@@ -24,6 +25,7 @@ export interface WatchdogResult {
   weeklyNote: boolean;
   briefing: boolean;
   selftest: string[];
+  frameio?: number;
   errors: string[];
 }
 
@@ -265,6 +267,67 @@ export async function runWatchdog(): Promise<WatchdogResult> {
       result.errors.push(`outreach-hygiëne: ${e instanceof Error ? e.message : "onbekend"}`);
     }
 
+    // ── 3c. Frame.io: nieuwe uploads → melding + koppelen aan kaart ─
+    try {
+      if (frameioConfigured()) {
+        const { data: ag } = await admin
+          .from("agencies")
+          .select("frameio_project_id")
+          .eq("id", agencyId)
+          .maybeSingle();
+        const projectId = ag?.frameio_project_id as string | null;
+        if (projectId) {
+          const files = await listProjectFiles(projectId);
+          const { data: seenRows } = await admin
+            .from("frameio_seen")
+            .select("id")
+            .in("id", files.map((f) => f.id));
+          const seen = new Set((seenRows ?? []).map((r: { id: string }) => r.id));
+          const fresh = files.filter((f) => !seen.has(f.id));
+
+          if (fresh.length) {
+            // Allereerste run: alles stil registreren, anders krijgt Menno
+            // één melding per bestand dat er al maanden staat.
+            const firstRun = seen.size === 0 && fresh.length === files.length && fresh.length > 3;
+            await admin
+              .from("frameio_seen")
+              .upsert(fresh.map((f) => ({ id: f.id, name: f.name })), { onConflict: "id" });
+
+            if (firstRun) {
+              result.frameio = fresh.length;
+            } else {
+              // Kaarten om tegen te matchen (niet-gepost werk).
+              const { data: cards } = await admin
+                .from("content")
+                .select("id, title, frame_url")
+                .eq("agency_id", agencyId)
+                .neq("stage", "posted");
+
+              for (const f of fresh.slice(0, 10)) {
+                const card = (cards ?? []).find((c: { title: string }) => matchesTitle(f.name, c.title));
+                if (card && !card.frame_url) {
+                  await admin.from("content").update({ frame_url: f.url }).eq("id", card.id);
+                }
+                await notifyOnce(
+                  admin,
+                  agencyId,
+                  `🎬 Nieuwe video op Frame.io: ${f.name}`,
+                  card
+                    ? `Automatisch gekoppeld aan kaart "${card.title}" — de Frame-link staat erop.`
+                    : "Nog niet aan een kaart gekoppeld — hang de link zelf aan de juiste kaart als dat nodig is.",
+                  "/platform/pipeline"
+                );
+                result.notifications += 1;
+                result.frameio = (result.frameio ?? 0) + 1;
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      result.errors.push(`frameio: ${e instanceof Error ? e.message : "onbekend"}`);
+    }
+
     // ── 4. Ochtendbriefing klaarzetten ───────────────────────────
     try {
       const b = await getOrCreateBriefing(admin, agencyId, agencyPlan);
@@ -303,6 +366,7 @@ export async function runWatchdog(): Promise<WatchdogResult> {
       if (!process.env.RAPIDAPI_KEY) defects.push("RAPIDAPI_KEY ontbreekt — Instagram-sync staat uit");
       if (!process.env.YOUTUBE_API_KEY) defects.push("YOUTUBE_API_KEY ontbreekt — YouTube-stats en eigen-kanaal-sync wachten");
       if (!process.env.RESEND_API_KEY) defects.push("RESEND_API_KEY ontbreekt — editor- en rapportmails staan uit");
+      if (!frameioConfigured()) defects.push("FRAMEIO_CLIENT_ID/SECRET ontbreken — Frame.io-uploadmeldingen staan uit");
 
       result.selftest = defects;
       for (const d of defects) {

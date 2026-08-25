@@ -7,8 +7,9 @@
 // bij het openen opgehaald zodat het board zelf licht blijft.
 // ════════════════════════════════════════════════════════════════
 
-import { useActionState, useEffect, useState, useTransition } from "react";
+import { useActionState, useEffect, useState, useSyncExternalStore, useTransition } from "react";
 import { Card, Badge, icons } from "../_components";
+import { selection } from "./selection";
 import { fmtNum, type ContentCard } from "../_data";
 import { ContentStageControl } from "./ContentStageControl";
 import {
@@ -40,6 +41,7 @@ export function ContentCardItem({
   isEditor: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const checked = useSyncExternalStore(selection.subscribe, () => selection.has(card.id), () => false);
 
   // Bewust Engels: het board is er ook voor de editors — één taal.
   const t = { edit: "Edit card", files: "Open files" };
@@ -53,7 +55,19 @@ export function ContentCardItem({
         title={t.edit}
       >
         <div className="flex items-center justify-between mb-2.5">
-          <Badge color={color}>{card.format}</Badge>
+          <div className="flex items-center gap-2">
+            {!demo && (
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={() => selection.toggle(card.id)}
+                onClick={(e) => e.stopPropagation()}
+                className="w-4 h-4 shrink-0 accent-[#F97316] cursor-pointer"
+                title="Select for bulk action"
+              />
+            )}
+            <Badge color={color}>{card.format}</Badge>
+          </div>
           <span className="font-mono text-[10px] text-muted">{card.due}</span>
         </div>
         <h3 className="font-medium text-sm leading-snug mb-2">{card.title}</h3>

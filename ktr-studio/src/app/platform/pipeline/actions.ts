@@ -573,3 +573,39 @@ export async function generateWeekAction(
   revalidatePath("/platform");
   return { ok: `Week van ${label} aangemaakt: vijf kaarten met briefing.` };
 }
+
+// ── Bulk: meerdere kaarten tegelijk verplaatsen of verwijderen ──
+// Bewust zonder de mail-per-kaart van updateContentStageAction: tien
+// kaarten tegelijk verschuiven mag geen tien mails opleveren.
+export async function bulkStageAction(ids: string[], stage: string): Promise<ContentActionResult> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { error: "Supabase niet geconfigureerd." };
+  if (!ids.length) return { error: "Geen kaarten geselecteerd." };
+
+  const patch: Record<string, unknown> = { stage };
+  if (stage === "posted") patch.posting_date = new Date().toISOString().slice(0, 10);
+
+  const { data, error } = await supabase.from("content").update(patch).in("id", ids).select("id");
+  if (error) return { error: error.message };
+
+  revalidatePath("/platform/pipeline");
+  revalidatePath("/platform");
+  return { ok: `${data?.length ?? 0} kaarten verplaatst.` };
+}
+
+export async function bulkDeleteAction(ids: string[]): Promise<ContentActionResult> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { error: "Supabase niet geconfigureerd." };
+  if (!ids.length) return { error: "Geen kaarten geselecteerd." };
+
+  const { profile } = await getSessionContext();
+  if (profile?.role === "editor") return { error: "Editors can't delete cards." };
+
+  const { data, error } = await supabase.from("content").delete().in("id", ids).select("id");
+  if (error) return { error: error.message };
+  if (!data?.length) return { error: "Niets verwijderd — geen rechten op deze kaarten." };
+
+  revalidatePath("/platform/pipeline");
+  revalidatePath("/platform");
+  return { ok: `${data.length} kaarten verwijderd.` };
+}

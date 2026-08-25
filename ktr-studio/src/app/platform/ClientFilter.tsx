@@ -1,14 +1,15 @@
 "use client";
 
 // ════════════════════════════════════════════════════════════════
-// Klant-switcher: pills bovenaan een pagina om snel te wisselen
-// tussen "Alle klanten" en één specifieke klant. Stuurt ?client=<id>
-// in de URL zodat server components erop kunnen filteren (en de
-// keuze deelbaar/bookmarkbaar is). Behoudt overige params (bv. ?m=).
+// Klant-switcher: pills bovenaan een pagina om snel op één klant te
+// filteren. Stuurt ?client=<id> in de URL zodat server components
+// erop kunnen filteren (en de keuze deelbaar/bookmarkbaar is).
+// Geen aparte "Alle klanten"-knop: nogmaals klikken op de actieve
+// klant zet het filter weer uit. Behoudt overige params (bv. ?m=).
 // ════════════════════════════════════════════════════════════════
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
-export function ClientFilter({ clients, allLabel = "Alle klanten" }: { clients: { id: string; name: string }[]; allLabel?: string }) {
+export function ClientFilter({ clients }: { clients: { id: string; name: string }[]; allLabel?: string }) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -25,20 +26,11 @@ export function ClientFilter({ clients, allLabel = "Alle klanten" }: { clients: 
 
   return (
     <div className="flex gap-2 overflow-x-auto pb-1 mb-5 -mx-1 px-1">
-      <button
-        onClick={() => pick("")}
-        className={`shrink-0 rounded-full px-3.5 py-1.5 text-[12.5px] transition-all ${
-          !active
-            ? "bg-accent text-background font-bold"
-            : "border border-white/[0.08] text-muted hover:border-accent/30 hover:text-accent"
-        }`}
-      >
-        {allLabel}
-      </button>
       {clients.map((c) => (
         <button
           key={c.id}
-          onClick={() => pick(c.id)}
+          onClick={() => pick(active === c.id ? "" : c.id)}
+          title={active === c.id ? "Klik om het filter uit te zetten" : `Alleen ${c.name} tonen`}
           className={`shrink-0 rounded-full px-3.5 py-1.5 text-[12.5px] transition-all ${
             active === c.id
               ? "bg-accent text-background font-bold"

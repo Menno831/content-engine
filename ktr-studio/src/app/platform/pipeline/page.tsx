@@ -9,6 +9,7 @@ import { ContentCardItem } from "./ContentCardItem";
 import { GanttBoard } from "./GanttBoard";
 import { ClientFilter } from "../ClientFilter";
 import { ClientBoard } from "./ClientBoard";
+import { BulkBar } from "./BulkBar";
 import { getSessionContext } from "@/lib/auth";
 
 const stageOrder: PipelineStage[] = [
@@ -124,9 +125,6 @@ export default async function Pipeline({
         hints: Object.fromEntries(stageOrder.map((s) => [s, stageMeta[s].hint])) as Record<string, string>,
       };
 
-  // Welke formats komen er überhaupt voor — geen lege sub-boards tonen.
-  const formatsInUse = [...new Set(allContent.map((c) => c.format).filter(Boolean))].sort();
-
   // Links bouwen met behoud van de actieve filters.
   const boardHref = (patch: Record<string, string | undefined>) => {
     const p = new URLSearchParams();
@@ -225,18 +223,8 @@ export default async function Pipeline({
         );
       })()}
 
-      {/* Sub-boards per formaat + tabel/kanban-weergave */}
-      <div className="flex flex-wrap items-center justify-between gap-2 mb-5">
-        <div className="flex flex-wrap gap-1.5">
-          <FilterLink
-            href={boardHref({ format: undefined })}
-            active={!sp.format}
-            label={isEditor ? "All formats" : "Alle formats"}
-          />
-          {formatsInUse.map((f) => (
-            <FilterLink key={f} href={boardHref({ format: sp.format === f ? undefined : f })} active={sp.format === f} label={f} />
-          ))}
-        </div>
+      {/* Weergave-schakelaar (tabel/kanban/tijdlijn) */}
+      <div className="flex flex-wrap items-center justify-end gap-2 mb-5">
         <div className="flex gap-1.5">
           <FilterLink href={boardHref({ weergave: undefined })} active={!kanban} label="☰ Tabel" />
           <FilterLink href={boardHref({ weergave: "kanban" })} active={kanban} label="▥ Kanban" />
@@ -358,6 +346,9 @@ export default async function Pipeline({
         })}
       </div>
       )}
+
+      {/* Zwevende bulk-balk: verschijnt zodra kaarten aangevinkt zijn */}
+      {!demo && <BulkBar isEditor={isEditor} />}
     </>
   );
 }
