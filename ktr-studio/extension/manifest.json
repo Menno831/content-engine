@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "KTR DM Runner",
+  "version": "1.0.0",
+  "description": "Zet outreach-DM's klaar in Instagram: opent de chats en typt het bericht alvast in. Versturen blijft altijd handmatig.",
+  "permissions": ["storage"],
+  "host_permissions": ["https://www.instagram.com/*", "https://ig.me/*"],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": ["https://www.instagram.com/*"],
+      "js": ["content-ig.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://content-engine-kr5c.vercel.app/*", "http://localhost:3000/*"],
+      "js": ["content-app.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

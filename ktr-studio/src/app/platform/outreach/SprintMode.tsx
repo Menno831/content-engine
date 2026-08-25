@@ -9,7 +9,7 @@
 // kaart schuift naar 'DM verstuurd' en de volgende staat klaar.
 // ════════════════════════════════════════════════════════════════
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { updateProspectStageAction } from "./actions";
 
 export interface SprintItem {
@@ -26,6 +26,16 @@ export function SprintMode({ items }: { items: SprintItem[] }) {
   const [sent, setSent] = useState(0);
   const [copied, setCopied] = useState(false);
   const [pending, start] = useTransition();
+
+  // KTR DM Runner-extensie aanwezig? (die zet een marker op <html>)
+  const [hasRunner, setHasRunner] = useState(false);
+  const [ranBatch, setRanBatch] = useState<SprintItem[]>([]);
+  useEffect(() => {
+    const check = () => setHasRunner(document.documentElement.getAttribute("data-ktr-runner") === "1");
+    check();
+    const t = setInterval(check, 1500);
+    return () => clearInterval(t);
+  }, []);
 
   const cur = queue[0];
 
@@ -49,6 +59,26 @@ export function SprintMode({ items }: { items: SprintItem[] }) {
       await updateProspectStageAction(cur.id, "dm_verstuurd");
       setSent((s) => s + 1);
       next();
+    });
+  }
+
+  // Run 10: de extensie opent de tabs en typt de berichten alvast in de
+  // composer. Versturen doet Menno per tab zelf; daarna hier afvinken.
+  function runTen() {
+    const batch = queue.slice(0, 10);
+    window.postMessage(
+      { type: "KTR_RUN", items: batch.map((b) => ({ handle: b.handle, message: b.message })) },
+      window.location.origin
+    );
+    setRanBatch(batch);
+  }
+
+  function markBatchSent() {
+    start(async () => {
+      for (const b of ranBatch) await updateProspectStageAction(b.id, "dm_verstuurd");
+      setSent((s) => s + ranBatch.length);
+      setQueue((q) => q.filter((x) => !ranBatch.some((b) => b.id === x.id)));
+      setRanBatch([]);
     });
   }
 
@@ -76,6 +106,37 @@ export function SprintMode({ items }: { items: SprintItem[] }) {
               </span>
             </div>
 
+            {hasRunner && ranBatch.length === 0 && cur && (
+              <button
+                onClick={runTen}
+                className="w-full mb-4 rounded-xl border border-accent/40 text-accent hover:bg-accent/10 font-bold text-sm py-3 transition-colors"
+              >
+                ⚡ Run {Math.min(10, queue.length)} — open tabs met bericht klaar
+              </button>
+            )}
+            {ranBatch.length > 0 && (
+              <div className="mb-4 rounded-xl border border-accent/30 bg-accent/[0.06] p-4">
+                <p className="text-[13px] mb-3">
+                  <strong>{ranBatch.length} tabs geopend</strong> — de berichten staan al ingetypt.
+                  Loop de tabs langs en druk per chat op versturen. Daarna hier afvinken:
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={markBatchSent}
+                    disabled={pending}
+                    className="flex-1 rounded-xl bg-emerald-500/90 hover:bg-emerald-500 disabled:opacity-50 text-background font-bold text-sm py-2.5 transition-colors"
+                  >
+                    ✓ Allemaal verstuurd → markeer {ranBatch.length}
+                  </button>
+                  <button
+                    onClick={() => setRanBatch([])}
+                    className="shrink-0 rounded-xl border border-white/[0.08] text-muted hover:border-white/20 px-4 py-2.5 text-sm transition-colors"
+                  >
+                    Annuleer
+                  </button>
+                </div>
+              </div>
+            )}
             {!cur ? (
               <div className="text-center py-8">
                 <div className="text-3xl mb-2">🎉</div>
