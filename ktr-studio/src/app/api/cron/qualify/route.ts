@@ -22,13 +22,16 @@ export async function GET(request: NextRequest) {
   const admin = createAdminClient();
   if (!admin) return NextResponse.json({ ok: false, error: "geen serverkey" }, { status: 503 });
 
-  const { data: batch } = await admin
+  // ?top=1 pakt juist de toplaag (los aan te roepen; die is klein).
+  const topOnly = request.nextUrl.searchParams.get("top") === "1";
+  let query = admin
     .from("prospects")
     .select("id, name, instagram, youtube, weakness, note")
     .eq("stage", "te_contacteren")
     .is("fit_checked_at", null)
-    .or("tier.is.null,tier.neq.top")
     .limit(20);
+  query = topOnly ? query.eq("tier", "top") : query.or("tier.is.null,tier.neq.top");
+  const { data: batch } = await query;
 
   let goed = 0, twijfel = 0, afgekeurd = 0;
   const errors: string[] = [];
@@ -41,6 +44,7 @@ export async function GET(request: NextRequest) {
       };
       if (fit.verdict === "geen_high_ticket" || fit.verdict === "al_sterk") {
         patch.stage = "afgekeurd";
+        if (topOnly) patch.tier = null; // afgekeurd hoort niet in de toplaag
         afgekeurd += 1;
       } else if (fit.verdict === "goed") goed += 1;
       else twijfel += 1;
@@ -50,12 +54,13 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  const { count: remaining } = await admin
+  let remQuery = admin
     .from("prospects")
     .select("id", { count: "exact", head: true })
     .eq("stage", "te_contacteren")
-    .is("fit_checked_at", null)
-    .or("tier.is.null,tier.neq.top");
+    .is("fit_checked_at", null);
+  remQuery = topOnly ? remQuery.eq("tier", "top") : remQuery.or("tier.is.null,tier.neq.top");
+  const { count: remaining } = await remQuery;
 
   return NextResponse.json({ ok: true, processed: (batch ?? []).length, goed, twijfel, afgekeurd, remaining: remaining ?? 0, errors });
 }
