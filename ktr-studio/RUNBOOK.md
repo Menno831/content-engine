@@ -145,3 +145,13 @@ sessie niet dubbel werk doet.
 - Outreach: igHandle haalt nu de eerste @handle uit annotatie-tekst
   ("@naam (~108K)") → 219 werkende IG-links, 0 kapot. Watchdog stap 3d vult
   lege instagram-velden via YouTube-kanaalbeschrijvingen (max 25/run).
+
+## Ronde 25 aug 2026 (3) — prospect-kwalificatie
+
+- lib/qualify.ts + /api/cron/qualify + migratie 035 + watchdog stap 2b:
+  elke te-contacteren-prospect gecheckt op high-ticket aanbod (AI) en
+  "YouTube loopt al te goed" (>=20K gem. views laatste 10 uploads).
+- Volledige run gedraaid: 228 beoordeeld -> 167 high-ticket ✓, 41 twijfel
+  (amber-label, handmatig scannen), 20 afgekeurd naar nieuwe stage
+  'afgekeurd' met reden op de kaart. Toplaag (17) bewust overgeslagen.
+- Nieuwe imports worden voortaan dagelijks door de bewaker gekwalificeerd.

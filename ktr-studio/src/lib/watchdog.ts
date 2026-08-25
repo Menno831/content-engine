@@ -17,6 +17,7 @@ import { buildGrowthPlanWith, type GrowthPlan } from "@/lib/growth";
 import { generateText } from "@/lib/ai";
 import { frameioConfigured, listProjectFiles, matchesTitle } from "@/lib/frameio";
 import { findInstagramViaYoutube } from "@/lib/sync/ig-fill";
+import { qualifyProspect } from "@/lib/qualify";
 import { getOrCreateBriefing } from "@/lib/briefing";
 import { moneybirdConfigured, getMoneybirdMonth } from "@/lib/integrations/moneybird";
 
@@ -267,6 +268,28 @@ export async function runWatchdog(): Promise<WatchdogResult> {
       }
     } catch (e) {
       result.errors.push(`outreach-hygiëne: ${e instanceof Error ? e.message : "onbekend"}`);
+    }
+
+    // ── 2b. Nieuwe prospects kwalificeren (max 10 per run) ──────────
+    // Zelfde check als /api/cron/qualify: geen high-ticket aanbod of
+    // YouTube draait al top → afgekeurd. Toplaag slaan we over.
+    try {
+      const { data: unchecked } = await admin
+        .from("prospects")
+        .select("id, name, instagram, youtube, weakness, note")
+        .eq("agency_id", agencyId)
+        .eq("stage", "te_contacteren")
+        .is("fit_checked_at", null)
+        .or("tier.is.null,tier.neq.top")
+        .limit(10);
+      for (const p of unchecked ?? []) {
+        const fit = await qualifyProspect(p);
+        const patch: Record<string, unknown> = { fit_reason: fit.reason, fit_checked_at: new Date().toISOString() };
+        if (fit.verdict === "geen_high_ticket" || fit.verdict === "al_sterk") patch.stage = "afgekeurd";
+        await admin.from("prospects").update(patch).eq("id", p.id);
+      }
+    } catch (e) {
+      result.errors.push(`kwalificatie: ${e instanceof Error ? e.message : "onbekend"}`);
     }
 
     // ── 3d. Instagram aanvullen bij prospects met alleen YouTube ────
