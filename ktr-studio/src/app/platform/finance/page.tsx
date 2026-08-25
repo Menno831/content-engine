@@ -2,7 +2,7 @@ import { redirectEditorToBoard } from "@/lib/guard";
 import { PageHeader, Card, Stat, Avatar, Badge, Eyebrow, icons } from "../_components";
 import { getWorkspaceData } from "@/lib/data";
 import { getSessionContext } from "@/lib/auth";
-import { getMoneybirdMonth } from "@/lib/integrations/moneybird";
+import { getMoneybirdMonth, getMoneybirdDrafts } from "@/lib/integrations/moneybird";
 import { fmtEur } from "../_data";
 import { PaymentStatusControl } from "./PaymentStatusControl";
 import { ExportButton } from "../ExportButton";
@@ -46,9 +46,10 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
 
   // Alle maanden in één keer (Moneybird cachet per maand 10 min) voor de
   // maandvergelijking: gaan we er elke maand op vooruit?
-  const [{ clients, demo }, { agency }, ...allMonths] = await Promise.all([
+  const [{ clients, demo }, { agency }, drafts, ...allMonths] = await Promise.all([
     getWorkspaceData(),
     getSessionContext(),
+    getMoneybirdDrafts(),
     ...months.map((m) => getMoneybirdMonth(m === thisMonth ? undefined : m)),
   ]);
   const byMonth = new Map(months.map((m, i) => [m, allMonths[i]]));
@@ -90,6 +91,18 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
     const omzet = mo.invoiced + overig;
     return { omzet, kosten, winst: omzet - kosten };
   };
+
+  // Omzet van de gekozen maand (gefactureerd + overig) — naast MRR in de
+  // statrij, want de MRR beweegt traag maar de maandomzet vertelt het verhaal.
+  const maandOmzet = profitOf(maand).omzet;
+
+  // Jaaroverzicht: alle maanden van dit jaar. Verleden = echte omzet,
+  // huidige maand krijgt de concepten er gestippeld bovenop (= verwacht
+  // als alles verstuurd wordt), toekomstige maanden = prognose op MRR.
+  const year = now.getFullYear();
+  const yearMonths = Array.from({ length: 12 }, (_, i) => `${year}-${String(i + 1).padStart(2, "0")}`);
+  const ytdOmzet = months.reduce((s, m) => s + profitOf(m).omzet, 0);
+  const ytdWinst = months.reduce((s, m) => s + profitOf(m).winst, 0);
 
   const invoiceCostsSum = moneybird.invoices.reduce((s, i) => s + (invoiceCostById.get(i.id) ?? 0), 0);
   const maandOverig = (incomeByMonth.get(maand) ?? []).reduce((s, r) => s + r.amount, 0);
@@ -137,8 +150,14 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
         }
       />
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
         <Stat label="MRR (retainers)" value={fmtEur(mrr)} delta={demo ? "+€2.200 deze maand" : undefined} icon={icons.money} />
+        <Stat
+          label={isCurrentMonth ? "Omzet deze maand" : `Omzet ${maandLabel}`}
+          value={fmtEur(maandOmzet)}
+          delta={isCurrentMonth && drafts.total > 0 ? `+${fmtEur(drafts.total)} in concepten` : undefined}
+          icon={icons.analytics}
+        />
         <Stat label="Editor-kosten" value={fmtEur(editorCosts)} icon={icons.studio} />
         <Stat label="Netto marge" value={fmtEur(margin)} delta={`${marginPct}% marge`} icon={icons.analytics} />
         <Stat label="Nieuw deze maand" value={String(newThisMonth)} icon={icons.clients} />
@@ -170,6 +189,126 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
               style={{ width: `${Math.min(100, target ? (mrr / target) * 100 : 0)}%` }}
             />
           </div>
+        </Card>
+      )}
+
+      {/* Jaaroverzicht: omzet per maand + wat er verwacht wordt */}
+      {!demo && moneybird.configured && (
+        <Card className="p-6 mb-6">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+            <div>
+              <Eyebrow>Jaar {year}</Eyebrow>
+              <h2 className="font-display font-extrabold text-xl">Omzet per maand</h2>
+            </div>
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
+              <span>
+                <span className="text-muted text-[12px]">Omzet {year} </span>
+                <strong className="font-mono">{fmtEur(ytdOmzet)}</strong>
+              </span>
+              <span>
+                <span className="text-muted text-[12px]">Winst {year} </span>
+                <strong className={`font-mono ${ytdWinst >= 0 ? "text-emerald-400" : "text-red-400"}`}>{fmtEur(ytdWinst)}</strong>
+              </span>
+              {drafts.total > 0 && (
+                <span>
+                  <span className="text-muted text-[12px]">Verwacht deze maand </span>
+                  <strong className="font-mono text-amber-300">{fmtEur(profitOf(thisMonth).omzet + drafts.total)}</strong>
+                </span>
+              )}
+            </div>
+          </div>
+          {(() => {
+            const actual = new Map(months.map((m) => [m, profitOf(m).omzet]));
+            const expectedNow = (actual.get(thisMonth) ?? 0) + drafts.total;
+            const max = Math.max(...yearMonths.map((m) => actual.get(m) ?? 0), expectedNow, mrr, 1);
+            const h = (v: number) => `${Math.max(2, Math.round((v / max) * 100))}%`;
+            return (
+              <>
+                <div className="flex items-end gap-1.5 sm:gap-2.5 h-36">
+                  {yearMonths.map((m) => {
+                    const label = new Date(`${m}-01`).toLocaleDateString("nl-NL", { month: "short" });
+                    const isNow = m === thisMonth;
+                    const isPast = m < thisMonth;
+                    const omzet = actual.get(m) ?? 0;
+                    return (
+                      <div key={m} className="flex-1 flex flex-col justify-end items-stretch h-full" title={
+                        isNow
+                          ? `${label}: ${fmtEur(omzet)} gefactureerd${drafts.total ? ` + ${fmtEur(drafts.total)} in concepten` : ""}`
+                          : isPast
+                            ? `${label}: ${fmtEur(omzet)}`
+                            : `${label}: prognose ${fmtEur(mrr)} (MRR)`
+                      }>
+                        {isNow && drafts.total > 0 && (
+                          <div className="rounded-t-md border border-dashed border-amber-300/60 bg-amber-300/10" style={{ height: h(drafts.total) }} />
+                        )}
+                        {(isPast || isNow) ? (
+                          <div className={`${isNow && drafts.total > 0 ? "" : "rounded-t-md"} bg-accent/80`} style={{ height: h(omzet) }} />
+                        ) : (
+                          <div className="rounded-t-md border border-dashed border-white/[0.18]" style={{ height: h(mrr) }} />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="flex gap-1.5 sm:gap-2.5 mt-1.5">
+                  {yearMonths.map((m) => (
+                    <div key={m} className={`flex-1 text-center text-[10px] font-mono uppercase ${m === thisMonth ? "text-accent" : "text-muted"}`}>
+                      {new Date(`${m}-01`).toLocaleDateString("nl-NL", { month: "short" })}
+                    </div>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-[11px] text-muted">
+                  <span><span className="inline-block w-2.5 h-2.5 rounded-sm bg-accent/80 align-middle mr-1.5" />gefactureerd</span>
+                  {drafts.total > 0 && <span><span className="inline-block w-2.5 h-2.5 rounded-sm border border-dashed border-amber-300/60 bg-amber-300/10 align-middle mr-1.5" />nog te versturen (concepten)</span>}
+                  <span><span className="inline-block w-2.5 h-2.5 rounded-sm border border-dashed border-white/[0.18] align-middle mr-1.5" />prognose op MRR</span>
+                </div>
+              </>
+            );
+          })()}
+        </Card>
+      )}
+
+      {/* Concepten in Moneybird: dit moet nog de deur uit deze maand */}
+      {!demo && moneybird.configured && (
+        <Card className={`p-6 mb-6 ${drafts.drafts.length > 0 ? "border-amber-300/25" : ""}`}>
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-1">
+            <div>
+              <Eyebrow>Concepten in Moneybird</Eyebrow>
+              <h2 className="font-display font-extrabold text-xl">Nog te versturen</h2>
+            </div>
+            {drafts.drafts.length > 0 && (
+              <span className="text-sm">
+                <span className="text-muted text-[12px]">Samen </span>
+                <strong className="font-mono text-amber-300">{fmtEur(drafts.total)}</strong>
+              </span>
+            )}
+          </div>
+          {drafts.error ? (
+            <p className="text-[13px] text-amber-300">{drafts.error}</p>
+          ) : drafts.drafts.length === 0 ? (
+            <p className="text-[13px] text-muted">Geen concepten — alles wat klaarstond is verstuurd. ✓</p>
+          ) : (
+            <>
+              <p className="text-[13px] text-muted mb-3">
+                Verstuur je alles, dan komt deze maand uit op{" "}
+                <strong className="text-emerald-400 font-mono">{fmtEur(profitOf(thisMonth).omzet + drafts.total)}</strong>.
+              </p>
+              <div className="space-y-1">
+                {drafts.drafts.map((d) => (
+                  <div key={d.id} className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl hover:bg-white/[0.02] transition-colors">
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium truncate">{d.contact}</div>
+                      <div className="text-[11px] text-muted">{d.reference ?? "concept"}</div>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="font-mono text-sm">{fmtEur(d.totalExcl)}</span>
+                      <Badge color="#FBBF24">concept</Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </Card>
       )}
 

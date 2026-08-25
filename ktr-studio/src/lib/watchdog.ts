@@ -16,6 +16,7 @@ import { todayStr } from "@/lib/dates";
 import { buildGrowthPlanWith, type GrowthPlan } from "@/lib/growth";
 import { generateText } from "@/lib/ai";
 import { frameioConfigured, listProjectFiles, matchesTitle } from "@/lib/frameio";
+import { findInstagramViaYoutube } from "@/lib/sync/ig-fill";
 import { getOrCreateBriefing } from "@/lib/briefing";
 import { moneybirdConfigured, getMoneybirdMonth } from "@/lib/integrations/moneybird";
 
@@ -26,6 +27,7 @@ export interface WatchdogResult {
   briefing: boolean;
   selftest: string[];
   frameio?: number;
+  igFilled?: number;
   errors: string[];
 }
 
@@ -265,6 +267,43 @@ export async function runWatchdog(): Promise<WatchdogResult> {
       }
     } catch (e) {
       result.errors.push(`outreach-hygiëne: ${e instanceof Error ? e.message : "onbekend"}`);
+    }
+
+    // ── 3d. Instagram aanvullen bij prospects met alleen YouTube ────
+    // Zonder IG-handle kost een DM te veel uitzoekwerk; de handle staat
+    // bijna altijd in de YouTube-kanaalbeschrijving. Max 25 per run.
+    try {
+      if (process.env.YOUTUBE_API_KEY) {
+        const { data: missing } = await admin
+          .from("prospects")
+          .select("id, youtube")
+          .eq("agency_id", agencyId)
+          .eq("stage", "te_contacteren")
+          .or("instagram.is.null,instagram.eq.")
+          .not("youtube", "is", null)
+          .limit(25);
+        let found = 0;
+        for (const p of missing ?? []) {
+          const ig = await findInstagramViaYoutube(String(p.youtube)).catch(() => null);
+          if (ig) {
+            await admin.from("prospects").update({ instagram: ig }).eq("id", p.id);
+            found += 1;
+          }
+        }
+        if (found) {
+          const sent = await notifyOnce(
+            admin,
+            agencyId,
+            `📸 ${found} Instagram-handle${found === 1 ? "" : "s"} automatisch gevonden`,
+            "Uit de YouTube-kanaalbeschrijvingen gehaald en op de prospects gezet — de DM-knop werkt daar nu direct.",
+            "/platform/outreach"
+          );
+          if (sent) result.notifications += 1;
+        }
+        result.igFilled = found;
+      }
+    } catch (e) {
+      result.errors.push(`ig-aanvullen: ${e instanceof Error ? e.message : "onbekend"}`);
     }
 
     // ── 3c. Frame.io: nieuwe uploads → melding + koppelen aan kaart ─
