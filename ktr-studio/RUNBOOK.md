@@ -155,3 +155,13 @@ sessie niet dubbel werk doet.
   (amber-label, handmatig scannen), 20 afgekeurd naar nieuwe stage
   'afgekeurd' met reden op de kaart. Toplaag (17) bewust overgeslagen.
 - Nieuwe imports worden voortaan dagelijks door de bewaker gekwalificeerd.
+
+## Ronde 25 aug 2026 (4) — DM-sprint
+
+- Auto-send naar onbekenden bewust NIET gebouwd (IG-ToS/accountrisico +
+  versturen blijft menselijk). In plaats daarvan: SprintMode.tsx op Outreach —
+  wachtrij van te-contacteren-prospects met AI-opener + werkende IG-handle
+  (toplaag eerst), per prospect 2 klikken: open DM + klembord, verstuurd →
+  kaart schuift naar dm_verstuurd. 151 stonden klaar bij livegang.
+- Fix: stage 'afgekeurd' toegevoegd aan STAGES in outreach/actions.ts
+  (terugzetten/handmatig afkeuren werkte anders niet).
