@@ -33,21 +33,23 @@ export async function GET(request: NextRequest) {
   query = topOnly ? query.eq("tier", "top") : query.or("tier.is.null,tier.neq.top");
   const { data: batch } = await query;
 
-  let goed = 0, twijfel = 0, afgekeurd = 0;
+  let goed = 0, onbekend = 0, afgekeurd = 0;
   const errors: string[] = [];
   for (const p of batch ?? []) {
     try {
       const fit = await qualifyProspect(p);
+      // Technische storing: niets wegschrijven, volgende run opnieuw.
+      if (fit.verdict === "onbekend") { onbekend += 1; continue; }
       const patch: Record<string, unknown> = {
         fit_reason: fit.reason,
         fit_checked_at: new Date().toISOString(),
       };
-      if (fit.verdict === "geen_high_ticket" || fit.verdict === "al_sterk") {
+      // Alleen een zeker high-ticket aanbod blijft; twijfel gaat er ook uit.
+      if (fit.verdict !== "goed") {
         patch.stage = "afgekeurd";
-        if (topOnly) patch.tier = null; // afgekeurd hoort niet in de toplaag
+        patch.tier = null; // afgekeurd hoort nergens een ster te hebben
         afgekeurd += 1;
-      } else if (fit.verdict === "goed") goed += 1;
-      else twijfel += 1;
+      } else goed += 1;
       await admin.from("prospects").update(patch).eq("id", p.id);
     } catch (e) {
       errors.push(`${p.name}: ${e instanceof Error ? e.message : "onbekend"}`);
@@ -62,5 +64,5 @@ export async function GET(request: NextRequest) {
   remQuery = topOnly ? remQuery.eq("tier", "top") : remQuery.or("tier.is.null,tier.neq.top");
   const { count: remaining } = await remQuery;
 
-  return NextResponse.json({ ok: true, processed: (batch ?? []).length, goed, twijfel, afgekeurd, remaining: remaining ?? 0, errors });
+  return NextResponse.json({ ok: true, processed: (batch ?? []).length, goed, onbekend, afgekeurd, remaining: remaining ?? 0, errors });
 }

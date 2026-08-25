@@ -284,8 +284,10 @@ export async function runWatchdog(): Promise<WatchdogResult> {
         .limit(10);
       for (const p of unchecked ?? []) {
         const fit = await qualifyProspect(p);
+        if (fit.verdict === "onbekend") continue; // storing → volgende run opnieuw
         const patch: Record<string, unknown> = { fit_reason: fit.reason, fit_checked_at: new Date().toISOString() };
-        if (fit.verdict === "geen_high_ticket" || fit.verdict === "al_sterk") patch.stage = "afgekeurd";
+        // Alleen zeker high-ticket blijft staan; twijfel = eruit (regel van Menno).
+        if (fit.verdict !== "goed") { patch.stage = "afgekeurd"; patch.tier = null; }
         await admin.from("prospects").update(patch).eq("id", p.id);
       }
     } catch (e) {

@@ -76,7 +76,10 @@ PROSPECT:
 {{onderwerp}}`;
 
 export interface FitVerdict {
-  verdict: "goed" | "twijfel" | "geen_high_ticket" | "al_sterk";
+  // Menno's regel: alleen een ZEKER high-ticket aanbod telt. Twijfel = eruit.
+  // "onbekend" = technische storing (AI niet bereikbaar) — later opnieuw proberen,
+  // nooit op basis daarvan afkeuren.
+  verdict: "goed" | "twijfel" | "geen_high_ticket" | "al_sterk" | "onbekend";
   reason: string;
 }
 
@@ -111,15 +114,15 @@ export async function qualifyProspect(p: {
     .join("\n");
 
   const { text, mock } = await generateText({ template: OFFER_TEMPLATE, input, model: "fast" });
-  if (mock) return { verdict: "twijfel", reason: "AI niet beschikbaar — handmatig checken" };
+  if (mock) return { verdict: "onbekend", reason: "AI niet beschikbaar" };
 
   try {
     const json = JSON.parse(text.match(/\{[\s\S]*\}/)?.[0] ?? "{}");
     const reden = String(json.reden ?? "").slice(0, 120);
     if (json.high_ticket === "nee") return { verdict: "geen_high_ticket", reason: `geen high-ticket aanbod — ${reden}` };
     if (json.high_ticket === "ja") return { verdict: "goed", reason: `high-ticket: ${reden}` };
-    return { verdict: "twijfel", reason: `twijfel over aanbod — ${reden}` };
+    return { verdict: "twijfel", reason: `aanbod onduidelijk — ${reden}` };
   } catch {
-    return { verdict: "twijfel", reason: "AI-antwoord onleesbaar — handmatig checken" };
+    return { verdict: "onbekend", reason: "AI-antwoord onleesbaar" };
   }
 }
