@@ -1,5 +1,7 @@
 "use client";
 
+import { Portal } from "./Portal";
+
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { icons } from "./_components";
@@ -42,8 +44,8 @@ export function NotificationsBell({ notifications }: { notifications: Notificati
 
       {open && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 mt-2 w-80 max-h-[26rem] overflow-y-auto z-50 rounded-2xl border border-white/[0.08] bg-card shadow-2xl">
+          <Portal><div className="fixed inset-0 z-40" onClick={() => setOpen(false)} /></Portal>
+          <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2.5rem)] max-h-[26rem] overflow-y-auto z-50 rounded-2xl border border-white/[0.08] bg-card shadow-2xl">
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
               <span className="font-display font-bold text-sm">Meldingen</span>
               {unread > 0 && (

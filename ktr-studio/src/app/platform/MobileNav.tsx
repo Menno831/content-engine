@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { icons } from "./_components";
+import { Portal } from "./Portal";
 
 interface NavItem {
   href: string;
@@ -36,6 +37,7 @@ export function MobileNav({ groups, brandName }: { groups: NavGroup[]; brandName
       </button>
 
       {open && (
+        <Portal>
         <div className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm" onClick={() => setOpen(false)}>
           <div className="w-72 max-w-[85vw] h-full bg-[#080808] border-r border-white/[0.06] flex flex-col" onClick={(e) => e.stopPropagation()}>
             <div className="h-16 flex items-center justify-between px-5 border-b border-white/[0.06]">
@@ -79,6 +81,7 @@ export function MobileNav({ groups, brandName }: { groups: NavGroup[]; brandName
             </nav>
           </div>
         </div>
+        </Portal>
       )}
     </div>
   );

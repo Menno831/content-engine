@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { icons } from "./_components";
+import { Portal } from "./Portal";
 
 interface Item {
   href: string;
@@ -48,6 +49,7 @@ export function CommandPalette({ items, placeholder }: { items: Item[]; placehol
       </button>
 
       {open && (
+        <Portal>
         <div className="fixed inset-0 z-[60] flex items-start justify-center pt-[15vh] px-4 bg-black/60 backdrop-blur-sm" onClick={() => setOpen(false)}>
           <div className="w-full max-w-lg bg-card border border-white/[0.1] rounded-2xl overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.06]">
@@ -82,6 +84,7 @@ export function CommandPalette({ items, placeholder }: { items: Item[]; placehol
             </div>
           </div>
         </div>
+        </Portal>
       )}
     </>
   );
