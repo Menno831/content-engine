@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { icons } from "./_components";
 import { Portal } from "./Portal";
@@ -23,6 +23,56 @@ export function MobileNav({ groups, brandName }: { groups: NavGroup[]; brandName
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const brandParts = brandName.split(" ");
+
+  // Swipe-gestures op telefoon: vanaf de linkerkant naar rechts vegen
+  // opent het menu, naar links vegen sluit het weer. Native listeners
+  // (passief, dus scrollen blijft soepel); verticale veegjes negeren we.
+  const openRef = useRef(open);
+  useEffect(() => {
+    openRef.current = open;
+  }, [open]);
+  useEffect(() => {
+    let startX = 0;
+    let startY = 0;
+    let tracking = false;
+    let fromEdge = false;
+
+    function onStart(e: TouchEvent) {
+      const t = e.touches[0];
+      if (!t) return;
+      startX = t.clientX;
+      startY = t.clientY;
+      // Open-gebaar alleen vanaf de linkerkant van het scherm, zodat
+      // horizontaal scrollen midden op de pagina gewoon blijft werken.
+      fromEdge = t.clientX < 40;
+      tracking = fromEdge || openRef.current;
+    }
+    function onMove(e: TouchEvent) {
+      if (!tracking) return;
+      const t = e.touches[0];
+      if (!t) return;
+      const dx = t.clientX - startX;
+      const dy = t.clientY - startY;
+      if (Math.abs(dy) > 50) {
+        tracking = false; // dit is scrollen, geen veeg
+        return;
+      }
+      if (!openRef.current && fromEdge && dx > 55) {
+        setOpen(true);
+        tracking = false;
+      } else if (openRef.current && dx < -55) {
+        setOpen(false);
+        tracking = false;
+      }
+    }
+
+    document.addEventListener("touchstart", onStart, { passive: true });
+    document.addEventListener("touchmove", onMove, { passive: true });
+    return () => {
+      document.removeEventListener("touchstart", onStart);
+      document.removeEventListener("touchmove", onMove);
+    };
+  }, []);
 
   return (
     <div className="lg:hidden">
