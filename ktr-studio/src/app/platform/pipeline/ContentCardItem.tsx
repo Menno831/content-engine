@@ -179,6 +179,7 @@ export function EditContentDialog({
     fTitle: "Title", fHook: "Hook (optional)", fFormat: "Format", fType: "Type",
     fDeadline: "Deadline", fLive: "Goes live on", fEditor: "Editor",
     fBrief: "Raw footage (Drive)", fFrame: "Delivery (Frame)", fVo: "Voice-over file",
+    fCta: "CTA (keyword / link the video points to)",
     fRef: "Reference video", fNotes: "Extra notes",
   };
 
@@ -248,6 +249,7 @@ export function EditContentDialog({
             />
             <Field name="brief_url" label={t.fBrief} defaultValue={detail.brief_url} placeholder="https://drive.google.com/…" />
             <Field name="frame_url" label={t.fFrame} defaultValue={detail.frame_url} placeholder="https://f.io/…" />
+            <Field name="cta" label={t.fCta} defaultValue={detail.cta} placeholder="bv. keyword GROEI → ManyChat-flow / link in bio" />
             <Field name="vo_url" label={t.fVo} defaultValue={detail.vo_url} placeholder="https://…" />
             <Field name="reference_url" label={t.fRef} defaultValue={detail.reference_url} placeholder="https://…" />
             <label className="block">

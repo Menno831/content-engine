@@ -28,11 +28,14 @@ export default async function OutreachPage({ searchParams }: { searchParams: Pro
     .filter((p) => p.stage !== "geen_reactie" && p.stage !== "afgekeurd")
     .reduce((s, p) => s + p.potentialValue, 0);
   const inGesprek = prospects.filter((p) => p.stage === "in_gesprek").length;
-  const auditSent = prospects.filter((p) => p.stage === "audit_verstuurd").length;
 
-  // Dagteller: DM's die vandaag verstuurd zijn (dm_sent_at van vandaag).
+  // Scorebord: vandaag / deze week verstuurd + replies — de cijfers
+  // waarop een setter gestuurd (en afgerekend) wordt.
   const today = todayStr();
+  const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString();
   const sentToday = prospects.filter((p) => (p.dmSentAt ?? "").slice(0, 10) === today).length;
+  const sentThisWeek = all.filter((p) => (p.dmSentAt ?? "") >= weekAgo).length;
+  const repliesThisWeek = all.filter((p) => (p.lastReplyAt ?? "") >= weekAgo).length;
 
   // Sprint-wachtrij: te contacteren, met concept-DM én werkende IG-handle.
   // Toplaag eerst. Versturen blijft in Instagram zelf — de sprint zet alles klaar.
@@ -52,10 +55,10 @@ export default async function OutreachPage({ searchParams }: { searchParams: Pro
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
         <Stat label="Vandaag verstuurd" value={String(sentToday)} icon={icons.send} />
-        <Stat label="Prospects" value={String(prospects.length)} icon={icons.leads} />
-        <Stat label="Potentiële waarde" value={fmtEur(pipelineValue)} icon={icons.money} />
+        <Stat label="Deze week verstuurd" value={String(sentThisWeek)} delta={sentThisWeek >= 25 ? "tempo gehaald ✓" : `doel 25/week`} icon={icons.send} />
+        <Stat label="Replies deze week" value={String(repliesThisWeek)} delta={sentThisWeek > 0 ? `${Math.round((repliesThisWeek / Math.max(1, sentThisWeek)) * 100)}% reply-rate` : undefined} icon={icons.leads} />
         <Stat label="In gesprek" value={String(inGesprek)} icon={icons.send} />
-        <Stat label="Audit verstuurd" value={String(auditSent)} icon={icons.check} />
+        <Stat label="Potentiële waarde" value={fmtEur(pipelineValue)} icon={icons.money} />
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">

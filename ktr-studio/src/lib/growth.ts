@@ -91,14 +91,33 @@ export async function buildGrowthPlanWith(supabase: SupabaseClient<any, any, any
   const actions: GrowthAction[] = [];
 
   // ── 1. Het gat naar het doel ──────────────────────────────────
+  // Menno's doel-pricing (eind 2026): retainers van €2-4K (reken met
+  // €3K) + longform-upsell van ±4 video's × €800 = €3.2K per klant.
+  // Dat scenario staat naast het huidige gemiddelde: zo zie je dat je
+  // met de juiste pricing veel minder klanten nodig hebt.
+  const TARGET_RETAINER = 3000;
+  const TARGET_UPSELL = 3200;
   if (gap > 0 && avgRetainer > 0) {
     const needed = Math.ceil(gap / avgRetainer);
+    const neededAtTarget = Math.ceil(gap / (TARGET_RETAINER + TARGET_UPSELL));
     actions.push({
       priority: 1,
-      title: `Nog ${needed} klanten van gemiddeld €${avgRetainer.toLocaleString("nl-NL")} tot je doel`,
-      why: `MRR is €${mrr.toLocaleString("nl-NL")} van de €${goal.toLocaleString("nl-NL")} — het gat is €${gap.toLocaleString("nl-NL")}/mnd. Elke deal telt dubbel: nieuwe klant + referral-kans.`,
+      title: `Nog ${needed} klanten bij je huidige gemiddelde (€${avgRetainer.toLocaleString("nl-NL")}) — of ${neededAtTarget} bij doel-pricing`,
+      why: `Gat: €${gap.toLocaleString("nl-NL")}/mnd. Bij je doel-pricing (retainer €${TARGET_RETAINER.toLocaleString("nl-NL")} + longform-upsell ±€${TARGET_UPSELL.toLocaleString("nl-NL")}) is elke klant €${(TARGET_RETAINER + TARGET_UPSELL).toLocaleString("nl-NL")}/mnd waard — prijs omhoog is de grootste hefboom.`,
       href: "/platform/outreach",
       linkLabel: "Naar outreach",
+    });
+  }
+
+  // Upsell-kans: actieve klanten die nog onder de doel-retainer zitten.
+  const belowTarget = active.filter((c) => Number(c.monthly_value) > 0 && Number(c.monthly_value) < TARGET_RETAINER);
+  if (belowTarget.length > 0) {
+    actions.push({
+      priority: 2,
+      title: `${belowTarget.length} klant${belowTarget.length === 1 ? "" : "en"} onder de doel-retainer — upsell longform`,
+      why: `Eén longform per week (±€800/video, 40-60% marge) is ±€3.200/mnd extra per klant, bovenop het pad naar €2-4K retainers.`,
+      href: "/platform/finance",
+      linkLabel: "Naar finance",
     });
   }
 

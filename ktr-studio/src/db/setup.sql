@@ -1160,3 +1160,9 @@ create policy feed_items_rw on feed_items
 
 alter table agencies add column if not exists feed_channels text; -- komma-lijst @handles
 alter table agencies add column if not exists feed_topics   text; -- komma-lijst zoektermen
+-- ════════════════════════════════════════════════════════════════
+-- Migratie 038: CTA per video. Elke video stuurt kijkers ergens
+-- naartoe (ManyChat-keyword, link, leadmagnet) — dat hoort op de
+-- kaart, zodat delivery en funnel één geheel zijn.
+-- ════════════════════════════════════════════════════════════════
+alter table content add column if not exists cta text;

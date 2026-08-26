@@ -121,6 +121,7 @@ const setterGroups: NavGroup[] = [
     title: "Sales",
     items: [
       { href: "/platform", label: "Overzicht", icon: icons.dashboard, exact: true },
+      { href: "/platform/outreach", label: "Outreach", icon: icons.rocket },
       { href: "/platform/leads", label: "CRM & Leads", icon: icons.leads },
     ],
   },

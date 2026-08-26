@@ -137,6 +137,7 @@ export async function createContentAction(
     brief_url: String(formData.get("brief_url") ?? "").trim() || null,
     posting_date: String(formData.get("posting_date") ?? "").trim() || null,
     frame_url: String(formData.get("frame_url") ?? "").trim() || null,
+    cta: String(formData.get("cta") ?? "").trim() || null,
     vo_url: String(formData.get("vo_url") ?? "").trim() || null,
     reference_url: String(formData.get("reference_url") ?? "").trim() || null,
     footage_notes: String(formData.get("footage_notes") ?? "").trim() || null,
@@ -296,6 +297,7 @@ export interface ContentDetail {
   editor_id: string;
   brief_url: string;
   frame_url: string;
+  cta: string;
   vo_url: string;
   reference_url: string;
   footage_notes: string;
@@ -310,7 +312,7 @@ export async function getContentDetailAction(
   const { data, error } = await supabase
     .from("content")
     .select(
-      "id,title,hook,format,content_type,stage,deadline,posting_date,editor_id,brief_url,frame_url,vo_url,reference_url,footage_notes"
+      "id,title,hook,format,content_type,stage,deadline,posting_date,editor_id,brief_url,frame_url,vo_url,reference_url,footage_notes,cta"
     )
     .eq("id", contentId)
     .maybeSingle();
@@ -330,6 +332,7 @@ export async function getContentDetailAction(
       editor_id: data.editor_id ?? "",
       brief_url: data.brief_url ?? "",
       frame_url: data.frame_url ?? "",
+      cta: data.cta ?? "",
       vo_url: data.vo_url ?? "",
       reference_url: data.reference_url ?? "",
       footage_notes: data.footage_notes ?? "",
@@ -370,6 +373,7 @@ export async function updateContentAction(
       editor_id: editorId || null,
       brief_url: String(formData.get("brief_url") ?? "").trim() || null,
       frame_url: String(formData.get("frame_url") ?? "").trim() || null,
+    cta: String(formData.get("cta") ?? "").trim() || null,
       vo_url: String(formData.get("vo_url") ?? "").trim() || null,
       reference_url: String(formData.get("reference_url") ?? "").trim() || null,
       footage_notes: String(formData.get("footage_notes") ?? "").trim() || null,
