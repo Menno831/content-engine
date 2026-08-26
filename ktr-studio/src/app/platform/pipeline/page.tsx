@@ -348,7 +348,7 @@ export default async function Pipeline({
       )}
 
       {/* Zwevende bulk-balk: verschijnt zodra kaarten aangevinkt zijn */}
-      {!demo && <BulkBar isEditor={isEditor} />}
+      {!demo && <BulkBar isEditor={isEditor} editors={editorOptions} />}
     </>
   );
 }

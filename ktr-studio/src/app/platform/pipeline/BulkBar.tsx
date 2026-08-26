@@ -9,7 +9,7 @@
 import { useState, useSyncExternalStore, useTransition } from "react";
 import { stageMeta, type PipelineStage } from "../_data";
 import { selection } from "./selection";
-import { bulkStageAction, bulkDeleteAction } from "./actions";
+import { bulkStageAction, bulkDeleteAction, bulkEditorAction } from "./actions";
 
 const STAGES: PipelineStage[] = [
   "ideation",
@@ -22,7 +22,7 @@ const STAGES: PipelineStage[] = [
   "posted",
 ];
 
-export function BulkBar({ isEditor }: { isEditor: boolean }) {
+export function BulkBar({ isEditor, editors = [] }: { isEditor: boolean; editors?: { id: string; label: string }[] }) {
   const count = useSyncExternalStore(selection.subscribe, selection.count, () => 0);
   const [pending, start] = useTransition();
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -35,6 +35,15 @@ export function BulkBar({ isEditor }: { isEditor: boolean }) {
     setError(null);
     start(async () => {
       const r = await bulkStageAction(selection.ids(), stage);
+      if (r.error) setError(r.error);
+      else selection.clear();
+    });
+  }
+
+  function assign(editorId: string) {
+    setError(null);
+    start(async () => {
+      const r = await bulkEditorAction(selection.ids(), editorId === "__none" ? null : editorId);
       if (r.error) setError(r.error);
       else selection.clear();
     });
@@ -76,6 +85,21 @@ export function BulkBar({ isEditor }: { isEditor: boolean }) {
             </option>
           ))}
         </select>
+
+        {!isEditor && editors.length > 0 && (
+          <select
+            value=""
+            disabled={pending}
+            onChange={(e) => e.target.value && assign(e.target.value)}
+            className="flex-1 min-w-[130px] rounded-xl border border-white/[0.1] bg-white/[0.03] px-3 py-2 text-[13px] outline-none focus:border-accent/40"
+          >
+            <option value="" className="bg-card">Assign to…</option>
+            {editors.map((ed) => (
+              <option key={ed.id} value={ed.id} className="bg-card">{ed.label}</option>
+            ))}
+            <option value="__none" className="bg-card">— niemand</option>
+          </select>
+        )}
 
         {!isEditor && (
           <button

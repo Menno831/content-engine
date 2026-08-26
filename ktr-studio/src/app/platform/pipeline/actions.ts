@@ -609,3 +609,20 @@ export async function bulkDeleteAction(ids: string[]): Promise<ContentActionResu
   revalidatePath("/platform");
   return { ok: `${data.length} kaarten verwijderd.` };
 }
+
+// Bulk: meerdere kaarten in één keer aan een editor hangen (of loskoppelen).
+export async function bulkEditorAction(ids: string[], editorId: string | null): Promise<ContentActionResult> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { error: "Supabase niet geconfigureerd." };
+  if (!ids.length) return { error: "Geen kaarten geselecteerd." };
+
+  const { data, error } = await supabase
+    .from("content")
+    .update({ editor_id: editorId })
+    .in("id", ids)
+    .select("id");
+  if (error) return { error: error.message };
+
+  revalidatePath("/platform/pipeline");
+  return { ok: `${data?.length ?? 0} kaarten toegewezen.` };
+}

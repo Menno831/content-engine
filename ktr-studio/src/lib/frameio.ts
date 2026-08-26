@@ -99,11 +99,20 @@ export async function listProjectFiles(projectId: string): Promise<FrameFile[]> 
 
 // Titel-match tussen een Frame-bestandsnaam en een kaarttitel: genoeg
 // overlap in genormaliseerde vorm ("Longform 2 v3.mp4" ↔ "Longform 2").
+// Met woordgrens op cijfers: "Reel 1" mag NIET matchen op "Reel 15".
 export function matchesTitle(fileName: string, cardTitle: string): boolean {
   const norm = (s: string) =>
     s.toLowerCase().replace(/\.(mp4|mov|mxf|wav|mp3)$/i, "").replace(/[^a-z0-9]+/g, " ").trim();
   const f = norm(fileName);
   const c = norm(cardTitle);
   if (!f || !c) return false;
-  return f.includes(c) || c.includes(f);
+  const contains = (hay: string, needle: string) => {
+    const i = hay.indexOf(needle);
+    if (i === -1) return false;
+    const before = hay[i - 1];
+    const after = hay[i + needle.length];
+    // grens vóór en na: begin/eind of een spatie — nooit midden in een woord/getal
+    return (i === 0 || before === " ") && (after === undefined || after === " ");
+  };
+  return contains(f, c) || contains(c, f);
 }

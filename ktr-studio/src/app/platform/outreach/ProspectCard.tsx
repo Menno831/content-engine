@@ -165,6 +165,24 @@ export function ProspectCard({ prospect: p, demo }: { prospect: Prospect; demo: 
         </div>
       )}
 
+      {/* Geen reply maar wél een follow-up-concept (na 7 dagen stilte
+          door de bewaker geschreven): klaar om te versturen. */}
+      {!p.lastReply && p.replyDraft && (
+        <div className="mt-2 rounded-lg border border-violet-400/25 bg-violet-400/[0.06] px-2.5 py-2">
+          <div className="text-[10px] font-mono uppercase tracking-wider text-violet-300 mb-0.5">↻ Follow-up klaar</div>
+          <p className="text-[12px] text-foreground/85 whitespace-pre-wrap">{p.replyDraft}</p>
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(p.replyDraft!);
+              if (handle) window.open(`https://ig.me/m/${handle}`, "_blank", "noopener");
+            }}
+            className="mt-1.5 w-full rounded-lg bg-violet-400/15 border border-violet-400/30 hover:bg-violet-400/25 text-violet-200 font-bold text-[11.5px] py-1.5 transition-colors"
+          >
+            ✉ Open DM + kopieer follow-up
+          </button>
+        </div>
+      )}
+
       {!open ? null : (
       <div className="mt-2.5">
       {tier === "top" && (

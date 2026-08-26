@@ -19,7 +19,7 @@ import { frameioConfigured, listProjectFiles, matchesTitle } from "@/lib/frameio
 import { findInstagramViaYoutube } from "@/lib/sync/ig-fill";
 import { qualifyProspect } from "@/lib/qualify";
 import { getOrCreateBriefing } from "@/lib/briefing";
-import { moneybirdConfigured, getMoneybirdMonth } from "@/lib/integrations/moneybird";
+import { moneybirdConfigured, getMoneybirdMonth, getMoneybirdDrafts } from "@/lib/integrations/moneybird";
 
 export interface WatchdogResult {
   notifications: number;
@@ -81,6 +81,21 @@ CONTEXT PROSPECT:
 {{onderwerp}}
 
 Schrijf alleen de DM zelf, geen uitleg eromheen.`;
+
+// Zachte follow-up na een week stilte: luchtig, geen druk, geen pitch.
+const FOLLOWUP_TEMPLATE = `Je schrijft een korte follow-up-DM namens Menno Kater. De eerste DM (positief, nieuwsgierig, geen pitch) bleef een week onbeantwoord. Schrijf één zachte tweede DM.
+
+STIJLREGELS (hard):
+- Geen punten, komma's, trema's of gedachtestreepjes. Een vraagteken mag wel
+- 1 tot 2 korte regels, luchtig en zonder enige druk of verwijt
+- NIET verwijzen naar "mijn vorige bericht" op een zeurende manier
+- Geen pitch, geen links
+- Nederlands, spreektaal
+
+CONTEXT PROSPECT:
+{{onderwerp}}
+
+Schrijf alleen de DM zelf.`;
 
 const WEEKLY_TEMPLATE = `Je bent de strategisch adviseur van Menno Kater (content-agency; het maanddoel staat als 'doel' in de JSON). Hieronder de actuele cijfers als JSON. Schrijf een korte analyse in het Nederlands: wat valt op, wat is dé hefboom voor komende week, en één concreet dagelijks gedrag dat het verschil maakt. Maximaal 130 woorden, geen opsomming van de cijfers zelf, geen inleiding, direct de inhoud. Nuchter en direct, geen em-dashes.
 
@@ -304,7 +319,8 @@ export async function runWatchdog(): Promise<WatchdogResult> {
           .select("id, youtube")
           .eq("agency_id", agencyId)
           .eq("stage", "te_contacteren")
-          .or("instagram.is.null,instagram.eq.")
+          // Ook "check IG"-achtige placeholders tellen als ontbrekend.
+          .or("instagram.is.null,instagram.eq.,instagram.ilike.*check*ig*")
           .not("youtube", "is", null)
           .limit(25);
         let found = 0;
@@ -390,6 +406,62 @@ export async function runWatchdog(): Promise<WatchdogResult> {
       }
     } catch (e) {
       result.errors.push(`frameio: ${e instanceof Error ? e.message : "onbekend"}`);
+    }
+
+    // ── 3e. Follow-up-concepten: 7+ dagen stil → één zachte tweede DM ─
+    try {
+      const { data: quiet } = await admin
+        .from("prospects")
+        .select("id, name, instagram, youtube, weakness, note")
+        .eq("agency_id", agencyId)
+        .eq("stage", "geen_reactie")
+        .is("last_reply_at", null)
+        .is("reply_draft", null)
+        .not("message", "is", null)
+        .limit(5);
+      let followups = 0;
+      for (const p of quiet ?? []) {
+        const { text, mock } = await generateText({
+          template: FOLLOWUP_TEMPLATE,
+          input: prospectDmContext(p),
+          model: "fast",
+        });
+        if (mock) break;
+        await admin.from("prospects").update({ reply_draft: text.trim() }).eq("id", p.id);
+        followups += 1;
+      }
+      if (followups) {
+        const sent = await notifyOnce(
+          admin,
+          agencyId,
+          `↻ ${followups} follow-up${followups === 1 ? "" : "s"} klaargezet`,
+          "Voor prospects die na een week nog stil zijn staat een zachte tweede DM klaar op de kaart — versturen blijft aan jou.",
+          "/platform/outreach"
+        );
+        if (sent) result.notifications += 1;
+      }
+    } catch (e) {
+      result.errors.push(`follow-ups: ${e instanceof Error ? e.message : "onbekend"}`);
+    }
+
+    // ── 3f. Einde van de maand: concepten die nog de deur uit moeten ─
+    try {
+      const dayOfMonth = new Date().getDate();
+      if (dayOfMonth >= 24) {
+        const drafts = await getMoneybirdDrafts();
+        if (drafts.total > 0) {
+          const sent = await notifyOnce(
+            admin,
+            agencyId,
+            `💸 ${drafts.drafts.length} conceptfactu${drafts.drafts.length === 1 ? "ur" : "ren"} nog niet verstuurd (€${Math.round(drafts.total).toLocaleString("nl-NL")})`,
+            "De maand loopt af — verstuur je concepten in Moneybird, anders telt deze omzet pas volgende maand mee.",
+            "/platform/finance"
+          );
+          if (sent) result.notifications += 1;
+        }
+      }
+    } catch (e) {
+      result.errors.push(`concepten-signaal: ${e instanceof Error ? e.message : "onbekend"}`);
     }
 
     // ── 4. Ochtendbriefing klaarzetten ───────────────────────────
