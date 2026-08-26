@@ -255,7 +255,9 @@ export function JarvisChat({ initial }: { initial: Msg[] }) {
                     : "bg-white/[0.04] border border-white/[0.06] rounded-bl-md"
                 }`}
               >
-                {m.content}
+                {/* De AI schrijft soms markdown-sterretjes; als platte tekst
+                    tonen we die zonder de ** eromheen. */}
+                {m.content.replace(/\*\*(.+?)\*\*/g, "$1").replace(/^#+\s/gm, "")}
               </div>
             </div>
           ))}

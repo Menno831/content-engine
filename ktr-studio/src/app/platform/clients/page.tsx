@@ -49,7 +49,7 @@ export default async function Clients({ searchParams }: { searchParams: Promise<
         title="Portalen & white-label"
         subtitle="Elke klant heeft een eigen omgeving in jouw huisstijl — eigen logo, eigen kleur, eigen domein. Zij zien alleen hun content, leads en rapporten."
         action={
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <SyncAllButton />
             <AddClientDialog />
             <Link
