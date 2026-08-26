@@ -18,6 +18,7 @@ import { generateText } from "@/lib/ai";
 import { frameioConfigured, listProjectFiles, matchesTitle } from "@/lib/frameio";
 import { findInstagramViaYoutube } from "@/lib/sync/ig-fill";
 import { qualifyProspect } from "@/lib/qualify";
+import { runFeedScan } from "@/lib/feedscan";
 import { getOrCreateBriefing } from "@/lib/briefing";
 import { moneybirdConfigured, getMoneybirdMonth, getMoneybirdDrafts } from "@/lib/integrations/moneybird";
 
@@ -462,6 +463,23 @@ export async function runWatchdog(): Promise<WatchdogResult> {
       }
     } catch (e) {
       result.errors.push(`concepten-signaal: ${e instanceof Error ? e.message : "onbekend"}`);
+    }
+
+    // ── 3g. Ochtendscan: verse video's uit volglijst + onderwerpen ─
+    try {
+      const scan = await runFeedScan(admin, agencyId);
+      if (scan.added > 0) {
+        const sent = await notifyOnce(
+          admin,
+          agencyId,
+          `🎬 ${scan.added} nieuwe video${scan.added === 1 ? "" : "'s"} klaar om te checken`,
+          "De ochtendscan vond outliers en knowledge in je volglijst — met samenvattingen. Zet je take eronder, dan wordt het scriptvoer.",
+          "/platform/discover"
+        );
+        if (sent) result.notifications += 1;
+      }
+    } catch (e) {
+      result.errors.push(`ochtendscan: ${e instanceof Error ? e.message : "onbekend"}`);
     }
 
     // ── 4. Ochtendbriefing klaarzetten ───────────────────────────

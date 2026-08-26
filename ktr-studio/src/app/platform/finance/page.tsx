@@ -2,7 +2,10 @@ import { redirectEditorToBoard } from "@/lib/guard";
 import { PageHeader, Card, Stat, Avatar, Badge, Eyebrow, icons } from "../_components";
 import { getWorkspaceData } from "@/lib/data";
 import { getSessionContext } from "@/lib/auth";
-import { getMoneybirdMonth, getMoneybirdDrafts } from "@/lib/integrations/moneybird";
+import { getMoneybirdMonth, getMoneybirdDrafts, getMoneybirdMutations } from "@/lib/integrations/moneybird";
+import { OutlookCard, type OutlookMonth } from "./OutlookCard";
+import { ReservesCard, type ReserveConfig } from "./ReservesCard";
+import { ExpenseTriage } from "./ExpenseTriage";
 import { fmtEur } from "../_data";
 import { PaymentStatusControl } from "./PaymentStatusControl";
 import { ExportButton } from "../ExportButton";
@@ -46,10 +49,11 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
 
   // Alle maanden in één keer (Moneybird cachet per maand 10 min) voor de
   // maandvergelijking: gaan we er elke maand op vooruit?
-  const [{ clients, demo }, { agency }, drafts, ...allMonths] = await Promise.all([
+  const [{ clients, demo }, { agency }, drafts, bank, ...allMonths] = await Promise.all([
     getWorkspaceData(),
     getSessionContext(),
     getMoneybirdDrafts(),
+    getMoneybirdMutations(45),
     ...months.map((m) => getMoneybirdMonth(m === thisMonth ? undefined : m)),
   ]);
   const byMonth = new Map(months.map((m, i) => [m, allMonths[i]]));
@@ -80,6 +84,28 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
       incomeByMonth.set(key, arr);
     }
   }
+  // Maanddoelen, gelabelde uitgaven en potjes-percentages.
+  let goalByMonth = new Map<string, { goal: number; note: string | null }>();
+  let linkedIds = new Set<string>();
+  let expenseTotals: { kind: string; total: number }[] = [];
+  let reserveConfig: ReserveConfig | null = null;
+  if (supabase && !demo) {
+    const [goalsRes, linksRes, agRes] = await Promise.all([
+      supabase.from("month_goals").select("month,goal,note"),
+      supabase.from("expense_links").select("id,kind,amount,mutation_date"),
+      supabase.from("agencies").select("reserve_config").limit(1).maybeSingle(),
+    ]);
+    goalByMonth = new Map((goalsRes.data ?? []).map((g) => [String(g.month), { goal: Number(g.goal ?? 0), note: g.note ?? null }]));
+    linkedIds = new Set((linksRes.data ?? []).map((l) => String(l.id)));
+    const totalsMap = new Map<string, number>();
+    for (const l of linksRes.data ?? []) {
+      if (String(l.mutation_date ?? "").slice(0, 7) !== thisMonth) continue;
+      totalsMap.set(String(l.kind), (totalsMap.get(String(l.kind)) ?? 0) + Number(l.amount ?? 0));
+    }
+    expenseTotals = [...totalsMap.entries()].map(([kind, total]) => ({ kind, total }));
+    reserveConfig = (agRes.data?.reserve_config as ReserveConfig | null) ?? null;
+  }
+
   const fixedTotal = fixedCosts.reduce((s, r) => s + r.amount, 0);
 
   // Winst per maand: gefactureerd + overig − factuurkosten − vaste lasten.
@@ -103,6 +129,43 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
   const yearMonths = Array.from({ length: 12 }, (_, i) => `${year}-${String(i + 1).padStart(2, "0")}`);
   const ytdOmzet = months.reduce((s, m) => s + profitOf(m).omzet, 0);
   const ytdWinst = months.reduce((s, m) => s + profitOf(m).winst, 0);
+
+  // Verschil met vorige maand (voor de omzet-stat).
+  const prevMonthKey = months[months.length - 2];
+  const prevOmzet = prevMonthKey ? profitOf(prevMonthKey).omzet : 0;
+  const omzetDelta = maandOmzet - prevOmzet;
+
+  // Projectie komende 6 maanden: retainers + gemiddeld los werk (3 mnd).
+  const mrrForecast = clients.filter((c) => c.status !== "gepauzeerd").reduce((s, c) => s + c.monthlyValue, 0);
+  const last3 = months.slice(-4, -1); // laatste 3 volledige maanden
+  const avgExtra = last3.length
+    ? Math.max(0, last3.reduce((s, m) => s + Math.max(0, profitOf(m).omzet - mrrForecast), 0) / last3.length)
+    : 0;
+  const outlookMonths: OutlookMonth[] = Array.from({ length: 6 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    const isCurrent = key === thisMonth;
+    const g = goalByMonth.get(key);
+    return {
+      month: key,
+      label: d.toLocaleDateString("nl-NL", { month: "short" }),
+      projected: isCurrent ? profitOf(thisMonth).omzet + drafts.total : mrrForecast + avgExtra,
+      goal: g?.goal ?? null,
+      note: g?.note ?? null,
+      isCurrent,
+    };
+  });
+
+  // Btw dit kwartaal: incl − excl van betaalde facturen in de kwartaalmaanden.
+  const q = Math.floor(now.getMonth() / 3);
+  const qMonths = months.filter((m) => Math.floor((Number(m.slice(5)) - 1) / 3) === q && m.slice(0, 4) === String(now.getFullYear()));
+  const vatThisQuarter = qMonths.reduce((s, m) => {
+    const mo = byMonth.get(m);
+    return s + (mo?.invoices ?? []).filter((i) => i.state === "paid").reduce((x, i) => x + (i.totalIncl - i.totalExcl), 0);
+  }, 0);
+
+  // Uitgaven-triage: mutaties zonder label.
+  const unlabeled = bank.mutations.filter((m) => !linkedIds.has(m.id));
 
   const invoiceCostsSum = moneybird.invoices.reduce((s, i) => s + (invoiceCostById.get(i.id) ?? 0), 0);
   const maandOverig = (incomeByMonth.get(maand) ?? []).reduce((s, r) => s + r.amount, 0);
@@ -151,17 +214,27 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-        <Stat label="MRR (retainers)" value={fmtEur(mrr)} delta={demo ? "+€2.200 deze maand" : undefined} icon={icons.money} />
         <Stat
           label={isCurrentMonth ? "Omzet deze maand" : `Omzet ${maandLabel}`}
           value={fmtEur(maandOmzet)}
-          delta={isCurrentMonth && drafts.total > 0 ? `+${fmtEur(drafts.total)} in concepten` : undefined}
+          delta={`${omzetDelta >= 0 ? "+" : "−"}${fmtEur(Math.abs(Math.round(omzetDelta)))} vs vorige maand`}
           icon={icons.analytics}
         />
-        <Stat label="Editor-kosten" value={fmtEur(editorCosts)} icon={icons.studio} />
+        <Stat
+          label="Winst deze maand"
+          value={fmtEur(Math.round(monthProfit))}
+          delta={isCurrentMonth && drafts.total > 0 ? `+${fmtEur(drafts.total)} in concepten` : undefined}
+          icon={icons.money}
+        />
+        <Stat label="MRR (retainers)" value={fmtEur(mrr)} icon={icons.money} />
         <Stat label="Netto marge" value={fmtEur(margin)} delta={`${marginPct}% marge`} icon={icons.analytics} />
         <Stat label="Nieuw deze maand" value={String(newThisMonth)} icon={icons.clients} />
       </div>
+
+      {/* Vooruitblik: projectie + klikbare maanddoelen */}
+      {!demo && moneybird.configured && (
+        <OutlookCard months={outlookMonths} basis={{ mrr: mrrForecast, avgExtra, drafts: drafts.total }} />
+      )}
 
       {/* Maanddoel: hoeveel nog te gaan (doel instellen via Instellingen) */}
       {target > 0 && (
@@ -419,6 +492,18 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
             gefactureerd, betaald en nog open is, plus je winst na editor-kosten.
           </p>
         </Card>
+      )}
+
+      {/* Potjes + uitgaven-triage */}
+      {!demo && moneybird.configured && (
+        <div className="grid lg:grid-cols-2 gap-6 mb-6">
+          <ReservesCard vatThisQuarter={vatThisQuarter} profitThisMonth={monthProfit} config={reserveConfig} />
+          <ExpenseTriage
+            unlabeled={unlabeled}
+            totals={expenseTotals}
+            clients={clients.filter((c) => c.status !== "gepauzeerd").map((c) => ({ id: c.id, label: c.name }))}
+          />
+        </div>
       )}
 
       <div className="grid lg:grid-cols-3 gap-6">

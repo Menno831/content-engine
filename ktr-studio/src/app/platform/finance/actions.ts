@@ -141,3 +141,63 @@ export async function deleteFixedCostAction(id: string): Promise<{ ok: boolean; 
   revalidatePath("/platform/finance");
   return { ok: true };
 }
+
+// ── Maanddoelen: klikbaar doel per komende maand ────────────────
+export async function setMonthGoalAction(month: string, goal: number, note: string): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { ok: false, error: "Supabase niet geconfigureerd." };
+  if (!/^\d{4}-\d{2}$/.test(month)) return { ok: false, error: "Ongeldige maand." };
+  const { agency } = await getSessionContext();
+  if (!agency) return { ok: false, error: "Geen agency." };
+  const { error } = await supabase
+    .from("month_goals")
+    .upsert({ agency_id: agency.id, month, goal, note: note || null }, { onConflict: "agency_id,month" });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/platform/finance");
+  return { ok: true };
+}
+
+// ── Potjes-percentages (door Menno zelf ingesteld) ──────────────
+export async function saveReserveConfigAction(config: { belasting: number; buffer: number; beleggen: number }): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { ok: false, error: "Supabase niet geconfigureerd." };
+  const { agency } = await getSessionContext();
+  if (!agency) return { ok: false, error: "Geen agency." };
+  const clean = {
+    belasting: Math.max(0, Math.min(100, Number(config.belasting) || 0)),
+    buffer: Math.max(0, Math.min(100, Number(config.buffer) || 0)),
+    beleggen: Math.max(0, Math.min(100, Number(config.beleggen) || 0)),
+  };
+  const { error } = await supabase.from("agencies").update({ reserve_config: clean }).eq("id", agency.id);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/platform/finance");
+  return { ok: true };
+}
+
+// ── Uitgaven-triage: bankmutatie koppelen aan klant / vaste last ─
+export async function linkExpenseAction(input: {
+  mutationId: string;
+  kind: string; // klant | vast | prive | overig
+  clientId?: string | null;
+  label?: string;
+  amount: number;
+  date?: string | null;
+}): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { ok: false, error: "Supabase niet geconfigureerd." };
+  const { agency } = await getSessionContext();
+  if (!agency) return { ok: false, error: "Geen agency." };
+  if (!["klant", "vast", "prive", "overig"].includes(input.kind)) return { ok: false, error: "Ongeldige categorie." };
+  const { error } = await supabase.from("expense_links").upsert({
+    id: input.mutationId,
+    agency_id: agency.id,
+    client_id: input.kind === "klant" ? (input.clientId ?? null) : null,
+    kind: input.kind,
+    label: input.label ?? null,
+    amount: input.amount,
+    mutation_date: input.date ?? null,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/platform/finance");
+  return { ok: true };
+}

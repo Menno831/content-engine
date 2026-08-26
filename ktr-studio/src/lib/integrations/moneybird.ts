@@ -139,3 +139,45 @@ export async function getMoneybirdDrafts(): Promise<MoneybirdDrafts> {
   }
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
+
+// ── Bankmutaties: wat er echt uitgaat (alleen-lezen) ────────────
+// Menno's bank hangt al aan Moneybird; hiermee zien we de uitgaven
+// zonder aparte bankkoppeling. Alleen uitgaand geld (amount < 0).
+export interface MoneybirdMutation {
+  id: string;
+  date: string | null;
+  amount: number;        // negatief = uitgave
+  party: string;         // tegenpartij
+  description: string;
+}
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export async function getMoneybirdMutations(days = 45): Promise<{ configured: boolean; mutations: MoneybirdMutation[]; error?: string }> {
+  if (!moneybirdConfigured()) return { configured: false, mutations: [] };
+  try {
+    const from = new Date(Date.now() - days * 86_400_000).toISOString().slice(0, 10).replace(/-/g, "");
+    const to = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+    const res = await fetch(
+      `https://moneybird.com/api/v2/${ADMINISTRATION_ID}/financial_mutations.json?filter=${encodeURIComponent(`period:${from}..${to}`)}&per_page=100`,
+      { headers: { Authorization: `Bearer ${TOKEN}` }, next: { revalidate: 600 } }
+    );
+    if (!res.ok) return { configured: true, mutations: [], error: `Moneybird-mutaties: status ${res.status}` };
+    const rows: any[] = await res.json();
+    const mutations: MoneybirdMutation[] = rows
+      .map((r) => ({
+        id: String(r.id),
+        date: r.date ?? null,
+        amount: Number(r.amount ?? 0),
+        party: String(r.contra_account_name || r.batch_reference || "Onbekend"),
+        description: String(r.message || "").slice(0, 140),
+      }))
+      .filter((m) => m.amount < 0)
+      .sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
+    return { configured: true, mutations };
+  } catch (e) {
+    let why = e instanceof Error ? e.message : "onbekende fout";
+    if (TOKEN) why = why.split(TOKEN).join("•••");
+    return { configured: true, mutations: [], error: `Moneybird niet bereikbaar (${why}).` };
+  }
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */
