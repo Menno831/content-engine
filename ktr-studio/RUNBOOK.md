@@ -239,3 +239,18 @@ sessie niet dubbel werk doet.
 - Geparkeerd op keys: Frame-video's van ready2post transcriberen (wacht op
   FRAMEIO_CLIENT_ID/SECRET; Transkriptor-key is er al) en ManyChat-koppeling
   op de setter/CTA-flows (wacht op de ManyChat External Request-stap).
+
+## Ronde 27 aug 2026 (3) — tempo + koppel-klusjes
+
+- Outreach-doel: 15 DM's/dag (75/week) in scorebord + growth-signalen.
+- Clarity: Data Export-token "ktr-studio-dashboard" gegenereerd in Menno's
+  Clarity (verklaarde de 403: er bestond nog geen token). Token staat
+  eenmalig op zijn scherm; Menno plakt hem zelf in Vercel als
+  CLARITY_API_TOKEN (bestaande variabele bewerken).
+- Resend: domein mennokater.nl bleek al Verified; RESEND_FROM gezet op
+  "KTR Studio <mail@mennokater.nl>" (alle envs; volgende deploy pakt het op).
+- ManyChat: uitgelogd in Chrome — Menno moet eenmalig inloggen, daarna kan
+  de External Request-stap gebouwd worden.
+- Adobe/Frame.io: console bleek ingelogd met dewinterjan687@gmail.com (niet
+  Menno's account) + Terms-acceptatie-dialoog namens die org. Gestopt;
+  Menno moet bevestigen welk Adobe-account bij zijn Frame.io hoort.
