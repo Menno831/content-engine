@@ -205,3 +205,25 @@ sessie niet dubbel werk doet.
   bulk editor-toewijzing in de BulkBar. Alles live geverifieerd: melding
   "💸 4 conceptfacturen (€15.856)", "↻ 5 follow-ups klaargezet",
   Assign to… zichtbaar in de balk.
+
+## Ronde 26-27 aug 2026 — swipe-menu, Finance-uitbouw, ochtendscan
+
+- Mobiel: swipe vanaf links opent het menu, terugvegen sluit (native touch-
+  listeners, passief; scroll-guard getest).
+- Finance 2.0: omzet + winst centraal (delta vs vorige maand), Vooruitblik-
+  kaart (6-mnd projectie: MRR + gem. los werk 3 mnd + concepten; klikbare
+  maanddoelen in month_goals), Potjes (btw-kwartaal uit facturen + eigen
+  percentages in agencies.reserve_config; rekentooling, geen advies),
+  Uitgaven-triage (financial_mutations via Moneybird -> expense_links,
+  label klant/vast/prive/overig). Migratie 036.
+- Discover-ochtendscan: lib/feedscan.ts + watchdog 3g — dagelijks max 6
+  video's uit volglijst (outlier >=2x mediaan / vers concept) + 2 interesse-
+  onderwerpen (knowledge), Haiku-samenvatting op titel+beschrijving (geen
+  transcript-kosten), notitieveld per video, Scan nu-knop + bronnen-instel-
+  paneel op Discover. Migratie 037; volglijst geseed (@FilmBooth,
+  @AlexHormozi) - Menno past aan via ⚙ Bronnen.
+- Eerste run live: 5 outliers + 1 knowledge met NL-samenvattingen; Finance
+  toont echte bankmutaties (53 te labelen) en btw-pot (€840).
+- Kanalen-data die op Menno wachten: GSC (service account), YouTube
+  Analytics (OAuth kanaal), Clarity (Data Export activeren), Google Ads
+  (zwaar traject), LinkedIn (geen API - handmatig).
