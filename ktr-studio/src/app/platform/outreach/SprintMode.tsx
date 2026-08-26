@@ -41,11 +41,13 @@ export function SprintMode({ items }: { items: SprintItem[] }) {
 
   function openDm() {
     if (!cur) return;
-    window.open(`https://ig.me/m/${cur.handle}`, "_blank", "noopener");
+    // Klembord EERST (synchroon binnen de tik), daarna pas Instagram openen —
+    // op telefoon faalt kopiëren zodra de browser naar de achtergrond gaat.
     navigator.clipboard.writeText(cur.message).then(() => {
       setCopied(true);
-      setTimeout(() => setCopied(false), 4000);
+      setTimeout(() => setCopied(false), 6000);
     }).catch(() => undefined);
+    window.open(`https://ig.me/m/${cur.handle}`, "_blank", "noopener");
   }
 
   function next() {

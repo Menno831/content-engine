@@ -64,13 +64,14 @@ export function ProspectCard({ prospect: p, demo }: { prospect: Prospect; demo: 
   // Eén klik: DM-venster open + bericht op het klembord. Daarna alleen
   // nog plakken, lezen en versturen — en terug hier op ✓ drukken.
   function openDmWithMessage() {
-    if (handle) window.open(`https://ig.me/m/${handle}`, "_blank", "noopener");
+    // Klembord eerst (werkt zo ook op telefoon), daarna Instagram openen.
     if (message) {
       navigator.clipboard.writeText(message).then(() => {
         setCopied(true);
-        setTimeout(() => setCopied(false), 4000);
+        setTimeout(() => setCopied(false), 6000);
       }).catch(() => setShowMsg(true));
     }
+    if (handle) window.open(`https://ig.me/m/${handle}`, "_blank", "noopener");
     setDmOpened(true);
     setShowMsg(true);
   }
