@@ -254,3 +254,13 @@ sessie niet dubbel werk doet.
 - Adobe/Frame.io: console bleek ingelogd met dewinterjan687@gmail.com (niet
   Menno's account) + Terms-acceptatie-dialoog namens die org. Gestopt;
   Menno moet bevestigen welk Adobe-account bij zijn Frame.io hoort.
+
+## Ronde 27 aug 2026 (4) — ManyChat-status + taken-bewaker
+
+- ManyChat: ingelogd, maar abonnement VERLOPEN (Free-plan, contactlimiet
+  geraakt; zelfs New Automation zit achter een upgrade-paywall). External
+  Request vereist Pro. Verlengen = beslissing Menno (staat als taak).
+- Taken-bewaker live: zelftest-blokkades worden automatisch taken (dedupe
+  14 dgn), btw-aangifte verschijnt vanzelf in jan/apr/jul/okt met deadline.
+  3 concrete taken van vandaag ingeschoten (Clarity-token, ManyChat
+  verlengen, Adobe/Frame.io-account).
