@@ -126,7 +126,7 @@ export function FeedBoard({ items, channels, topics }: { items: FeedItem[]; chan
                       <div className="text-[11px] text-muted mt-1">
                         {i.channel} · {fmtNum(i.views)} views{i.outlier ? ` · ${i.outlier}× mediaan` : ""}
                       </div>
-                      {i.summary && <p className="text-[12px] text-foreground/80 leading-relaxed mt-2">{i.summary}</p>}
+                      {i.summary && <p className="text-[12px] text-foreground/80 leading-relaxed mt-2">{i.summary.replace(/\*\*(.+?)\*\*/g, "$1")}</p>}
                       <textarea
                         defaultValue={i.note ?? ""}
                         onBlur={(e) => saveNote(i.id, e.target.value)}

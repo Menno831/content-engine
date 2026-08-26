@@ -135,7 +135,7 @@ export async function runFeedScan(admin: any, agencyId: string): Promise<{ added
         input: `Titel: ${c.title}\nKanaal: ${c.channel}\nViews: ${c.views}\nBeschrijving: ${c.description}`,
         model: "fast",
       });
-      if (!mock) summary = text.trim();
+      if (!mock) summary = text.trim().replace(/\*\*(.+?)\*\*/g, "$1");
     } catch {
       // samenvatting is nice-to-have
     }
