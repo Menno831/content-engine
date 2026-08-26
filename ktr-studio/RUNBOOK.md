@@ -177,3 +177,18 @@ sessie niet dubbel werk doet.
 - Installatie door Menno (eenmalig): chrome://extensions → Ontwikkelaarsmodus
   → Uitgepakt laden → map ~/content-engine/ktr-studio/extension (zie
   extension/README.md).
+
+## Ronde 26 aug 2026 — mobiel volledig gefixt
+
+- HOOFDBUG gevonden: de header heeft backdrop-blur; een element met
+  backdrop-filter wordt containing block voor fixed descendants, waardoor
+  het mobiele menu (fixed inset-0 in de header) in de 64px hoge header
+  geklemd werd — navigeren op telefoon was onmogelijk. Fix: Portal.tsx,
+  alle header-overlays (MobileNav, CommandPalette, NotificationsBell)
+  renderen nu op <body>.
+- Bel-paneel: op mobiel full-width (viel 17px buiten beeld), via portal.
+- Klanten: actieknoppen wrappen; Jarvis-chat strip markdown-sterretjes.
+- Getest op 390px in Menno's ingelogde sessie (iframe-methode): alle 19
+  routes geladen zonder horizontale overflow of errors; visueel gecheckt:
+  dashboard, pipeline, outreach, finance, jarvis, groei, clients, agenda;
+  menu-open + navigatie + ⌘K + bel functioneel geverifieerd.
