@@ -192,3 +192,16 @@ sessie niet dubbel werk doet.
   routes geladen zonder horizontale overflow of errors; visueel gecheckt:
   dashboard, pipeline, outreach, finance, jarvis, groei, clients, agenda;
   menu-open + navigatie + ⌘K + bel functioneel geverifieerd.
+
+## Ronde 26 aug 2026 (2) — grote auditronde
+
+- Sweep: alle 28 routes (incl. verborgen) renderen foutloos; watchdog schoon
+  (enige zelftest-melding: Frame.io-keys wachten op Menno).
+- Fixes: matchesTitle-woordgrens (frameio), ig-fill pakt "check IG"-
+  placeholders (21 in wachtrij; levert alleen wat op als het youtube-veld
+  oplosbaar is), 2 dubbele kaarten verwijderd via de app.
+- Nieuw: follow-up-concepten na 7 dagen stilte (watchdog 3e, max 5/dag,
+  paars blok op de kaart), einde-maand-conceptensignaal (3f, vanaf de 24e),
+  bulk editor-toewijzing in de BulkBar. Alles live geverifieerd: melding
+  "💸 4 conceptfacturen (€15.856)", "↻ 5 follow-ups klaargezet",
+  Assign to… zichtbaar in de balk.
