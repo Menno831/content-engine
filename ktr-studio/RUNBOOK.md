@@ -227,3 +227,15 @@ sessie niet dubbel werk doet.
 - Kanalen-data die op Menno wachten: GSC (service account), YouTube
   Analytics (OAuth kanaal), Clarity (Data Export activeren), Google Ads
   (zwaar traject), LinkedIn (geen API - handmatig).
+
+## Ronde 27 aug 2026 (2) — doel-pricing, setter, CTA
+
+- growth.ts: doel-scenario (retainer EUR 3K + longform-upsell EUR 3.2K)
+  naast huidig gemiddelde + upsell-signaal voor klanten onder doel-retainer.
+- Setter: Outreach in setter-nav; scorebord op Outreach (week verstuurd
+  met doel 25, replies deze week + reply-rate). Setter-login werkt via
+  bestaande rol; commissiemodel nog te kiezen door Menno (call met setter).
+- Migratie 038: content.cta + veld in kaart-dialoog (keyword/funnel).
+- Geparkeerd op keys: Frame-video's van ready2post transcriberen (wacht op
+  FRAMEIO_CLIENT_ID/SECRET; Transkriptor-key is er al) en ManyChat-koppeling
+  op de setter/CTA-flows (wacht op de ManyChat External Request-stap).
