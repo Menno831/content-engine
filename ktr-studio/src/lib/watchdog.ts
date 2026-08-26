@@ -33,6 +33,36 @@ export interface WatchdogResult {
   errors: string[];
 }
 
+// Taak aanmaken als die er nog niet is: zelfde titel in de laatste
+// 14 dagen (open of afgevinkt) = overslaan. Zo landen blijvende
+// blokkades en terugkerende verplichtingen vanzelf in Taken zonder
+// dat de lijst volloopt met dubbelen.
+async function todoOnce(
+  admin: NonNullable<ReturnType<typeof createAdminClient>>,
+  agencyId: string,
+  title: string,
+  urgency: "vandaag" | "later",
+  due?: string
+): Promise<boolean> {
+  const since = new Date(Date.now() - 14 * 86_400_000).toISOString();
+  const { data: existing } = await admin
+    .from("todos")
+    .select("id")
+    .eq("agency_id", agencyId)
+    .eq("title", title)
+    .gte("created_at", since)
+    .limit(1);
+  if (existing?.length) return false;
+  const { error } = await admin.from("todos").insert({
+    agency_id: agencyId,
+    client_id: null,
+    title,
+    urgency,
+    due: due ?? null,
+  });
+  return !error;
+}
+
 // Zelfde signaal niet vaker dan eens per 3 dagen herhalen.
 async function notifyOnce(
   admin: NonNullable<ReturnType<typeof createAdminClient>>,
@@ -526,6 +556,25 @@ export async function runWatchdog(): Promise<WatchdogResult> {
       for (const d of defects) {
         const sent = await notifyOnce(admin, agencyId, `Zelftest: ${d.split(" — ")[0]}`, d, "/platform/settings");
         if (sent) result.notifications += 1;
+        // Blijvende blokkades horen ook in Taken — zo blijven ze niet
+        // eeuwig in de bel hangen maar staan ze op de lijst.
+        await todoOnce(admin, agencyId, `🔧 ${d.split(" — ")[0]}`, "later").catch(() => undefined);
+      }
+
+      // Terugkerende verplichting: btw-aangifte in de kwartaalmaand
+      // (jan/apr/jul/okt, deadline eind die maand). Eén taak per kwartaal.
+      const nu = new Date();
+      if ([0, 3, 6, 9].includes(nu.getMonth())) {
+        const prevQ = nu.getMonth() === 0 ? 4 : nu.getMonth() / 3;
+        const prevQYear = nu.getMonth() === 0 ? nu.getFullYear() - 1 : nu.getFullYear();
+        const lastDay = new Date(nu.getFullYear(), nu.getMonth() + 1, 0).toISOString().slice(0, 10);
+        await todoOnce(
+          admin,
+          agencyId,
+          `💸 Btw-aangifte Q${prevQ} ${prevQYear} indienen (deadline eind ${nu.toLocaleDateString("nl-NL", { month: "long" })})`,
+          "vandaag",
+          lastDay
+        ).catch(() => undefined);
       }
     } catch (e) {
       result.errors.push(`zelftest: ${e instanceof Error ? e.message : "onbekend"}`);
