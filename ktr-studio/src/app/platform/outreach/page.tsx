@@ -54,8 +54,8 @@ export default async function OutreachPage({ searchParams }: { searchParams: Pro
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-        <Stat label="Vandaag verstuurd" value={String(sentToday)} icon={icons.send} />
-        <Stat label="Deze week verstuurd" value={String(sentThisWeek)} delta={sentThisWeek >= 25 ? "tempo gehaald ✓" : `doel 25/week`} icon={icons.send} />
+        <Stat label="Vandaag verstuurd" value={String(sentToday)} delta={sentToday >= 15 ? "dagdoel gehaald ✓" : "doel 15/dag"} icon={icons.send} />
+        <Stat label="Deze week verstuurd" value={String(sentThisWeek)} delta={sentThisWeek >= 75 ? "tempo gehaald ✓" : `doel 75/week (15/dag)`} icon={icons.send} />
         <Stat label="Replies deze week" value={String(repliesThisWeek)} delta={sentThisWeek > 0 ? `${Math.round((repliesThisWeek / Math.max(1, sentThisWeek)) * 100)}% reply-rate` : undefined} icon={icons.leads} />
         <Stat label="In gesprek" value={String(inGesprek)} icon={icons.send} />
         <Stat label="Potentiële waarde" value={fmtEur(pipelineValue)} icon={icons.money} />

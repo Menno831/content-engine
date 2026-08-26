@@ -124,9 +124,9 @@ export async function buildGrowthPlanWith(supabase: SupabaseClient<any, any, any
   // ── 2. Outreach-tempo deze week ───────────────────────────────
   const sentThisWeek = (prospects ?? []).filter((p) => p.dm_sent_at && p.dm_sent_at >= daysAgo7).length;
   const stock = (prospects ?? []).filter((p) => p.stage === "te_contacteren").length;
-  if (sentThisWeek < 25) {
+  if (sentThisWeek < 75) {
     actions.push({
-      priority: sentThisWeek < 10 ? 1 : 2,
+      priority: sentThisWeek < 30 ? 1 : 2,
       title: `Outreach-tempo: ${sentThisWeek} DM's in 7 dagen`,
       why: `Bij 5 per werkdag (25/week) blijft de pipeline gevuld; er staan ${stock} prospects klaar om te contacteren.`,
       href: "/platform/outreach",
