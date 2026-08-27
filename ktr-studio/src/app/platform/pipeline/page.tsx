@@ -179,7 +179,16 @@ export default async function Pipeline({
         </div>
       )}
 
-      <ClientFilter clients={clients.map((c) => ({ id: c.id, name: c.name }))} allLabel={t.allLabel} />
+      <ClientFilter
+        clients={(ownEditorId
+          ? clients.filter((c) => {
+              const own = editors.find((e) => e.id === ownEditorId);
+              return (own?.clientIds ?? []).includes(c.id);
+            })
+          : clients
+        ).map((c) => ({ id: c.id, name: c.name }))}
+        allLabel={t.allLabel}
+      />
 
       {/* Editor-weekplanning: dan moet dit af, dan dat — op volgorde. */}
       {isEditor && (() => {

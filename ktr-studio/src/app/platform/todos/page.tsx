@@ -1,6 +1,7 @@
 import { PageHeader, Card, Badge } from "../_components";
 import { getTodos } from "@/lib/notifications";
 import { getWorkspaceData } from "@/lib/data";
+import { getEditors } from "@/lib/editors";
 import { getSessionContext } from "@/lib/auth";
 import { TodoToggle } from "./TodoToggle";
 import { AddTodoDialog } from "./AddTodoDialog";
@@ -17,7 +18,24 @@ export default async function TodosPage({ searchParams }: { searchParams: Promis
 
   // Persoonlijke taken (van deze gebruiker) los van de klant-taken.
   const personal = allTodos.filter((t) => t.userId && t.userId === ctx.user?.id);
-  const clientTodos = allTodos.filter((t) => !t.userId);
+
+  // Editor-login: alleen taken van klanten waaraan de editor gekoppeld is —
+  // Menno's eigen/agency-taken horen niet in haar lijst.
+  const isEditorRole = ctx.profile?.role === "editor";
+  let allowedClientNames: Set<string> | null = null;
+  let visibleClients = clients;
+  if (isEditorRole && ctx.profile?.editor_id) {
+    const editors = await getEditors();
+    const own = editors.find((e) => e.id === ctx.profile!.editor_id);
+    allowedClientNames = new Set(
+      (own?.clientIds ?? []).map((id) => clients.find((c) => c.id === id)?.name).filter(Boolean) as string[]
+    );
+    visibleClients = clients.filter((c) => allowedClientNames!.has(c.name));
+  }
+
+  const clientTodos = allTodos
+    .filter((t) => !t.userId)
+    .filter((t) => !allowedClientNames || (t.client != null && allowedClientNames.has(t.client)));
 
   const activeClient = clients.find((c) => c.id === sp.client);
   const todos = activeClient ? clientTodos.filter((t) => t.client === activeClient.name) : clientTodos;
@@ -40,7 +58,7 @@ export default async function TodosPage({ searchParams }: { searchParams: Promis
         action={isClient || isEditor ? undefined : <AddTodoDialog clients={clientOptions} />}
       />
 
-      {!isClient && <ClientFilter clients={clients.map((c) => ({ id: c.id, name: c.name }))} allLabel={isEditor ? "All clients" : "Alle klanten"} />}
+      {!isClient && <ClientFilter clients={visibleClients.map((c) => ({ id: c.id, name: c.name }))} allLabel={isEditor ? "All clients" : "Alle klanten"} />}
 
       {!isClient && !isEditor && <PersonalTodos initial={personal} />}
 

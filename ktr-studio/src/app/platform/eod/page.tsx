@@ -11,6 +11,11 @@ export default async function EodPage() {
   const demo = DEMO_MODE || !isSupabaseConfigured;
   const [ctx, reports] = await Promise.all([getSessionContext(), demo ? [] : getEodReports(40)]);
 
+  const isEditor = ctx.profile?.role === "editor";
+  const t = isEditor
+    ? { eyebrow: "End of day", title: "Close your day", subtitle: "Three lines a day: what's done, where you got stuck, and what's first tomorrow. That way everyone knows where things stand without an extra call.", today: "Submitted today", nobody: "Nobody yet. You first?", earlier: "Earlier" }
+    : { eyebrow: "End of day", title: "Dag afsluiten", subtitle: "Drie regels per dag: wat af is, waar je vastliep en wat morgen als eerste moet. Zo weet iedereen waar het staat zonder extra call.", today: "Vandaag ingediend", nobody: "Nog niemand. Jij eerst?", earlier: "Eerder" };
+
   const today = todayStr();
   const mine = reports.find((r) => r.userId === ctx.user?.id && r.date === today) ?? null;
   const todays = reports.filter((r) => r.date === today);
@@ -19,9 +24,9 @@ export default async function EodPage() {
   return (
     <>
       <PageHeader
-        eyebrow="End of day"
-        title="Dag afsluiten"
-        subtitle="Drie regels per dag: wat af is, waar je vastliep en wat morgen als eerste moet. Zo weet iedereen waar het staat zonder extra call."
+        eyebrow={t.eyebrow}
+        title={t.title}
+        subtitle={t.subtitle}
       />
 
       {demo ? (
@@ -29,17 +34,17 @@ export default async function EodPage() {
       ) : (
         <div className="grid lg:grid-cols-2 gap-6">
           <div>
-            <EodForm today={mine ? { done: mine.done ?? "", blockers: mine.blockers ?? "", tomorrow: mine.tomorrow ?? "", videos: mine.videos } : null} />
+            <EodForm isEditor={isEditor} today={mine ? { done: mine.done ?? "", blockers: mine.blockers ?? "", tomorrow: mine.tomorrow ?? "", videos: mine.videos } : null} />
           </div>
 
           <div className="space-y-6">
             <Card className="p-6">
               <div className="flex items-baseline justify-between mb-4">
-                <h2 className="font-display font-extrabold text-xl">Vandaag ingediend</h2>
+                <h2 className="font-display font-extrabold text-xl">{t.today}</h2>
                 <Badge color={todays.length ? "#34D399" : "#6B7280"}>{todays.length}</Badge>
               </div>
               {todays.length === 0 ? (
-                <p className="text-[13px] text-muted">Nog niemand. Jij eerst?</p>
+                <p className="text-[13px] text-muted">{t.nobody}</p>
               ) : (
                 <div className="space-y-4">
                   {todays.map((r) => (
@@ -51,7 +56,7 @@ export default async function EodPage() {
 
             {earlier.length > 0 && (
               <Card className="p-6">
-                <h2 className="font-display font-extrabold text-xl mb-4">Eerder</h2>
+                <h2 className="font-display font-extrabold text-xl mb-4">{t.earlier}</h2>
                 <div className="space-y-4">
                   {earlier.slice(0, 12).map((r) => (
                     <EodItem key={r.id} report={r} showDate />
