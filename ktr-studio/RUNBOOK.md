@@ -264,3 +264,22 @@ sessie niet dubbel werk doet.
   14 dgn), btw-aangifte verschijnt vanzelf in jan/apr/jul/okt met deadline.
   3 concrete taken van vandaag ingeschoten (Clarity-token, ManyChat
   verlengen, Adobe/Frame.io-account).
+
+## Ronde 27 aug 2026 (5) — bord-rebuild voor Max + editor-view
+
+- Frame gecheckt in Menno's sessie: mappen POSTED (4) / READY TO POST
+  (reel1, REEL-3, r5, reel7) / Trial reels (3); in review: reel9 (6
+  comments), Estonia-1 (lifestyle), long video (LF1, 15 comments),
+  VLOG (Rut). ⚠️ Frame toont "Payment Problem - account will be locked"
+  → als urgente taak in Taken gezet.
+- BORD-REBUILD: alle niet-geposte kaarten verwijderd (posted-archief 98
+  intact) en 23 nieuwe kaarten (external_id rb:*) o.b.v. Frame + Drive +
+  WhatsApp-afspraken: 4 ready_for_posting, 3 revisie, 1 QC, 12 te editen
+  (reels 10-15, lifestyle 2-3, longforms 2+4, banners, A&B-edit deadline
+  27 aug), 3 wachtend op Menno (clip/VO/trials). Deadlines gespreid 1/dag,
+  zondag vrij. Editor-weekstrip toont nu exact "wat wanneer".
+- Editor-view: taken gefilterd (alleen gekoppelde klanten, geen agency-
+  taken), klant-chips beperkt, EOD volledig Engels. Melding bij oplevering
+  (bel + e-mail via notifyOwner) bestond al en werkt nu echt door de
+  Resend-fix. Frame-uploadmeldingen volgen zodra Adobe-keys er zijn.
+- Kaart-cache-les: na een SQL-rebuild even hard verversen (router cache).
