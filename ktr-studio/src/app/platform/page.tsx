@@ -6,6 +6,7 @@ import { getWorkspaceData, getTodaysBrief } from "@/lib/data";
 import { getTodos } from "@/lib/notifications";
 import { getSessionContext } from "@/lib/auth";
 import { getOutreachTodoCount } from "@/lib/prospects";
+import { AdsStrip } from "./AdsStrip";
 import { getMeetings, getEodReports } from "@/lib/workspace";
 import { getOrCreateBriefing, type Briefing } from "@/lib/briefing";
 import { createClient as supabaseServer } from "@/lib/supabase/server";
@@ -115,6 +116,9 @@ export default async function Dashboard() {
         todosOpen={todos.filter((t) => !t.done).length}
         outreachTodo={outreachTodo}
       />
+
+      {/* Advertenties: alleen zichtbaar zodra er data is */}
+      <AdsStrip />
 
       {/* Daily Brief teaser: vandaag's verse ideeën */}
       {brief.length > 0 && (
