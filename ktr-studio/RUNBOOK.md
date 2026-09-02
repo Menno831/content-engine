@@ -12,6 +12,12 @@ Environment-variabelen (via de environment-instellingen, nooit in chat/commits):
 Supabase SQL Editor gedraaid, Vercel via de lokaal ingelogde CLI.)
 
 ## Openstaande acties (aug 2026)
+0. **Migratie 039 draaien** (advertenties op campagne-niveau): tabellen
+   `ad_entries` + `ad_insights`. Zolang die er niet zijn, toont
+   /platform/advertising alleen de melding dat de migratie mist. De oude
+   `ad_spend`-maandbedragen worden door de migratie zelf overgenomen.
+   Daarna: CSV uit Ads Manager (per dag uitgesplitst) importeren en één
+   keer de AI-analyse draaien om te controleren dat die klopt.
 1. **Vercel-envs aanvullen** (project content-engine-kr5c, root `ktr-studio`):
    `RESEND_API_KEY` en `YOUTUBE_API_KEY` ontbreken nog — waarden alleen bij Menno.
    `MONEYBIRD_API_TOKEN` staat er maar de waarde is verhaspeld (token meerdere keren
