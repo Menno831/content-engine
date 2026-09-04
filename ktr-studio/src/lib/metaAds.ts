@@ -254,3 +254,59 @@ export async function getMetaAds(preset: Preset = "last_7d"): Promise<MetaAdsSna
     return { ...empty, configured: true, error: e instanceof Error ? e.message : "Onbekende fout" };
   }
 }
+
+// ── Naar de advertentietabel ────────────────────────────────────────
+// De rest van het platform (grafieken, campagne-niveau, AI-analyse) leest uit
+// ad_entries. Hieronder halen we dezelfde cijfers per dag per advertentie op,
+// in precies die vorm, zodat de CSV-import niet meer nodig is.
+
+export interface MetaEntry {
+  date: string;
+  platform: string;
+  campaign: string | null;
+  adset: string | null;
+  creative: string | null;
+  impressions: number;
+  clicks: number;
+  spend: number;
+  results: number;
+  source: string;
+}
+
+export async function getMetaAdEntries(days = 30): Promise<MetaEntry[]> {
+  const token = process.env.META_ADS_TOKEN;
+  const raw = process.env.META_AD_ACCOUNT_ID;
+  if (!token || !raw) return [];
+  const account = raw.startsWith("act_") ? raw : `act_${raw}`;
+
+  const to = new Date();
+  const from = new Date();
+  from.setDate(from.getDate() - (days - 1));
+  const iso = (d: Date) => d.toISOString().slice(0, 10);
+
+  const rows = await insights(account, token, {
+    level: "ad",
+    time_increment: "1",
+    time_range: JSON.stringify({ since: iso(from), until: iso(to) }),
+    fields: [
+      "spend", "impressions", "clicks", "actions",
+      "campaign_name", "adset_name", "ad_name",
+    ].join(","),
+  });
+
+  return rows.map((r) => ({
+    date: String(r.date_start ?? "").slice(0, 10),
+    platform: "Meta",
+    campaign: (r.campaign_name as string) ?? null,
+    adset: (r.adset_name as string) ?? null,
+    creative: (r.ad_name as string) ?? null,
+    impressions: n(r.impressions),
+    clicks: action(r.actions, "link_click") || n(r.clicks),
+    spend: n(r.spend),
+    // Een lead telt als resultaat; is er nog geen leadmeting, dan is een
+    // landingspagina-weergave het eerlijkste alternatief.
+    results:
+      action(r.actions, ...LEAD_ACTIONS) || action(r.actions, "landing_page_view"),
+    source: "meta",
+  })).filter((e) => e.date && (e.impressions > 0 || e.spend > 0));
+}

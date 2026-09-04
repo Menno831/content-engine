@@ -18,6 +18,10 @@
     {
       "path": "/api/cron/watchdog",
       "schedule": "30 7 * * *"
+    },
+    {
+      "path": "/api/cron/sync-meta-ads",
+      "schedule": "0 5 * * *"
     }
   ]
 }
