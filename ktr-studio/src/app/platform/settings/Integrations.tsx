@@ -53,6 +53,13 @@ export function Integrations() {
       where: "dashboard.stripe.com → Developers → API keys (restricted key, alleen lezen)",
     },
     {
+      name: "Meta Ads",
+      what: "Haalt elke ochtend je advertentiecijfers op in het ads-dashboard",
+      set: has("META_ADS_TOKEN") && has("META_AD_ACCOUNT_ID"),
+      keys: "META_ADS_TOKEN + META_AD_ACCOUNT_ID",
+      where: "business.facebook.com → Systeemgebruiker met ads_read → token; account-id staat in Ads Manager (act_…)",
+    },
+    {
       name: "Asana",
       what: "Twee-weg-sync met klantborden (o.a. Arthur en Bryan)",
       set: has("ASANA_TOKEN"),
