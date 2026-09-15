@@ -3,6 +3,8 @@ import { PageHeader, Card, Stat, Avatar, Badge, Eyebrow, icons } from "../_compo
 import { getWorkspaceData } from "@/lib/data";
 import { getSessionContext } from "@/lib/auth";
 import { getMoneybirdMonth, getMoneybirdDrafts, getMoneybirdMutations } from "@/lib/integrations/moneybird";
+import { getStripeMonth, getStripeSubscriptions, getStripePayouts, stripeConfigured } from "@/lib/integrations/stripe";
+import { StripeCard } from "./StripeCard";
 import { OutlookCard, type OutlookMonth } from "./OutlookCard";
 import { ReservesCard, type ReserveConfig } from "./ReservesCard";
 import { ExpenseTriage } from "./ExpenseTriage";
@@ -59,6 +61,31 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
   const byMonth = new Map(months.map((m, i) => [m, allMonths[i]]));
   const moneybird = byMonth.get(maand) ?? allMonths[allMonths.length - 1];
 
+  // Stripe naast Moneybird: per maand de betalingen (netto), ontdubbeld op
+  // bedrag tegen de betaalde Moneybird-facturen van die maand, plus de
+  // abonnementen en uitbetalingen (die zijn niet maandgebonden).
+  const stripeOn = !demo && stripeConfigured();
+  const [stripeSubs, stripePayouts, ...stripeMonths] = stripeOn
+    ? await Promise.all([
+        getStripeSubscriptions(),
+        getStripePayouts(6),
+        ...months.map((m) => {
+          const mb = byMonth.get(m);
+          const paid = (mb?.invoices ?? []).filter((i) => i.state === "paid").flatMap((i) => [i.totalIncl, i.totalExcl]);
+          return getStripeMonth(m === thisMonth ? undefined : m, paid);
+        }),
+      ])
+    : [null, null];
+  const stripeByMonth = new Map(months.map((m, i) => [m, stripeMonths[i]]));
+  const stripe = stripeByMonth.get(maand) ?? null;
+  // Wat Stripe toevoegt aan de omzet van een maand: netto betalingen die
+  // niet ook als betaalde factuur in Moneybird staan, min terugbetalingen.
+  const stripeExtra = (m: string) => {
+    const sm = stripeByMonth.get(m);
+    if (!sm) return 0;
+    return sm.payments.filter((p) => p.refund || !p.inMoneybird).reduce((acc, p) => acc + p.net, 0);
+  };
+
   // Kosten per factuur (alle maanden), vaste lasten en overige inkomsten.
   const supabase = await supabaseServer();
   let invoiceCostById = new Map<string, number>();
@@ -114,7 +141,7 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
     if (!mo) return { omzet: 0, kosten: 0, winst: 0 };
     const kosten = mo.invoices.reduce((s, i) => s + (invoiceCostById.get(i.id) ?? 0), 0) + fixedTotal;
     const overig = (incomeByMonth.get(m) ?? []).reduce((s, r) => s + r.amount, 0);
-    const omzet = mo.invoiced + overig;
+    const omzet = mo.invoiced + overig + stripeExtra(m);
     return { omzet, kosten, winst: omzet - kosten };
   };
 
@@ -169,7 +196,7 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
 
   const invoiceCostsSum = moneybird.invoices.reduce((s, i) => s + (invoiceCostById.get(i.id) ?? 0), 0);
   const maandOverig = (incomeByMonth.get(maand) ?? []).reduce((s, r) => s + r.amount, 0);
-  const monthProfit = moneybird.invoiced + maandOverig - invoiceCostsSum - fixedTotal;
+  const monthProfit = moneybird.invoiced + maandOverig + stripeExtra(maand) - invoiceCostsSum - fixedTotal;
   const billable = clients.filter((c) => c.status !== "gepauzeerd");
   const target = Number(agency?.monthly_target ?? 0);
 
@@ -386,6 +413,11 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
       )}
 
       {/* Moneybird: wat er deze maand écht binnenkomt (facturen, excl. btw) */}
+      {/* Stripe: betalingen, abonnementen en uitbetalingen (alleen-lezen) */}
+      {stripeOn && stripe && stripeSubs && stripePayouts && (
+        <StripeCard maandLabel={maandLabel} month={stripe} subs={stripeSubs} payouts={stripePayouts} />
+      )}
+
       {!demo && moneybird.configured && (
         <Card className="p-6 mb-6">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-3">

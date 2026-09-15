@@ -46,6 +46,13 @@ export function Integrations() {
       where: "moneybird.com → Instellingen → Ontwikkelaars",
     },
     {
+      name: "Stripe",
+      what: "Betalingen, abonnementen en uitbetalingen op Finance (alleen-lezen)",
+      set: has("STRIPE_SECRET_KEY"),
+      keys: "STRIPE_SECRET_KEY",
+      where: "dashboard.stripe.com → Developers → API keys (restricted key, alleen lezen)",
+    },
+    {
       name: "Asana",
       what: "Twee-weg-sync met klantborden (o.a. Arthur en Bryan)",
       set: has("ASANA_TOKEN"),

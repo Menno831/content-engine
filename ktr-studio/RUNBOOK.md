@@ -289,3 +289,8 @@ sessie niet dubbel werk doet.
   (bel + e-mail via notifyOwner) bestond al en werkt nu echt door de
   Resend-fix. Frame-uploadmeldingen volgen zodra Adobe-keys er zijn.
 - Kaart-cache-les: na een SQL-rebuild even hard verversen (router cache).
+
+## 15 sep 2026 · Stripe-koppeling (alleen-lezen)
+- Nieuw: `src/lib/integrations/stripe.ts` (betalingen per maand via balance_transactions, abonnementen actief + betaling mislukt → MRR, uitbetalingen) en `finance/StripeCard.tsx`.
+- Finance: netto Stripe-betalingen tellen mee in maandomzet en winst, ontdubbeld op bedrag tegen betaalde Moneybird-facturen van dezelfde maand (label "ook in Moneybird", telt dan niet dubbel). Kaart staat boven het Moneybird-blok.
+- Settings → Koppelingen: Stripe-rij. Openstaand: `STRIPE_SECRET_KEY` in Vercel zetten (restricted key, alleen lezen op Balance, Charges, Customers, Subscriptions, Payouts).
