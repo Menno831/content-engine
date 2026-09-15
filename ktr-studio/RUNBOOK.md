@@ -12,12 +12,9 @@ Environment-variabelen (via de environment-instellingen, nooit in chat/commits):
 Supabase SQL Editor gedraaid, Vercel via de lokaal ingelogde CLI.)
 
 ## Openstaande acties (aug 2026)
-0. **Migratie 039 draaien** (advertenties op campagne-niveau): tabellen
-   `ad_entries` + `ad_insights`. Zolang die er niet zijn, toont
-   /platform/advertising alleen de melding dat de migratie mist. De oude
-   `ad_spend`-maandbedragen worden door de migratie zelf overgenomen.
-   Daarna: CSV uit Ads Manager (per dag uitgesplitst) importeren en één
-   keer de AI-analyse draaien om te controleren dat die klopt.
+0. **Advertenties**: migratie 039 is gedraaid (15 sep, via de Management
+   API). Openstaand: CSV uit Ads Manager (per dag uitgesplitst) importeren
+   en één keer de AI-analyse draaien om te controleren dat die klopt.
 1. **Vercel-envs aanvullen** (project content-engine-kr5c, root `ktr-studio`):
    `RESEND_API_KEY` en `YOUTUBE_API_KEY` ontbreken nog — waarden alleen bij Menno.
    `MONEYBIRD_API_TOKEN` staat er maar de waarde is verhaspeld (token meerdere keren
@@ -55,6 +52,10 @@ CLARITY_API_TOKEN opnieuw (huidige geeft 403 — Data export activeren in
 Clarity), ManyChat External Request in de default-flow, Resend-domein-DNS.
 
 ## Afgerond (18-25 aug 2026)
+- **Migratie 039 — advertenties op campagne-niveau** (15 sep, gedraaid en
+  geverifieerd): `ad_entries` (17 kolommen) en `ad_insights` staan, RLS aan
+  met de team-policy, alle indexen incl. de unieke external_id-index die
+  dubbele imports tegenhoudt. `ad_spend` was leeg, dus niets over te nemen.
 - **DM-flow één-klik** (25 aug): "Open DM + kopieer bericht" opent ig.me en
   zet het bericht op het klembord; daarna ✓ Verstuurd-knop → dagteller.
   **Reply-keten**: webhook `/api/manychat-reply` (secret in Vercel) matcht
