@@ -31,7 +31,7 @@ export function DeleteClientButton({ clientId, clientName }: { clientId: string;
 
       {open && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setOpen(false)}>
-          <div className="w-full max-w-sm bg-card border border-white/[0.08] rounded-2xl p-6" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-sm bg-card border border-white/[0.08] rounded-2xl p-6 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <h3 className="font-display font-extrabold text-lg mb-1">Klant verwijderen?</h3>
             <p className="text-muted text-sm mb-5">
               <strong>{clientName}</strong> en alle bijbehorende content, leads en koppelingen worden definitief verwijderd. Dit kan niet ongedaan worden gemaakt.

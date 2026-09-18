@@ -66,7 +66,7 @@ export function ClientFinanceDialog({
 
       {open && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setOpen(false)}>
-          <div className="w-full max-w-sm bg-card border border-white/[0.08] rounded-2xl p-6" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-sm bg-card border border-white/[0.08] rounded-2xl p-6 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <h3 className="font-display font-extrabold text-xl mb-4">{name}</h3>
             <div className="space-y-3.5">
               <div className="grid grid-cols-2 gap-3">
