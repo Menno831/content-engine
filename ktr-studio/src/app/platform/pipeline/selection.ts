@@ -44,6 +44,18 @@ export const selection = {
     }
     this.toggle(id);
   },
+  // Hele groepen in één klik: een fase-rij of het complete board.
+  addMany(ids: string[]) {
+    for (const id of ids) selected.add(id);
+    anchor = ids[ids.length - 1] ?? anchor;
+    emit();
+  },
+  removeMany(ids: string[]) {
+    for (const id of ids) selected.delete(id);
+    emit();
+  },
+  hasAll: (ids: string[]) => ids.length > 0 && ids.every((id) => selected.has(id)),
+
   clear() {
     selected.clear();
     anchor = null;

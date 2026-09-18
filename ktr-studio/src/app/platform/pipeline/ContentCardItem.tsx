@@ -74,6 +74,11 @@ export function ContentCardItem({
           </div>
           <span className="font-mono text-[10px] text-muted">{card.due}</span>
         </div>
+        {/* Voor welke klant is dit — meteen bovenaan, ook als het board
+            op "alle klanten" staat en alles door elkaar loopt. */}
+        <div className="text-[11px] font-mono uppercase tracking-wider text-accent/90 mb-1 truncate">
+          {card.client}
+        </div>
         <h3 className="font-medium text-sm leading-snug mb-2">{card.title}</h3>
         {card.hook && (
           <p className="text-[12px] text-muted leading-relaxed mb-3 line-clamp-2">
@@ -92,7 +97,11 @@ export function ContentCardItem({
           </a>
         )}
         <div className="flex items-center justify-between pt-3 border-t border-white/[0.05]">
-          <span className="text-[11px] text-muted truncate max-w-[120px]">{card.client}</span>
+          <span className="text-[11px] text-muted truncate max-w-[120px]">
+            {card.costPrice != null || card.sellPrice != null
+              ? `€${((card.sellPrice ?? 0) - (card.costPrice ?? 0)).toLocaleString("nl-NL", { maximumFractionDigits: 0 })} marge`
+              : ""}
+          </span>
           {card.stage === "posted" ? (
             <div className="flex items-center gap-2.5 text-[11px]">
               {card.permalink ? (

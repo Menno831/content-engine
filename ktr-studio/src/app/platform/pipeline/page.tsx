@@ -7,6 +7,7 @@ import { AddContentDialog } from "./AddContentDialog";
 import { QuickAddDialog } from "./QuickAddDialog";
 import { ContentCardItem } from "./ContentCardItem";
 import { CostStrip } from "./CostStrip";
+import { SelectAll } from "./SelectAll";
 import { GanttBoard } from "./GanttBoard";
 import { ClientFilter } from "../ClientFilter";
 import { ClientBoard } from "./ClientBoard";
@@ -237,7 +238,12 @@ export default async function Pipeline({
       })()}
 
       {/* Weergave-schakelaar (tabel/kanban/tijdlijn) */}
-      <div className="flex flex-wrap items-center justify-end gap-2 mb-5">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-5">
+        {!demo ? (
+          <SelectAll ids={contentCards.map((c) => c.id)} label="Alles selecteren" />
+        ) : (
+          <span />
+        )}
         <div className="flex gap-1.5">
           <FilterLink href={boardHref({ weergave: undefined })} active={!kanban} label="☰ Tabel" />
           <FilterLink href={boardHref({ weergave: "kanban" })} active={kanban} label="▥ Kanban" />
@@ -265,7 +271,10 @@ export default async function Pipeline({
               <div key={stage} className="w-[300px] shrink-0">
                 <div className="flex items-center justify-between mb-3 px-1">
                   <span className="font-display font-bold text-sm">{stageMeta[stage].label}</span>
-                  <span className="font-mono text-[11px] text-muted">{all.length}</span>
+                  <div className="flex items-center gap-2">
+                    {!demo && cards.length > 0 && <SelectAll ids={cards.map((c) => c.id)} />}
+                    <span className="font-mono text-[11px] text-muted">{all.length}</span>
+                  </div>
                 </div>
                 <div className="space-y-3 min-h-[120px] rounded-2xl bg-white/[0.015] border border-white/[0.04] p-2.5">
                   {cards.map((card) => (
@@ -322,7 +331,10 @@ export default async function Pipeline({
                     {cards.length + hiddenPosted}
                   </span>
                 </div>
-                <span className="text-[11px] text-muted font-mono">{t.hints[stage]}</span>
+                <div className="flex items-center gap-2">
+                  {!demo && cards.length > 0 && <SelectAll ids={cards.map((c) => c.id)} />}
+                  <span className="text-[11px] text-muted font-mono">{t.hints[stage]}</span>
+                </div>
               </div>
 
               {/* Kaarten in een grid; lege fase = compacte lege staat */}

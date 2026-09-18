@@ -38,7 +38,7 @@ const agencyGroups: NavGroup[] = [
       { href: "/platform/clients", label: "Klanten", icon: icons.clients },
       { href: "/platform/todos", label: "Taken", icon: icons.check },
       { href: "/platform/agenda", label: "Agenda", icon: icons.calendar },
-      { href: "/platform/eod", label: "EOD", icon: icons.thumb },
+      // EOD op non-actief (route blijft werken via /platform/eod).
     ],
   },
   {
