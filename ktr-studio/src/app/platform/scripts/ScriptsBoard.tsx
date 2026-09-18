@@ -31,9 +31,20 @@ const STATUS = [
 
 const statusMeta = Object.fromEntries(STATUS.map((s) => [s.id, s]));
 
-export function ScriptsBoard({ initial, clients }: { initial: ScriptRow[]; clients: { id: string; name: string }[] }) {
+export function ScriptsBoard({
+  initial,
+  clients,
+  initialActiveId,
+}: {
+  initial: ScriptRow[];
+  clients: { id: string; name: string }[];
+  initialActiveId?: string | null;
+}) {
   const [scripts, setScripts] = useState(initial);
-  const [activeId, setActiveId] = useState<string | null>(initial[0]?.id ?? null);
+  // Van de ideeën-tab kom je hier binnen met een specifiek script open.
+  const [activeId, setActiveId] = useState<string | null>(
+    (initialActiveId && initial.some((s) => s.id === initialActiveId) ? initialActiveId : null) ?? initial[0]?.id ?? null
+  );
   const [filter, setFilter] = useState<string>("");
   const [locFilter, setLocFilter] = useState<string>("");
   const [saved, setSaved] = useState<"idle" | "saving" | "saved" | "error">("idle");
