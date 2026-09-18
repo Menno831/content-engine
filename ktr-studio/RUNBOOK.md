@@ -386,3 +386,19 @@ sessie niet dubbel werk doet.
   Het doelveld staat voorgevuld op de prognose, afgerond op €500 omhoog.
 - Concepten in Moneybird hebben nu ook een kostenveld, zodat de winst al
   klopt voordat de factuur de deur uit is.
+
+## Ronde 18 sep 2026 (8) — kosten 2026 gereconstrueerd
+
+- Migratie 051: tabel `monthly_costs` (maand, kind edit/software/overig,
+  label, bedrag, bron) met RLS. Telt mee in `profitOf`: edit bovenop de
+  factuurkosten, software bij de vaste lasten, overig bij overig.
+- Gevuld uit Menno's mail (label Boekhouding):
+  editfacturen Dualz Media jan t/m jul (excl. btw): 2.024 / 3.162 / 2.000 /
+  1.800 / 2.230 / 1.210 / 1.165. Augustus niet geseed — daar staan al
+  factuurkosten (€1.703), anders telt het dubbel.
+  Verder: editor Vietnam mrt €276 (₫7.875.000), IRL Toolkit jun €165,
+  Vodafone jul/aug/sep, About Impact jul €774,40, Oussama Khedri aug €384.
+- `MonthCostsCard` op Finance: per gekozen maand kostenposten toevoegen,
+  bewerken en verwijderen.
+- Niet te reconstrueren uit mail: de bankafschriften zelf. Moneybird-token
+  is 'sensitive' in Vercel, dus vanuit deze sessie niet op te halen.

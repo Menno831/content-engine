@@ -315,3 +315,40 @@ export async function dealToClientAction(id: string): Promise<{ ok: boolean; err
   revalidatePath("/platform/clients");
   return { ok: true };
 }
+
+// ── Kosten per maand (editfacturen, software, eenmalig) ─────────
+export async function saveMonthCostAction(input: {
+  id?: string;
+  month: string; // YYYY-MM
+  kind: string;
+  label: string;
+  amount: number;
+}): Promise<{ ok: boolean; error?: string }> {
+  const auth = await requireTeam();
+  if ("error" in auth) return { ok: false, error: auth.error };
+  if (!input.label.trim()) return { ok: false, error: "Geef de kostenpost een naam." };
+  if (!/^\d{4}-\d{2}$/.test(input.month)) return { ok: false, error: "Onbekende maand." };
+
+  const row = {
+    agency_id: auth.agency.id,
+    month: `${input.month}-01`,
+    kind: ["edit", "software", "overig"].includes(input.kind) ? input.kind : "overig",
+    label: input.label.trim().slice(0, 120),
+    amount: Math.max(0, Number(input.amount) || 0),
+  };
+  const { error } = input.id
+    ? await auth.supabase.from("monthly_costs").update(row).eq("id", input.id)
+    : await auth.supabase.from("monthly_costs").insert({ ...row, source: "handmatig" });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/platform/finance");
+  return { ok: true };
+}
+
+export async function deleteMonthCostAction(id: string): Promise<{ ok: boolean; error?: string }> {
+  const auth = await requireTeam();
+  if ("error" in auth) return { ok: false, error: auth.error };
+  const { error } = await auth.supabase.from("monthly_costs").delete().eq("id", id);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/platform/finance");
+  return { ok: true };
+}

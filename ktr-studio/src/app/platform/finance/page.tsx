@@ -22,6 +22,7 @@ import { getEditors } from "@/lib/editors";
 import { usdToEurRate, toEur, fmtMoney } from "@/lib/fx";
 import { getDeals, pipelineFor, pipelineMax } from "@/lib/deals";
 import { PipelineCard } from "./PipelineCard";
+import { MonthCostsCard, type MonthCost } from "./MonthCostsCard";
 import type { CostLine } from "./actions";
 import { createClient as supabaseServer } from "@/lib/supabase/server";
 import Link from "next/link";
@@ -162,6 +163,20 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
     dismissed = new Set((data ?? []).filter((d) => String(d.until) >= now.toISOString().slice(0, 10)).map((d) => String(d.item_key)));
   }
 
+  // Kosten die bij een maand horen maar niet bij één factuur: editfacturen,
+  // losse software, eenmalige uitgaven.
+  const monthCosts = new Map<string, MonthCost[]>();
+  if (supabase && !demo) {
+    const { data } = await supabase.from("monthly_costs").select("id,month,kind,label,amount,source").order("kind").order("label");
+    for (const r of data ?? []) {
+      const key = String(r.month).slice(0, 7);
+      const arr = monthCosts.get(key) ?? [];
+      arr.push({ id: String(r.id), month: key, kind: String(r.kind), label: String(r.label), amount: Number(r.amount ?? 0), source: (r.source as string) ?? null });
+      monthCosts.set(key, arr);
+    }
+  }
+  const monthCostOf = (m: string, kind: string) => (monthCosts.get(m) ?? []).filter((c) => c.kind === kind).reduce((s, c) => s + c.amount, 0);
+
   const fixedTotal = fixedCosts.reduce((s, r) => s + r.amount, 0);
 
   // Winst per maand: gefactureerd + overig − editkosten (per factuur) −
@@ -172,11 +187,13 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
     const mo = byMonth.get(m);
     const ex = expenseByMonth.get(m) ?? { klant: 0, vast: 0, prive: 0, overig: 0 };
     if (!mo) return { omzet: 0, kosten: 0, winst: 0, edit: 0, vast: fixedTotal + ownContentCost, overigUit: ex.overig, klantBank: ex.klant };
-    const edit = mo.invoices.reduce((s, i) => s + (invoiceCostById.get(i.id) ?? 0), 0);
-    const kosten = edit + fixedTotal + ex.overig + ownContentCost;
+    const edit = mo.invoices.reduce((s, i) => s + (invoiceCostById.get(i.id) ?? 0), 0) + monthCostOf(m, "edit");
+    const vast = fixedTotal + ownContentCost + monthCostOf(m, "software");
+    const overigUit = ex.overig + monthCostOf(m, "overig");
+    const kosten = edit + vast + overigUit;
     const overig = (incomeByMonth.get(m) ?? []).reduce((s, r) => s + r.amount, 0);
     const omzet = mo.invoiced + overig + stripeExtra(m);
-    return { omzet, kosten, winst: omzet - kosten, edit, vast: fixedTotal + ownContentCost, overigUit: ex.overig, klantBank: ex.klant };
+    return { omzet, kosten, winst: omzet - kosten, edit, vast, overigUit, klantBank: ex.klant };
   };
 
   // Omzet van de gekozen maand (gefactureerd + overig) — naast MRR in de
@@ -574,7 +591,7 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
               <Eyebrow>Afgelopen {historyMonths.length} maanden</Eyebrow>
               <h2 className="font-display font-extrabold text-xl">Wat je overhoudt na edit- en softwarekosten</h2>
             </div>
-            <span className="text-[12px] text-muted">Editkosten uit je facturen · vaste lasten en overige uitgaven uit de bank</span>
+            <span className="text-[12px] text-muted">Editkosten uit je facturen en editfacturen · vaste lasten, software en overige uitgaven</span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-[13px]">
@@ -632,6 +649,8 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
           </div>
         </Card>
       )}
+
+      {!demo && <MonthCostsCard month={maand} monthLabel={maandLabel} costs={monthCosts.get(maand) ?? []} />}
 
       <RecurringCard suggestions={recurring} />
 
