@@ -58,10 +58,10 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
   const clientCols =
     "id,name,ig_handle,status,monthly_value,package,videos_per_month,editor_cost,payment_status,created_at,soul_character_id,reference_image_url,brand_prompt,brand_primary,brand_secondary";
   let [clientsRes, contentRes, leadsRes, metricsRes] = await Promise.all([
-    supabase.from("clients").select(`${clientCols},content_mix,manager,hidden,health,health_note`),
+    supabase.from("clients").select(`${clientCols},content_mix,manager,hidden,health,health_note,video_price`),
     supabase
       .from("content")
-      .select("id,client_id,title,hook,format,stage,published_at,permalink,posting_date,deadline,brief_url,editor_id"),
+      .select("id,client_id,title,hook,format,stage,published_at,permalink,posting_date,deadline,brief_url,editor_id,cost_price,sell_price"),
     supabase
       .from("leads")
       .select("id,client_id,name,source_label,source_content_id,stage,value,setter,created_at,closed_at,next_followup,followup_note"),
@@ -118,6 +118,7 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
       leadsThisMonth: cLeads.filter((l) => inThisMonth(l.created_at)).length,
       packageName: c.package ?? null,
       videosPerMonth: Number(c.videos_per_month ?? 0),
+      videoPrice: c.video_price === null || c.video_price === undefined ? null : Number(c.video_price),
       contentMix: c.content_mix ?? null,
       editorCost: Number(c.editor_cost ?? 0),
       manager: (c.manager as string) ?? null,
@@ -145,6 +146,8 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
       hook: x.hook ?? "",
       assignee: "—",
       editorId: x.editor_id ?? null,
+      costPrice: x.cost_price === null || x.cost_price === undefined ? null : Number(x.cost_price),
+      sellPrice: x.sell_price === null || x.sell_price === undefined ? null : Number(x.sell_price),
       // Editors plannen op posting_date/deadline; pas ná publicatie telt published_at.
       due: (() => {
         const d = x.posting_date ?? x.deadline ?? x.published_at;
@@ -227,7 +230,7 @@ export async function getClient(id: string): Promise<Client | null> {
   const supabase = await createClient();
   if (!supabase) return null;
   const legacyCols =
-    "id,name,ig_handle,yt_channel_id,status,monthly_value,package,videos_per_month,editor_cost,payment_status,soul_character_id,reference_image_url,brand_prompt,brand_identity,brand_story,brand_strategy,brand_voice,notes,brand_primary,brand_secondary";
+    "id,name,ig_handle,yt_channel_id,status,monthly_value,package,videos_per_month,video_price,editor_cost,payment_status,soul_character_id,reference_image_url,brand_prompt,brand_identity,brand_story,brand_strategy,brand_voice,notes,brand_primary,brand_secondary";
   const baseCols = `${legacyCols},manager,hidden,health,health_note,start_date,tiktok_handle,moneybird_contact`;
   // Nieuwe kolommen apart: als een migratie nog niet gedraaid is mag het
   // klantprofiel niet stuk — dan vallen we terug op de basiskolommen.
@@ -253,6 +256,7 @@ export async function getClient(id: string): Promise<Client | null> {
     leadsThisMonth: 0,
     packageName: c.package ?? null,
     videosPerMonth: Number(c.videos_per_month ?? 0),
+    videoPrice: c.video_price === null || c.video_price === undefined ? null : Number(c.video_price),
     contentMix: c.content_mix ?? null,
     asanaProject: c.asana_project_id ?? null,
     editorCost: Number(c.editor_cost ?? 0),

@@ -4,6 +4,7 @@ import { useActionState, useEffect, useState } from "react";
 import { createContentAction, type ContentActionResult } from "./actions";
 import { stageMeta, type PipelineStage } from "../_data";
 import { icons } from "../_components";
+import { PriceFields, type PriceOption } from "./PriceFields";
 
 const initial: ContentActionResult = {};
 const STAGE_ORDER: PipelineStage[] = [
@@ -18,10 +19,7 @@ const STAGE_ORDER: PipelineStage[] = [
 ];
 const FORMATS = ["Longform", "Clip", "Lifestyle", "VO story", "Talking", "Trio", "Carrousel"];
 
-interface Option {
-  id: string;
-  label: string;
-}
+type Option = PriceOption;
 
 // Bewust volledig Engels: dit scherm is er ook voor de editors —
 // één taal houdt het simpel.
@@ -36,6 +34,9 @@ export function AddContentDialog({
 }) {
   const [open, setOpen] = useState(false);
   const [state, action, pending] = useActionState(createContentAction, initial);
+  // Klant en editor bijhouden: daar hangen de standaardprijzen aan.
+  const [clientId, setClientId] = useState(defaultClient ?? clients[0]?.id ?? "");
+  const [editorId, setEditorId] = useState("");
 
   useEffect(() => {
     if (state.ok) {
@@ -64,7 +65,7 @@ export function AddContentDialog({
             ) : (
               <form action={action} className="space-y-3.5">
                 <div className="grid grid-cols-2 gap-3">
-                  <Select name="client_id" label="Client" options={clients} required defaultValue={defaultClient} />
+                  <Select name="client_id" label="Client" options={clients} required defaultValue={defaultClient} onChange={setClientId} />
                   <Select name="stage" label="Stage" options={STAGE_ORDER.map((s) => ({ id: s, label: stageMeta[s].label }))} />
                 </div>
                 <Field name="title" label="Title" placeholder="Client result reveal" required />
@@ -74,7 +75,7 @@ export function AddContentDialog({
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <Field name="deadline" label="Deadline" type="date" />
-                  <Select name="editor_id" label="Editor" options={editors} placeholder={editors.length ? "— none —" : "No editors yet"} />
+                  <Select name="editor_id" label="Editor" options={editors} placeholder={editors.length ? "— none —" : "No editors yet"} onChange={setEditorId} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <Field name="posting_date" label="Goes live on" type="date" />
@@ -83,6 +84,8 @@ export function AddContentDialog({
                 <Field name="brief_url" label="Raw footage (Drive)" placeholder="https://drive.google.com/… — where the files are" />
                 <Field name="frame_url" label="Delivery (Frame)" placeholder="https://f.io/… — filled in by the editor" />
                 <Field name="vo_url" label="Voice-over file" placeholder="https://… — VO stories only" />
+                <PriceFields editors={editors} clients={clients} editorId={editorId} clientId={clientId} />
+
                 <label className="block">
                   <span className="block text-[12px] font-mono uppercase tracking-wider text-muted mb-1.5">Extra notes</span>
                   <textarea
@@ -118,11 +121,11 @@ function Field({ name, label, type = "text", placeholder, required }: { name: st
   );
 }
 
-function Select({ name, label, options, placeholder, required, defaultValue }: { name: string; label: string; options: Option[]; placeholder?: string; required?: boolean; defaultValue?: string }) {
+function Select({ name, label, options, placeholder, required, defaultValue, onChange }: { name: string; label: string; options: Option[]; placeholder?: string; required?: boolean; defaultValue?: string; onChange?: (v: string) => void }) {
   return (
     <label className="block">
       <span className="block text-[12px] font-mono uppercase tracking-wider text-muted mb-1.5">{label}</span>
-      <select name={name} required={required} defaultValue={defaultValue ?? (placeholder !== undefined ? "" : options[0]?.id ?? "")} className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-3.5 py-2.5 text-sm outline-none focus:border-accent/40">
+      <select name={name} required={required} defaultValue={defaultValue ?? (placeholder !== undefined ? "" : options[0]?.id ?? "")} onChange={(e) => onChange?.(e.target.value)} className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-3.5 py-2.5 text-sm outline-none focus:border-accent/40">
         {placeholder !== undefined && <option value="" className="bg-card">{placeholder}</option>}
         {options.map((o) => (
           <option key={o.id} value={o.id} className="bg-card">{o.label}</option>

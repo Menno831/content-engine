@@ -6,6 +6,7 @@ import { getEditors } from "@/lib/editors";
 import { AddContentDialog } from "./AddContentDialog";
 import { QuickAddDialog } from "./QuickAddDialog";
 import { ContentCardItem } from "./ContentCardItem";
+import { CostStrip } from "./CostStrip";
 import { GanttBoard } from "./GanttBoard";
 import { ClientFilter } from "../ClientFilter";
 import { ClientBoard } from "./ClientBoard";
@@ -64,8 +65,9 @@ export default async function Pipeline({
   }
 
   const editors = await getEditors();
-  const clientOptions = clients.map((c) => ({ id: c.id, label: c.name }));
-  const editorOptions = editors.map((e) => ({ id: e.id, label: e.name }));
+  // De dialogen vullen prijzen voor: editor-tarief en klantprijs gaan mee.
+  const clientOptions = clients.map((c) => ({ id: c.id, label: c.name, amount: c.videoPrice ?? undefined }));
+  const editorOptions = editors.map((e) => ({ id: e.id, label: e.name, amount: e.payPerVideo || undefined }));
 
   // Kaarten dragen de editor-naam (voor het board en de editor-weergave).
   const editorNameById = new Map(editors.map((e) => [e.id, e.name]));
@@ -178,6 +180,8 @@ export default async function Pipeline({
           </Link>
         </div>
       )}
+
+      {!isEditor && !demo && <CostStrip cards={contentCards} />}
 
       <ClientFilter
         clients={(ownEditorId

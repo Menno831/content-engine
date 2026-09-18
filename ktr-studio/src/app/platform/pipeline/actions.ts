@@ -108,6 +108,16 @@ async function notifyOwner(
   await sendEmail({ to: ownerUser?.user?.email, subject: emailSubject, html: emailHtml });
 }
 
+
+// "21,41" en "21.41" leveren allebei 21.41 op; leeg blijft leeg (null),
+// zodat "niet ingevuld" niet stilzwijgend 0 euro wordt.
+function euro(v: FormDataEntryValue | null): number | null {
+  const raw = String(v ?? "").trim();
+  if (!raw) return null;
+  const n = Number(raw.replace(/[^\d,.-]/g, "").replace(",", "."));
+  return Number.isFinite(n) ? n : null;
+}
+
 export async function createContentAction(
   _prev: ContentActionResult,
   formData: FormData
@@ -141,6 +151,8 @@ export async function createContentAction(
     vo_url: String(formData.get("vo_url") ?? "").trim() || null,
     reference_url: String(formData.get("reference_url") ?? "").trim() || null,
     footage_notes: String(formData.get("footage_notes") ?? "").trim() || null,
+    cost_price: euro(formData.get("cost_price")),
+    sell_price: euro(formData.get("sell_price")),
     stage,
   });
   if (error) return { error: error.message };
@@ -301,6 +313,8 @@ export interface ContentDetail {
   vo_url: string;
   reference_url: string;
   footage_notes: string;
+  cost_price: string;
+  sell_price: string;
 }
 
 export async function getContentDetailAction(
@@ -312,7 +326,7 @@ export async function getContentDetailAction(
   const { data, error } = await supabase
     .from("content")
     .select(
-      "id,title,hook,format,content_type,stage,deadline,posting_date,editor_id,brief_url,frame_url,vo_url,reference_url,footage_notes,cta"
+      "id,title,hook,format,content_type,stage,deadline,posting_date,editor_id,brief_url,frame_url,vo_url,reference_url,footage_notes,cta,cost_price,sell_price"
     )
     .eq("id", contentId)
     .maybeSingle();
@@ -336,6 +350,8 @@ export async function getContentDetailAction(
       vo_url: data.vo_url ?? "",
       reference_url: data.reference_url ?? "",
       footage_notes: data.footage_notes ?? "",
+      cost_price: data.cost_price === null || data.cost_price === undefined ? "" : String(data.cost_price),
+      sell_price: data.sell_price === null || data.sell_price === undefined ? "" : String(data.sell_price),
     },
   };
 }
@@ -377,6 +393,8 @@ export async function updateContentAction(
       vo_url: String(formData.get("vo_url") ?? "").trim() || null,
       reference_url: String(formData.get("reference_url") ?? "").trim() || null,
       footage_notes: String(formData.get("footage_notes") ?? "").trim() || null,
+      cost_price: euro(formData.get("cost_price")),
+      sell_price: euro(formData.get("sell_price")),
     })
     .eq("id", contentId);
   if (error) return { error: error.message };
@@ -444,6 +462,8 @@ export async function bulkCreateContentAction(
   const format = String(formData.get("format") ?? "Talking");
   const deadline = String(formData.get("deadline") ?? "").trim() || null;
   const briefUrl = String(formData.get("brief_url") ?? "").trim() || null;
+  const costPrice = euro(formData.get("cost_price"));
+  const sellPrice = euro(formData.get("sell_price"));
 
   const { error } = await supabase.from("content").insert(
     titles.map((title) => ({
@@ -454,6 +474,8 @@ export async function bulkCreateContentAction(
       editor_id: editorId,
       deadline,
       brief_url: briefUrl,
+      cost_price: costPrice,
+      sell_price: sellPrice,
     }))
   );
   if (error) return { error: error.message };

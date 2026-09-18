@@ -14,6 +14,7 @@ export function ClientFinanceDialog({
   packageName,
   videosPerMonth,
   editorCost,
+  videoPrice,
   children,
 }: {
   clientId: string;
@@ -22,6 +23,7 @@ export function ClientFinanceDialog({
   packageName: string | null;
   videosPerMonth: number;
   editorCost: number;
+  videoPrice?: number | null;
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -30,6 +32,7 @@ export function ClientFinanceDialog({
     pakket: packageName ?? "",
     videos: String(videosPerMonth || ""),
     editorCost: String(editorCost || ""),
+    videoPrice: String(videoPrice || ""),
   });
   const [error, setError] = useState("");
   const [pending, start] = useTransition();
@@ -41,6 +44,7 @@ export function ClientFinanceDialog({
         package: form.pakket,
         videos_per_month: Number(form.videos) || 0,
         editor_cost: Number(form.editorCost) || 0,
+        video_price: form.videoPrice.trim() ? Number(form.videoPrice.replace(",", ".")) : null,
       });
       if (r.error) setError(r.error);
       else setOpen(false);
@@ -71,6 +75,19 @@ export function ClientFinanceDialog({
                   <input value={form.editorCost} onChange={(e) => setForm({ ...form, editorCost: e.target.value })} type="number" className={field} />
                 </label>
               </div>
+              <label className="block">
+                <span className={label}>Prijs per video €</span>
+                <input
+                  value={form.videoPrice}
+                  onChange={(e) => setForm({ ...form, videoPrice: e.target.value })}
+                  inputMode="decimal"
+                  placeholder="75,00"
+                  className={field}
+                />
+                <span className="block mt-1 text-[11.5px] text-muted">
+                  Vult automatisch de verkoopprijs in als je voor deze klant een video toevoegt.
+                </span>
+              </label>
               <div className="grid grid-cols-2 gap-3">
                 <label className="block">
                   <span className={label}>Pakket</span>

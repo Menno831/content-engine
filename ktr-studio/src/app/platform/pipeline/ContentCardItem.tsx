@@ -181,6 +181,7 @@ export function EditContentDialog({
     fBrief: "Raw footage (Drive)", fFrame: "Delivery (Frame)", fVo: "Voice-over file",
     fCta: "CTA (keyword / link the video points to)",
     fRef: "Reference video", fNotes: "Extra notes",
+    fCost: "Cost price (editor)", fSell: "Sell price (client)", fMargin: "margin",
   };
 
   useEffect(() => {
@@ -252,6 +253,22 @@ export function EditContentDialog({
             <Field name="cta" label={t.fCta} defaultValue={detail.cta} placeholder="bv. keyword GROEI → ManyChat-flow / link in bio" />
             <Field name="vo_url" label={t.fVo} defaultValue={detail.vo_url} placeholder="https://…" />
             <Field name="reference_url" label={t.fRef} defaultValue={detail.reference_url} placeholder="https://…" />
+            <div className="grid grid-cols-2 gap-3">
+              <Field name="cost_price" label={t.fCost} defaultValue={detail.cost_price} placeholder="21,41" />
+              <Field name="sell_price" label={t.fSell} defaultValue={detail.sell_price} placeholder="75,00" />
+            </div>
+            {(() => {
+              // Marge van de opgeslagen bedragen — meteen zichtbaar bij openen.
+              const n = (v: string) => Number(v.replace(",", ".")) || 0;
+              const m = n(detail.sell_price) - n(detail.cost_price);
+              if (!detail.cost_price && !detail.sell_price) return null;
+              return (
+                <p className={`text-[12.5px] ${m < 0 ? "text-red-400" : "text-emerald-400"}`}>
+                  €{m.toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {t.fMargin}
+                </p>
+              );
+            })()}
+
             <label className="block">
               <span className="block text-[12px] font-mono uppercase tracking-wider text-muted mb-1.5">{t.fNotes}</span>
               <textarea

@@ -27,6 +27,8 @@ export interface Client {
   // Finance
   packageName: string | null;
   videosPerMonth: number;
+  /** Standaard verkoopprijs per video voor deze klant. */
+  videoPrice?: number | null;
   /** Soorten video's in de retainer, bv. "4× Talking, 2× Lifestyle" of "Alleen YouTube". */
   contentMix?: string | null;
   /** Asana-project-id als deze klant z'n eigen Asana-bord heeft (twee-weg-sync). */
@@ -108,6 +110,9 @@ export interface ContentCard {
   deadlineISO?: string | null; // wanneer de editor moet aanleveren
   postingISO?: string | null; // wanneer het live gaat
   briefUrl?: string | null; // files/brief-link (Frame.io, Drive) voor de editor
+  /** Wat deze video de editor kost en wat de klant ervoor betaalt. */
+  costPrice?: number | null;
+  sellPrice?: number | null;
   editorId?: string | null; // toegewezen editor (voor het editor-board en de mails)
 }
 

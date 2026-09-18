@@ -3,14 +3,12 @@
 import { useActionState, useEffect, useState } from "react";
 import { bulkCreateContentAction, type ContentActionResult } from "./actions";
 import { icons } from "../_components";
+import { PriceFields, type PriceOption } from "./PriceFields";
 
 const initial: ContentActionResult = {};
 const FORMATS = ["Longform", "Clip", "Lifestyle", "VO story", "Talking", "Trio", "Carrousel"];
 
-interface Option {
-  id: string;
-  label: string;
-}
+type Option = PriceOption;
 
 // Bewust Engels: het board is er ook voor de editors — één taal.
 // Snelle invoer: één titel per regel, klant/editor/format één keer kiezen.
@@ -26,6 +24,10 @@ export function QuickAddDialog({
 }) {
   const [open, setOpen] = useState(false);
   const [state, action, pending] = useActionState(bulkCreateContentAction, initial);
+  const [clientId, setClientId] = useState(defaultClient ?? clients[0]?.id ?? "");
+  const [editorId, setEditorId] = useState("");
+  // Aantal regels tellen zodat de rekensom over de hele batch klopt.
+  const [count, setCount] = useState(0);
 
   useEffect(() => {
     if (state.ok) {
@@ -62,13 +64,14 @@ export function QuickAddDialog({
                     name="titles"
                     rows={6}
                     required
+                    onChange={(e) => setCount(e.target.value.split("\n").filter((l) => l.trim()).length)}
                     placeholder={"Talking: founder story\nClip from longform week 34\nLifestyle: Budapest b-roll"}
                     className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-3.5 py-2.5 text-sm outline-none focus:border-accent/40 transition-colors resize-y"
                   />
                 </label>
                 <div className="grid grid-cols-2 gap-3">
-                  <Select name="client_id" label="Client" options={clients} required defaultValue={defaultClient} />
-                  <Select name="editor_id" label="Editor" options={editors} placeholder={editors.length ? "— none —" : "No editors yet"} />
+                  <Select name="client_id" label="Client" options={clients} required defaultValue={defaultClient} onChange={setClientId} />
+                  <Select name="editor_id" label="Editor" options={editors} placeholder={editors.length ? "— none —" : "No editors yet"} onChange={setEditorId} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <Select name="format" label="Format" options={FORMATS.map((f) => ({ id: f, label: f }))} />
@@ -85,6 +88,22 @@ export function QuickAddDialog({
                   <Field name="deadline" label="Deadline (all)" type="date" />
                   <Field name="brief_url" label="Raw footage (Drive)" placeholder="https://drive.google.com/…" />
                 </div>
+
+                <PriceFields
+                  editors={editors}
+                  clients={clients}
+                  editorId={editorId}
+                  clientId={clientId}
+                  count={count}
+                  labels={{
+                    cost: "Cost per video (editor)",
+                    sell: "Sell price per video",
+                    perVideo: "per video",
+                    total: count > 1 ? `Total for ${count} videos` : "Total",
+                    margin: "margin",
+                    noPrices: "Fill in a price to see what this batch costs and earns.",
+                  }}
+                />
 
                 {state.error && <p className="text-[13px] text-red-400">{state.error}</p>}
                 {state.ok && <p className="text-[13px] text-emerald-400">{state.ok}</p>}
@@ -113,11 +132,11 @@ function Field({ name, label, type = "text", placeholder }: { name: string; labe
   );
 }
 
-function Select({ name, label, options, placeholder, required, defaultValue }: { name: string; label: string; options: Option[]; placeholder?: string; required?: boolean; defaultValue?: string }) {
+function Select({ name, label, options, placeholder, required, defaultValue, onChange }: { name: string; label: string; options: Option[]; placeholder?: string; required?: boolean; defaultValue?: string; onChange?: (v: string) => void }) {
   return (
     <label className="block">
       <span className="block text-[12px] font-mono uppercase tracking-wider text-muted mb-1.5">{label}</span>
-      <select name={name} required={required} defaultValue={defaultValue ?? (placeholder !== undefined ? "" : options[0]?.id ?? "")} className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-3.5 py-2.5 text-sm outline-none focus:border-accent/40">
+      <select name={name} required={required} defaultValue={defaultValue ?? (placeholder !== undefined ? "" : options[0]?.id ?? "")} onChange={(e) => onChange?.(e.target.value)} className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-3.5 py-2.5 text-sm outline-none focus:border-accent/40">
         {placeholder !== undefined && <option value="" className="bg-card">{placeholder}</option>}
         {options.map((o) => (
           <option key={o.id} value={o.id} className="bg-card">{o.label}</option>

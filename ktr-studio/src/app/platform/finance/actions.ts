@@ -89,7 +89,7 @@ export async function deleteOtherIncomeAction(id: string): Promise<{ ok: boolean
 // ── Retainer/pakket per klant bijwerken (vanaf Finance) ─────────
 export async function updateClientFinanceAction(
   clientId: string,
-  patch: { monthly_value?: number; package?: string; videos_per_month?: number; editor_cost?: number }
+  patch: { monthly_value?: number; package?: string; videos_per_month?: number; editor_cost?: number; video_price?: number | null }
 ): Promise<{ ok: boolean; error?: string }> {
   const supabase = await supabaseServer();
   if (!supabase) return { ok: false, error: "Supabase niet geconfigureerd." };

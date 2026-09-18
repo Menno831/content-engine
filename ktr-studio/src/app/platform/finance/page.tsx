@@ -562,6 +562,7 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
                       packageName={c.packageName}
                       videosPerMonth={c.videosPerMonth}
                       editorCost={c.editorCost}
+                      videoPrice={c.videoPrice}
                     >
                       <div className="flex items-center gap-2.5 cursor-pointer">
                         <Avatar initials={c.initials} size={30} />

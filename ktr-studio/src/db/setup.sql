@@ -63,6 +63,7 @@ create table if not exists clients (
   package          text,
   monthly_value    numeric default 0,   -- retainer
   videos_per_month int default 0,
+  video_price      numeric,             -- standaard verkoopprijs per video
   content_mix      text,               -- soorten video's in de retainer
   asana_project_id text,               -- eigen Asana-bord (twee-weg-sync)
   editor_cost      numeric default 0,
@@ -138,6 +139,8 @@ create table if not exists content (
   deadline     date,
   posting_date date,
   editor_id    uuid references editors (id) on delete set null,
+  cost_price   numeric,         -- wat deze video de editor kost
+  sell_price   numeric,         -- wat de klant ervoor betaalt
   delivered_at timestamptz,     -- wanneer de editor aanleverde
   paid         boolean not null default false,
   created_at   timestamptz not null default now()

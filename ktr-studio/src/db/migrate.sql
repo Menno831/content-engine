@@ -844,3 +844,8 @@ where not exists (
   where e.agency_id = s.agency_id and e.date = s.month
     and e.campaign = coalesce(s.notes, 'Maandtotaal (oude invoer)')
 );
+
+-- ── 040 · Kostprijs en verkoopprijs per video ──────────────────
+alter table content add column if not exists cost_price numeric;  -- wat de editor kost
+alter table content add column if not exists sell_price numeric;  -- wat de klant betaalt
+alter table clients add column if not exists video_price numeric; -- standaardprijs per video
