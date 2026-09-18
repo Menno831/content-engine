@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { createClient as supabaseServer } from "@/lib/supabase/server";
 import { getSessionContext } from "@/lib/auth";
 import { requireTeam } from "@/lib/guard";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { importBankHistory } from "@/lib/bank";
 
 const STATUSES = ["betaald", "open", "te_laat"] as const;
 
@@ -351,4 +353,20 @@ export async function deleteMonthCostAction(id: string): Promise<{ ok: boolean; 
   if (error) return { ok: false, error: error.message };
   revalidatePath("/platform/finance");
   return { ok: true };
+}
+
+// ── Bankgeschiedenis ophalen en sorteren ────────────────────────
+// Moneybird heeft ABN en Revolut al gekoppeld; de sleutel staat op de
+// server, dus dit kan met één klik zonder dat je iets hoeft te delen.
+export async function importBankHistoryAction(
+  fromDate: string,
+  toDate: string
+): Promise<{ ok: boolean; fetched?: number; labeled?: number; byAi?: number; error?: string }> {
+  const auth = await requireTeam();
+  if ("error" in auth) return { ok: false, error: auth.error };
+  const admin = createAdminClient() ?? auth.supabase;
+  const r = await importBankHistory(admin, auth.agency.id, fromDate, toDate);
+  if (!r.ok) return { ok: false, error: r.error ?? "Ophalen mislukt." };
+  revalidatePath("/platform/finance");
+  return { ok: true, fetched: r.fetched, labeled: r.labeled, byAi: r.byAi, error: r.error };
 }

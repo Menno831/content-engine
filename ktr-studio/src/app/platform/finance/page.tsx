@@ -23,6 +23,7 @@ import { usdToEurRate, toEur, fmtMoney } from "@/lib/fx";
 import { getDeals, pipelineFor, pipelineMax } from "@/lib/deals";
 import { PipelineCard } from "./PipelineCard";
 import { MonthCostsCard, type MonthCost } from "./MonthCostsCard";
+import { BankHistoryCard } from "./BankHistoryCard";
 import type { CostLine } from "./actions";
 import { createClient as supabaseServer } from "@/lib/supabase/server";
 import Link from "next/link";
@@ -132,6 +133,8 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
   // per maand laat zien wat er via de bank uitging.
   const expenseByMonth = new Map<string, { klant: number; vast: number; prive: number; overig: number }>();
   let reserveConfig: ReserveConfig | null = null;
+  let bankLabeled = 0;
+  let bankOldest: string | null = null;
   if (supabase && !demo) {
     const [goalsRes, linksRes, agRes] = await Promise.all([
       supabase.from("month_goals").select("month,goal,note"),
@@ -141,6 +144,8 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
     goalByMonth = new Map((goalsRes.data ?? []).map((g) => [String(g.month), { goal: Number(g.goal ?? 0), note: g.note ?? null }]));
     linkedIds = new Set((linksRes.data ?? []).map((l) => String(l.id)));
     const totalsMap = new Map<string, number>();
+    bankLabeled = (linksRes.data ?? []).length;
+    bankOldest = (linksRes.data ?? []).map((l) => String(l.mutation_date ?? "")).filter(Boolean).sort()[0] ?? null;
     for (const l of linksRes.data ?? []) {
       const mKey = String(l.mutation_date ?? "").slice(0, 7);
       if (mKey) {
@@ -188,7 +193,10 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
     const ex = expenseByMonth.get(m) ?? { klant: 0, vast: 0, prive: 0, overig: 0 };
     if (!mo) return { omzet: 0, kosten: 0, winst: 0, edit: 0, vast: fixedTotal + ownContentCost, overigUit: ex.overig, klantBank: ex.klant };
     const edit = mo.invoices.reduce((s, i) => s + (invoiceCostById.get(i.id) ?? 0), 0) + monthCostOf(m, "edit");
-    const vast = fixedTotal + ownContentCost + monthCostOf(m, "software");
+    // Staat er voor deze maand echte bankdata? Dan zijn dát je vaste
+    // lasten — nauwkeuriger dan het vaste maandbedrag.
+    const vastBank = ex.vast;
+    const vast = (vastBank > 0 ? vastBank : fixedTotal) + ownContentCost + monthCostOf(m, "software");
     const overigUit = ex.overig + monthCostOf(m, "overig");
     const kosten = edit + vast + overigUit;
     const overig = (incomeByMonth.get(m) ?? []).reduce((s, r) => s + r.amount, 0);
@@ -649,6 +657,8 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
           </div>
         </Card>
       )}
+
+      {!demo && moneybird.configured && <BankHistoryCard labeled={bankLabeled} oldest={bankOldest} />}
 
       {!demo && <MonthCostsCard month={maand} monthLabel={maandLabel} costs={monthCosts.get(maand) ?? []} />}
 

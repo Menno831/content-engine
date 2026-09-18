@@ -402,3 +402,18 @@ sessie niet dubbel werk doet.
   bewerken en verwijderen.
 - Niet te reconstrueren uit mail: de bankafschriften zelf. Moneybird-token
   is 'sensitive' in Vercel, dus vanuit deze sessie niet op te halen.
+
+## Ronde 18 sep 2026 (9) — bankgeschiedenis in één klik
+
+- Menno vroeg of ik door zijn bankgeschiedenis kon. Vanuit de sessie niet:
+  het Moneybird-token staat als 'sensitive' in Vercel. De app zelf kan het
+  wél, want daar draait de sleutel — dus knop gebouwd in plaats van export.
+- `getMoneybirdMutationRange(van, tot)`: paginaal (100/pagina, max 40
+  pagina's) alle mutaties tussen twee datums.
+- `lib/bank.ts` `importBankHistory()`: labelt elke afschrijving als vast /
+  klant / prive / overig. Eerst regels op tegenpartij (softwarelijst,
+  supermarkten, editors), de rest in batches van 60 naar het snelle model.
+  Wat al een label heeft blijft ongemoeid.
+- `BankHistoryCard` op Finance met knoppen voor dit en vorig jaar.
+- Kostenhistorie: staat er voor een maand echte bankdata onder 'vast', dan
+  zijn dát de vaste lasten van die maand in plaats van het vaste bedrag.

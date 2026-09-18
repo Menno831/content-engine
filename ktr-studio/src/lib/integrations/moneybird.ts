@@ -181,3 +181,46 @@ export async function getMoneybirdMutations(days = 45): Promise<{ configured: bo
   }
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
+
+// ── Hele bankgeschiedenis ophalen ───────────────────────────────
+// Voor het terugkijken over een heel jaar: paginaal alles ophalen tussen
+// twee datums, inkomend én uitgaand. Moneybird geeft 100 per pagina.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export async function getMoneybirdMutationRange(
+  fromDate: string, // YYYY-MM-DD
+  toDate: string
+): Promise<{ configured: boolean; mutations: MoneybirdMutation[]; error?: string }> {
+  if (!moneybirdConfigured()) return { configured: false, mutations: [] };
+  const period = `${fromDate.replace(/-/g, "")}..${toDate.replace(/-/g, "")}`;
+  const all: MoneybirdMutation[] = [];
+  try {
+    for (let page = 1; page <= 40; page++) {
+      const res = await fetch(
+        `https://moneybird.com/api/v2/${ADMINISTRATION_ID}/financial_mutations.json?filter=${encodeURIComponent(`period:${period}`)}&per_page=100&page=${page}`,
+        { headers: { Authorization: `Bearer ${TOKEN}` }, cache: "no-store" }
+      );
+      if (!res.ok) {
+        return { configured: true, mutations: all, error: `Moneybird gaf status ${res.status} op pagina ${page}` };
+      }
+      const rows: any[] = await res.json();
+      if (!Array.isArray(rows) || rows.length === 0) break;
+      for (const r of rows) {
+        all.push({
+          id: String(r.id),
+          date: r.date ?? null,
+          amount: Number(r.amount ?? 0),
+          party: String(r.contra_account_name || r.batch_reference || "Onbekend"),
+          description: String(r.message || "").slice(0, 200),
+        });
+      }
+      if (rows.length < 100) break;
+    }
+    all.sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
+    return { configured: true, mutations: all };
+  } catch (e) {
+    let why = e instanceof Error ? e.message : "onbekende fout";
+    if (TOKEN) why = why.split(TOKEN).join("•••");
+    return { configured: true, mutations: all, error: `Moneybird niet bereikbaar (${why}).` };
+  }
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */
