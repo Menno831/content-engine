@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { syncClientAll } from "@/lib/sync/client";
 import { syncCompetitorCore } from "@/lib/sync/competitors";
 import { scoreUncheckedPosts } from "@/lib/fit";
-import { getMoneybirdMonth, moneybirdConfigured } from "@/lib/integrations/moneybird";
+import { getMoneybirdMonth, getMoneybirdDrafts, moneybirdConfigured } from "@/lib/integrations/moneybird";
 import { fmtEur } from "@/app/platform/_data";
 
 // Nachtelijke sync van alle klanten (Vercel Cron). Beveiligd met CRON_SECRET.
@@ -96,9 +96,54 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // ── Factuur moet eruit (ochtendrun) ─────────────────────────────
+  // Klanten met een retainer en een factuurdag die al geweest is, maar
+  // zonder factuur óf concept in Moneybird deze maand: één melding per
+  // klant per maand, zodat er nooit een factuur vergeten wordt.
+  let invoiceReminders = 0;
+  if (moneybirdConfigured() && new Date().getUTCHours() < 12) {
+    const [mb, drafts] = await Promise.all([getMoneybirdMonth(), getMoneybirdDrafts()]);
+    if (!mb.error && !drafts.error) {
+      const contacts = [...mb.invoices, ...drafts.drafts].map((i) => i.contact.toLowerCase());
+      const now = new Date();
+      const dayNow = Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Amsterdam", day: "numeric" }).format(now));
+      const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
+      const { data: due } = await admin
+        .from("clients")
+        .select("id, agency_id, name, monthly_value, invoice_day, status")
+        .gt("monthly_value", 0)
+        .neq("status", "gepauzeerd");
+      const { data: sent } = await admin
+        .from("notifications")
+        .select("title")
+        .like("title", "Factuur moet eruit:%")
+        .gte("created_at", monthStart);
+      const already = new Set((sent ?? []).map((n) => String(n.title)));
+      for (const c of due ?? []) {
+        const day = Number(c.invoice_day ?? 1);
+        if (dayNow < day) continue;
+        const first = String(c.name ?? "").trim().split(/\s+/)[0]?.toLowerCase();
+        if (!first || contacts.some((x) => x.includes(first))) continue;
+        const title = `Factuur moet eruit: ${c.name}`;
+        if (already.has(title)) continue;
+        await admin.from("notifications").insert({
+          agency_id: c.agency_id,
+          client_id: c.id,
+          audience: "team",
+          type: "todo",
+          title,
+          body: `${fmtEur(Number(c.monthly_value))} retainer · factuurdag ${day} is geweest en er staat nog geen factuur of concept in Moneybird.`,
+          link: "/platform/finance",
+        });
+        invoiceReminders++;
+      }
+    }
+  }
+
   return NextResponse.json({
     ranAt: new Date().toISOString(),
     synced: results.length,
+    invoiceReminders,
     competitors: competitorsSynced,
     fitScored: fit.scored,
     outreachReminder,

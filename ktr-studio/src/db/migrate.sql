@@ -970,3 +970,6 @@ create unique index if not exists idx_meetings_external
 
 alter table agencies add column if not exists calendar_ics_url text;
 alter table agencies add column if not exists calendar_synced_at timestamptz;
+
+-- ── 046 · Factuurdag per klant ─────────────────────────────────
+alter table clients add column if not exists invoice_day int not null default 1;

@@ -29,6 +29,8 @@ export interface Client {
   videosPerMonth: number;
   /** Standaard verkoopprijs per video voor deze klant. */
   videoPrice?: number | null;
+  /** Dag van de maand waarop de retainer gefactureerd hoort te zijn. */
+  invoiceDay?: number;
   /** Soorten video's in de retainer, bv. "4× Talking, 2× Lifestyle" of "Alleen YouTube". */
   contentMix?: string | null;
   /** Asana-project-id als deze klant z'n eigen Asana-bord heeft (twee-weg-sync). */

@@ -63,15 +63,18 @@ export function Card({
   hover = false,
   onClick,
   title,
+  id,
 }: {
   children: ReactNode;
   className?: string;
   hover?: boolean;
   onClick?: () => void;
   title?: string;
+  id?: string;
 }) {
   return (
     <div
+      id={id}
       onClick={onClick}
       title={title}
       className={`bg-card border border-white/[0.07] rounded-2xl ${

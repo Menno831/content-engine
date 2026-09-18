@@ -15,6 +15,10 @@ import { InvoiceCost } from "./InvoiceCost";
 import { FixedCosts, type FixedCostRow } from "./FixedCosts";
 import { OtherIncome, type IncomeRow } from "./OtherIncome";
 import { ClientFinanceDialog } from "./ClientFinanceDialog";
+import { RecurringCard } from "./RecurringCard";
+import { FinanceTodo, type TodoItem } from "./FinanceTodo";
+import { findRecurring } from "@/lib/recurring";
+import { getEditors } from "@/lib/editors";
 import type { CostLine } from "./actions";
 import { createClient as supabaseServer } from "@/lib/supabase/server";
 import Link from "next/link";
@@ -51,11 +55,14 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
 
   // Alle maanden in één keer (Moneybird cachet per maand 10 min) voor de
   // maandvergelijking: gaan we er elke maand op vooruit?
-  const [{ clients, demo }, { agency }, drafts, bank, ...allMonths] = await Promise.all([
+  // Bankmutaties 120 dagen terug: genoeg om terugkerende afschrijvingen
+  // (vaste lasten) in minstens twee maanden te herkennen.
+  const [{ clients, demo }, { agency }, drafts, bank, editors, ...allMonths] = await Promise.all([
     getWorkspaceData(),
     getSessionContext(),
     getMoneybirdDrafts(),
-    getMoneybirdMutations(45),
+    getMoneybirdMutations(120),
+    getEditors(),
     ...months.map((m) => getMoneybirdMonth(m === thisMonth ? undefined : m)),
   ]);
   const byMonth = new Map(months.map((m, i) => [m, allMonths[i]]));
@@ -115,6 +122,9 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
   let goalByMonth = new Map<string, { goal: number; note: string | null }>();
   let linkedIds = new Set<string>();
   let expenseTotals: { kind: string; total: number }[] = [];
+  // Gelabelde uitgaven per maand (positief), zodat de kostenhistorie
+  // per maand laat zien wat er via de bank uitging.
+  const expenseByMonth = new Map<string, { klant: number; vast: number; prive: number; overig: number }>();
   let reserveConfig: ReserveConfig | null = null;
   if (supabase && !demo) {
     const [goalsRes, linksRes, agRes] = await Promise.all([
@@ -126,7 +136,14 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
     linkedIds = new Set((linksRes.data ?? []).map((l) => String(l.id)));
     const totalsMap = new Map<string, number>();
     for (const l of linksRes.data ?? []) {
-      if (String(l.mutation_date ?? "").slice(0, 7) !== thisMonth) continue;
+      const mKey = String(l.mutation_date ?? "").slice(0, 7);
+      if (mKey) {
+        const cur = expenseByMonth.get(mKey) ?? { klant: 0, vast: 0, prive: 0, overig: 0 };
+        const kind = String(l.kind) as keyof typeof cur;
+        if (kind in cur) cur[kind] += Math.abs(Number(l.amount ?? 0));
+        expenseByMonth.set(mKey, cur);
+      }
+      if (mKey !== thisMonth) continue;
       totalsMap.set(String(l.kind), (totalsMap.get(String(l.kind)) ?? 0) + Number(l.amount ?? 0));
     }
     expenseTotals = [...totalsMap.entries()].map(([kind, total]) => ({ kind, total }));
@@ -135,14 +152,19 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
 
   const fixedTotal = fixedCosts.reduce((s, r) => s + r.amount, 0);
 
-  // Winst per maand: gefactureerd + overig − factuurkosten − vaste lasten.
+  // Winst per maand: gefactureerd + overig − editkosten (per factuur) −
+  // vaste lasten − overige gelabelde uitgaven uit de bank. Bankuitgaven
+  // die als "klant" gelabeld zijn tellen niet dubbel: dat zijn doorgaans
+  // dezelfde editor-betalingen die al als factuurkosten staan.
   const profitOf = (m: string) => {
     const mo = byMonth.get(m);
-    if (!mo) return { omzet: 0, kosten: 0, winst: 0 };
-    const kosten = mo.invoices.reduce((s, i) => s + (invoiceCostById.get(i.id) ?? 0), 0) + fixedTotal;
+    const ex = expenseByMonth.get(m) ?? { klant: 0, vast: 0, prive: 0, overig: 0 };
+    if (!mo) return { omzet: 0, kosten: 0, winst: 0, edit: 0, vast: fixedTotal, overigUit: ex.overig, klantBank: ex.klant };
+    const edit = mo.invoices.reduce((s, i) => s + (invoiceCostById.get(i.id) ?? 0), 0);
+    const kosten = edit + fixedTotal + ex.overig;
     const overig = (incomeByMonth.get(m) ?? []).reduce((s, r) => s + r.amount, 0);
     const omzet = mo.invoiced + overig + stripeExtra(m);
-    return { omzet, kosten, winst: omzet - kosten };
+    return { omzet, kosten, winst: omzet - kosten, edit, vast: fixedTotal, overigUit: ex.overig, klantBank: ex.klant };
   };
 
   // Omzet van de gekozen maand (gefactureerd + overig) — naast MRR in de
@@ -194,9 +216,8 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
   // Uitgaven-triage: mutaties zonder label.
   const unlabeled = bank.mutations.filter((m) => !linkedIds.has(m.id));
 
-  const invoiceCostsSum = moneybird.invoices.reduce((s, i) => s + (invoiceCostById.get(i.id) ?? 0), 0);
   const maandOverig = (incomeByMonth.get(maand) ?? []).reduce((s, r) => s + r.amount, 0);
-  const monthProfit = moneybird.invoiced + maandOverig + stripeExtra(maand) - invoiceCostsSum - fixedTotal;
+  const monthProfit = profitOf(maand).winst;
   const billable = clients.filter((c) => c.status !== "gepauzeerd");
   const target = Number(agency?.monthly_target ?? 0);
 
@@ -218,6 +239,83 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
   }
 
   const sorted = [...billable].sort((a, b) => b.monthlyValue - b.editorCost - (a.monthlyValue - a.editorCost));
+
+  // ── Vaste lasten herkennen in de bank ───────────────────────────
+  const recurring = !demo && moneybird.configured ? findRecurring(bank.mutations, fixedCosts.map((f) => f.name), linkedIds) : [];
+
+  // ── Wat mist er nog voor een kloppend overzicht? ────────────────
+  // Elk punt met de kortste weg om het direct te fixen.
+  const todos: TodoItem[] = [];
+  if (!demo) {
+    const thisMo = byMonth.get(thisMonth);
+    const firstName = (n: string) => n.trim().split(/\s+/)[0]?.toLowerCase() ?? "";
+    const hasInvoiceFor = (name: string) => {
+      const fn = firstName(name);
+      if (!fn) return false;
+      const all = [...(thisMo?.invoices ?? []), ...drafts.drafts];
+      return all.some((i) => i.contact.toLowerCase().includes(fn));
+    };
+    for (const c of billable) {
+      if (c.monthlyValue > 0) continue;
+      todos.push({
+        text: `${c.name} heeft nog geen retainer — de MRR klopt pas als dit is ingevuld.`,
+        action: (
+          <ClientFinanceDialog
+            clientId={c.id}
+            name={c.name}
+            monthlyValue={c.monthlyValue}
+            packageName={c.packageName}
+            videosPerMonth={c.videosPerMonth}
+            editorCost={c.editorCost}
+            videoPrice={c.videoPrice}
+            invoiceDay={c.invoiceDay}
+          >
+            <span className="shrink-0 rounded-lg border border-white/[0.08] hover:border-accent/30 hover:text-accent px-2.5 py-1 text-[12px] text-muted transition-all cursor-pointer">Instellen →</span>
+          </ClientFinanceDialog>
+        ),
+      });
+    }
+    if (moneybird.configured) {
+      const dayNow = now.getDate();
+      for (const c of billable) {
+        if (c.monthlyValue <= 0) continue;
+        const day = c.invoiceDay ?? 1;
+        if (dayNow < day) continue;
+        if (hasInvoiceFor(c.name)) continue;
+        todos.push({
+          text: `Factuur voor ${c.name} moet eruit (${fmtEur(c.monthlyValue)}, dag ${day} is geweest) — nog niets in Moneybird.`,
+          href: "https://moneybird.com",
+          external: true,
+        });
+      }
+      const noCost = (thisMo?.invoices ?? []).filter((i) => !invoiceCostById.has(i.id));
+      if (noCost.length) {
+        todos.push({
+          text: `${noCost.length} factu${noCost.length === 1 ? "ur" : "ren"} deze maand zonder editkosten — zonder kosten klopt je winst niet.`,
+          href: "#facturen",
+        });
+      }
+      if (unlabeled.length) {
+        todos.push({ text: `${unlabeled.length} bankafschrijvingen nog zonder label (klant / vast / privé / overig).`, href: "#triage" });
+      }
+      if (recurring.length) {
+        todos.push({
+          text: `${recurring.length} terugkerende afschrijving${recurring.length === 1 ? "" : "en"} die nog niet als vaste last staan.`,
+          href: "#vast",
+        });
+      }
+    }
+    const noRate = editors.filter((e) => e.active && !(e.payShortform ?? e.payPerVideo) && !e.payLongform);
+    if (noRate.length) {
+      todos.push({
+        text: `${noRate.map((e) => e.name).join(", ")}: geen tarief ingevuld — kostprijs per video blijft leeg.`,
+        href: "/platform/editors",
+      });
+    }
+  }
+
+  // ── Kostenhistorie: laatste 6 maanden ───────────────────────────
+  const historyMonths = months.slice(-6);
 
   return (
     <>
@@ -257,6 +355,8 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
         <Stat label="Netto marge" value={fmtEur(margin)} delta={`${marginPct}% marge`} icon={icons.analytics} />
         <Stat label="Nieuw deze maand" value={String(newThisMonth)} icon={icons.clients} />
       </div>
+
+      <FinanceTodo items={todos} />
 
       {/* Vooruitblik: projectie + klikbare maanddoelen */}
       {!demo && moneybird.configured && (
@@ -368,6 +468,75 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
         </Card>
       )}
 
+      {/* Kostenhistorie: wat hield je de afgelopen maanden over? */}
+      {!demo && moneybird.configured && historyMonths.length > 0 && (
+        <Card className="p-6 mb-6">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div>
+              <Eyebrow>Afgelopen {historyMonths.length} maanden</Eyebrow>
+              <h2 className="font-display font-extrabold text-xl">Wat je overhoudt na edit- en softwarekosten</h2>
+            </div>
+            <span className="text-[12px] text-muted">Editkosten uit je facturen · vaste lasten en overige uitgaven uit de bank</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-[13px]">
+              <thead>
+                <tr className="text-[10px] font-mono uppercase tracking-wider text-muted">
+                  <th className="text-left px-3 pb-2 font-normal">Maand</th>
+                  <th className="text-right px-3 pb-2 font-normal">Omzet</th>
+                  <th className="text-right px-3 pb-2 font-normal">Editkosten</th>
+                  <th className="text-right px-3 pb-2 font-normal">Vaste lasten</th>
+                  <th className="text-right px-3 pb-2 font-normal">Overig</th>
+                  <th className="text-right px-3 pb-2 font-normal">Winst</th>
+                  <th className="text-right px-3 pb-2 font-normal">Marge</th>
+                </tr>
+              </thead>
+              <tbody>
+                {historyMonths.map((m) => {
+                  const p = profitOf(m);
+                  const pct = p.omzet ? Math.round((p.winst / p.omzet) * 100) : 0;
+                  const label = new Date(`${m}-01`).toLocaleDateString("nl-NL", { month: "long" });
+                  return (
+                    <tr key={m} className={`border-t border-white/[0.05] ${m === thisMonth ? "bg-accent/[0.04]" : ""}`}>
+                      <td className="px-3 py-2 font-medium capitalize">
+                        <Link href={m === thisMonth ? "/platform/finance" : `/platform/finance?maand=${m}`} className="hover:text-accent">{label}</Link>
+                        {m === thisMonth && <span className="ml-2 text-[10px] font-mono uppercase text-accent">nu</span>}
+                      </td>
+                      <td className="px-3 py-2 text-right font-mono">{fmtEur(Math.round(p.omzet))}</td>
+                      <td className="px-3 py-2 text-right font-mono text-muted">{p.edit ? `−${fmtEur(Math.round(p.edit))}` : <span className="text-amber-300/80" title="Nog geen editkosten ingevuld bij de facturen van deze maand">?</span>}</td>
+                      <td className="px-3 py-2 text-right font-mono text-muted">−{fmtEur(Math.round(p.vast))}</td>
+                      <td className="px-3 py-2 text-right font-mono text-muted">{p.overigUit ? `−${fmtEur(Math.round(p.overigUit))}` : "—"}</td>
+                      <td className={`px-3 py-2 text-right font-mono font-bold ${p.winst >= 0 ? "text-emerald-400" : "text-red-400"}`}>{fmtEur(Math.round(p.winst))}</td>
+                      <td className={`px-3 py-2 text-right font-mono ${pct >= 50 ? "text-emerald-400" : pct >= 30 ? "text-amber-300" : "text-red-400"}`}>{p.omzet ? `${pct}%` : "—"}</td>
+                    </tr>
+                  );
+                })}
+                {historyMonths.length > 1 && (() => {
+                  const tot = historyMonths.reduce(
+                    (acc, m) => { const p = profitOf(m); return { omzet: acc.omzet + p.omzet, edit: acc.edit + p.edit, vast: acc.vast + p.vast, overig: acc.overig + p.overigUit, winst: acc.winst + p.winst }; },
+                    { omzet: 0, edit: 0, vast: 0, overig: 0, winst: 0 }
+                  );
+                  const pct = tot.omzet ? Math.round((tot.winst / tot.omzet) * 100) : 0;
+                  return (
+                    <tr className="border-t border-white/[0.12] text-foreground/90">
+                      <td className="px-3 py-2 font-bold">Totaal</td>
+                      <td className="px-3 py-2 text-right font-mono font-bold">{fmtEur(Math.round(tot.omzet))}</td>
+                      <td className="px-3 py-2 text-right font-mono">−{fmtEur(Math.round(tot.edit))}</td>
+                      <td className="px-3 py-2 text-right font-mono">−{fmtEur(Math.round(tot.vast))}</td>
+                      <td className="px-3 py-2 text-right font-mono">{tot.overig ? `−${fmtEur(Math.round(tot.overig))}` : "—"}</td>
+                      <td className={`px-3 py-2 text-right font-mono font-bold ${tot.winst >= 0 ? "text-emerald-400" : "text-red-400"}`}>{fmtEur(Math.round(tot.winst))}</td>
+                      <td className="px-3 py-2 text-right font-mono">{tot.omzet ? `${pct}%` : "—"}</td>
+                    </tr>
+                  );
+                })()}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
+
+      <RecurringCard suggestions={recurring} />
+
       {/* Concepten in Moneybird: dit moet nog de deur uit deze maand */}
       {!demo && moneybird.configured && (
         <Card className={`p-6 mb-6 ${drafts.drafts.length > 0 ? "border-amber-300/25" : ""}`}>
@@ -419,7 +588,7 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
       )}
 
       {!demo && moneybird.configured && (
-        <Card className="p-6 mb-6">
+        <Card id="facturen" className="p-6 mb-6">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
             <div>
               <Eyebrow>Moneybird · {maandLabel}</Eyebrow>
@@ -446,7 +615,7 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
               )}
               <span>
                 <span className="text-muted text-[12px]">Kosten </span>
-                <strong className="font-mono text-red-400">{fmtEur(invoiceCostsSum + fixedTotal)}</strong>
+                <strong className="font-mono text-red-400">{fmtEur(Math.round(profitOf(maand).kosten))}</strong>
               </span>
               <span>
                 <span className="text-muted text-[12px]">Winst </span>
@@ -528,7 +697,7 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
 
       {/* Potjes + uitgaven-triage */}
       {!demo && moneybird.configured && (
-        <div className="grid lg:grid-cols-2 gap-6 mb-6">
+        <div id="triage" className="grid lg:grid-cols-2 gap-6 mb-6">
           <ReservesCard vatThisQuarter={vatThisQuarter} profitThisMonth={monthProfit} config={reserveConfig} />
           <ExpenseTriage
             unlabeled={unlabeled}
@@ -563,6 +732,7 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
                       videosPerMonth={c.videosPerMonth}
                       editorCost={c.editorCost}
                       videoPrice={c.videoPrice}
+                      invoiceDay={c.invoiceDay}
                     >
                       <div className="flex items-center gap-2.5 cursor-pointer">
                         <Avatar initials={c.initials} size={30} />

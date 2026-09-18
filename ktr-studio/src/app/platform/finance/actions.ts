@@ -89,7 +89,7 @@ export async function deleteOtherIncomeAction(id: string): Promise<{ ok: boolean
 // ── Retainer/pakket per klant bijwerken (vanaf Finance) ─────────
 export async function updateClientFinanceAction(
   clientId: string,
-  patch: { monthly_value?: number; package?: string; videos_per_month?: number; editor_cost?: number; video_price?: number | null }
+  patch: { monthly_value?: number; package?: string; videos_per_month?: number; editor_cost?: number; video_price?: number | null; invoice_day?: number }
 ): Promise<{ ok: boolean; error?: string }> {
   const supabase = await supabaseServer();
   if (!supabase) return { ok: false, error: "Supabase niet geconfigureerd." };
@@ -198,6 +198,34 @@ export async function linkExpenseAction(input: {
     mutation_date: input.date ?? null,
   });
   if (error) return { ok: false, error: error.message };
+  revalidatePath("/platform/finance");
+  return { ok: true };
+}
+
+
+// Terugkerende afschrijving → vaste last, en de mutaties meteen gelabeld
+// zodat ze niet ook nog in de triage of dubbel in de kosten belanden.
+export async function adoptFixedCostAction(input: {
+  name: string;
+  amount: number;
+  mutationIds: string[];
+  dates: (string | null)[];
+}): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await supabaseServer();
+  if (!supabase) return { ok: false, error: "Supabase niet geconfigureerd." };
+  const { agency } = await getSessionContext();
+  if (!agency) return { ok: false, error: "Geen agency." };
+
+  const { error } = await supabase.from("fixed_costs").insert({ agency_id: agency.id, name: input.name.trim().slice(0, 80), amount: Math.abs(Number(input.amount) || 0), note: "uit bankmutaties" });
+  if (error) return { ok: false, error: error.message };
+
+  if (input.mutationIds.length) {
+    const rows = input.mutationIds.map((id, i) => ({
+      id, agency_id: agency.id, kind: "vast", label: input.name.trim().slice(0, 80),
+      amount: -Math.abs(Number(input.amount) || 0), mutation_date: input.dates[i] ?? null, client_id: null,
+    }));
+    await supabase.from("expense_links").upsert(rows);
+  }
   revalidatePath("/platform/finance");
   return { ok: true };
 }

@@ -58,7 +58,7 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
   const clientCols =
     "id,name,ig_handle,status,monthly_value,package,videos_per_month,editor_cost,payment_status,created_at,soul_character_id,reference_image_url,brand_prompt,brand_primary,brand_secondary";
   let [clientsRes, contentRes, leadsRes, metricsRes] = await Promise.all([
-    supabase.from("clients").select(`${clientCols},content_mix,manager,hidden,health,health_note,video_price`),
+    supabase.from("clients").select(`${clientCols},content_mix,manager,hidden,health,health_note,video_price,invoice_day`),
     supabase
       .from("content")
       .select("id,client_id,title,hook,format,stage,published_at,permalink,posting_date,deadline,brief_url,editor_id,cost_price,sell_price"),
@@ -119,6 +119,7 @@ export async function getWorkspaceData(): Promise<WorkspaceData> {
       packageName: c.package ?? null,
       videosPerMonth: Number(c.videos_per_month ?? 0),
       videoPrice: c.video_price === null || c.video_price === undefined ? null : Number(c.video_price),
+      invoiceDay: Number(c.invoice_day ?? 1),
       contentMix: c.content_mix ?? null,
       editorCost: Number(c.editor_cost ?? 0),
       manager: (c.manager as string) ?? null,

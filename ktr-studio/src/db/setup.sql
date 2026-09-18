@@ -71,6 +71,7 @@ create table if not exists clients (
   asana_project_id text,               -- eigen Asana-bord (twee-weg-sync)
   editor_cost      numeric default 0,
   payment_status   text default 'open', -- 'betaald' | 'open' | 'te_laat'
+  invoice_day      int not null default 1, -- dag waarop de retainer gefactureerd hoort te zijn
   -- AI Visuals (Higgsfield Soul)
   soul_character_id   text,
   reference_image_url text,

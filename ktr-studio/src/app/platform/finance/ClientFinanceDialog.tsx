@@ -15,6 +15,7 @@ export function ClientFinanceDialog({
   videosPerMonth,
   editorCost,
   videoPrice,
+  invoiceDay = 1,
   children,
 }: {
   clientId: string;
@@ -24,6 +25,7 @@ export function ClientFinanceDialog({
   videosPerMonth: number;
   editorCost: number;
   videoPrice?: number | null;
+  invoiceDay?: number;
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -33,6 +35,7 @@ export function ClientFinanceDialog({
     videos: String(videosPerMonth || ""),
     editorCost: String(editorCost || ""),
     videoPrice: String(videoPrice || ""),
+    invoiceDay: String(invoiceDay || 1),
   });
   const [error, setError] = useState("");
   const [pending, start] = useTransition();
@@ -45,6 +48,7 @@ export function ClientFinanceDialog({
         videos_per_month: Number(form.videos) || 0,
         editor_cost: Number(form.editorCost) || 0,
         video_price: form.videoPrice.trim() ? Number(form.videoPrice.replace(",", ".")) : null,
+        invoice_day: Math.min(28, Math.max(1, Number(form.invoiceDay) || 1)),
       });
       if (r.error) setError(r.error);
       else setOpen(false);
@@ -86,6 +90,13 @@ export function ClientFinanceDialog({
                 />
                 <span className="block mt-1 text-[11.5px] text-muted">
                   Vult automatisch de verkoopprijs in als je voor deze klant een video toevoegt.
+                </span>
+              </label>
+              <label className="block">
+                <span className={label}>Factuur eruit op dag</span>
+                <input value={form.invoiceDay} onChange={(e) => setForm({ ...form, invoiceDay: e.target.value })} type="number" min={1} max={28} className={field} />
+                <span className="block mt-1 text-[11.5px] text-muted">
+                  Staat er op die dag nog geen factuur in Moneybird, dan krijg je 's ochtends een melding.
                 </span>
               </label>
               <div className="grid grid-cols-2 gap-3">
