@@ -65,7 +65,6 @@ Vraag de echte waarden aan Menno (nooit committen; `.env.local` is gitignored).
 - **Eigen kanalen** `platform/channels` + `lib/sync/channels.ts` + cron `/api/cron/sync-channels` (07:00) — website/IG/LinkedIn/YT-snapshots, IG-sync werkt
 - **Documenten** `platform/contracts` + `lib/legal.ts` + publiek `/sign/[token]` — NDA/klant-overeenkomst met digitale ondertekening; NDA-knop ook op Editors
 - **Klant-werkstation** `platform/clients/[id]/*` — tabs Pipeline/Stats/Stories/Leads/Revenue/Links/Calls/Health/Profiel
-- **Leadformulieren** `platform/forms` + publiek `/f/[token]` — inzendingen worden leads (honeypot-beveiligd)
 
 - **Dashboard** `platform/page.tsx` — commandopost ("Vandaag"-rij) + KPI's + brief-teaser
 - **Daily Brief** `platform/brief` + `lib/brief.ts` + cron `/api/cron/daily-brief` — dagelijkse ideeën per klant
