@@ -7,7 +7,7 @@ import { useState, useTransition } from "react";
 import { Card } from "../_components";
 import { saveCalendarUrlAction, importCalendarAction } from "./actions";
 
-export function CalendarCard({ icsUrl, syncedAt }: { icsUrl: string; syncedAt: string | null }) {
+export function CalendarCard({ icsUrl, syncedAt, manualCount = 0 }: { icsUrl: string; syncedAt: string | null; manualCount?: number }) {
   const [url, setUrl] = useState(icsUrl);
   const [open, setOpen] = useState(!icsUrl);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
@@ -42,7 +42,9 @@ export function CalendarCard({ icsUrl, syncedAt }: { icsUrl: string; syncedAt: s
           <p className="text-[12px] text-muted mt-0.5">
             {icsUrl
               ? `Gekoppeld · elke ochtend automatisch${syncedAt ? ` · laatst ${new Date(syncedAt).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}` : ""}`
-              : "Nog niet gekoppeld — twee minuten werk, daarna zie je hier en op het dashboard wat er vandaag staat en wat gedaan is."}
+              : manualCount > 0
+                ? `${manualCount} afspraken staan erin, eenmalig ingelezen — koppel het geheime adres en het werkt elke ochtend vanzelf bij.`
+                : "Nog niet gekoppeld — twee minuten werk, daarna zie je hier en op het dashboard wat er vandaag staat en wat gedaan is."}
           </p>
         </div>
         <div className="flex items-center gap-2">

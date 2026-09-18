@@ -325,3 +325,14 @@ sessie niet dubbel werk doet.
 - Watchdog-zelftest meldt ontbrekende of falende Meta-sleutels.
 - Menno hoeft alleen nog `META_ADS_TOKEN` en `META_AD_ACCOUNT_ID` in Vercel
   te zetten en te redeployen; daarna Sync nu klikken.
+
+## Ronde 18 sep 2026 (3) — agenda eenmalig ingelezen
+
+- Menno's Google Agenda (menno72003@gmail.com) via de Google-koppeling in
+  de chat uitgelezen: 37 afspraken van 30 aug t/m 27 okt in `meetings`,
+  source `google-mcp`, external_id `gcal:<event id>`. Verleden = 'gehouden'.
+  Terugkerende syncs met Jip gekoppeld aan klant Jip Geuke.
+- `importCalendar` gooit die handmatige regels weg zodra het geheime
+  iCal-adres is ingevuld, dus niets komt dubbel te staan.
+- Klantherkenning verbeterd: een naam die in meer dan 60% van de afspraken
+  voorkomt (Menno zelf) telt alleen mee als er verder niemand past.

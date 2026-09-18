@@ -39,14 +39,24 @@ export async function importCalendar(db: SupabaseClient, agencyId: string): Prom
   // Klantnamen matchen op titel/deelnemers, zodat een call meteen bij de
   // juiste klant hangt (bv. "Sync - Jip & Menno" → Jip Geuke).
   const { data: clients } = await db.from("clients").select("id,name").eq("agency_id", agencyId);
+  // Een naam die in bijna élke afspraak staat, is jijzelf — die zegt niets
+  // over wélke klant het is. Zulke namen tellen alleen mee als er verder
+  // niemand past.
+  const hayOf = (title: string, attendees: string[]) => `${title} ${attendees.join(" ")}`.toLowerCase();
+  const names = (clients ?? []).map((c) => ({ id: c.id as string, first: String(c.name).split(/\s+/)[0]?.toLowerCase() ?? "" })).filter((c) => c.first.length >= 3);
+  const hits = new Map(names.map((c) => [c.id, events.filter((e) => hayOf(e.title, e.attendees).includes(c.first)).length]));
+  const tooCommon = Math.max(3, Math.round(events.length * 0.6));
   const clientFor = (title: string, attendees: string[]) => {
-    const hay = `${title} ${attendees.join(" ")}`.toLowerCase();
-    for (const c of clients ?? []) {
-      const first = String(c.name).split(/\s+/)[0]?.toLowerCase();
-      if (first && first.length >= 3 && hay.includes(first)) return c.id as string;
-    }
-    return null;
+    const hay = hayOf(title, attendees);
+    const matches = names.filter((c) => hay.includes(c.first));
+    if (!matches.length) return null;
+    const specific = matches.filter((c) => (hits.get(c.id) ?? 0) < tooCommon);
+    return (specific[0] ?? matches[0]).id;
   };
+
+  // Eerder handmatig ingelezen afspraken (via de Google-koppeling in de chat)
+  // wijken voor de echte sync, anders staat alles dubbel.
+  await db.from("meetings").delete().eq("agency_id", agencyId).eq("source", "google-mcp").gte("starts_at", from.toISOString());
 
   const cancelledIds = events.filter((e) => e.cancelled).map((e) => e.uid);
   let removed = 0;

@@ -14,6 +14,9 @@ export default async function AgendaPage() {
   const meetings = demo ? [] : await getMeetings({ limit: 200 });
   let icsUrl = "";
   let syncedAt: string | null = null;
+  // Eenmalig ingelezen afspraken (via de Google-koppeling in de chat) tellen
+  // we apart: dan weet de kaart dat er al iets staat, maar nog niets automatisch.
+  let manualCount = 0;
   if (!demo) {
     const supabase = await createClient();
     const { agency } = await getSessionContext();
@@ -21,6 +24,8 @@ export default async function AgendaPage() {
       const { data } = await supabase.from("agencies").select("calendar_ics_url, calendar_synced_at").eq("id", agency.id).maybeSingle();
       icsUrl = (data?.calendar_ics_url as string) ?? "";
       syncedAt = (data?.calendar_synced_at as string) ?? null;
+      const { count } = await supabase.from("meetings").select("id", { count: "exact", head: true }).eq("source", "google-mcp");
+      manualCount = count ?? 0;
     }
   }
 
@@ -35,7 +40,7 @@ export default async function AgendaPage() {
         <p className="text-sm text-muted">Demo-modus — de agenda werkt in de echte omgeving.</p>
       ) : (
         <>
-          <CalendarCard icsUrl={icsUrl} syncedAt={syncedAt} />
+          <CalendarCard icsUrl={icsUrl} syncedAt={syncedAt} manualCount={manualCount} />
           <CallsBoard clientId={null} initial={meetings} />
         </>
       )}
