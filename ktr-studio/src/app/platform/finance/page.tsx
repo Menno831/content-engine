@@ -255,8 +255,10 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
       const all = [...(thisMo?.invoices ?? []), ...drafts.drafts];
       return all.some((i) => i.contact.toLowerCase().includes(fn));
     };
+    // Klanten in onboarding zonder retainer: de deal wordt nog gevormd,
+    // daar hoeft geen taak voor te staan. Actieve klanten zonder bedrag wel.
     for (const c of billable) {
-      if (c.monthlyValue > 0) continue;
+      if (c.monthlyValue > 0 || c.status === "onboarding") continue;
       todos.push({
         text: `${c.name} heeft nog geen retainer — de MRR klopt pas als dit is ingevuld.`,
         action: (
