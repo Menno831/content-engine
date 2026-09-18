@@ -113,7 +113,7 @@ function rateLabel(e: Editor): string {
   return parts.length ? parts.join(" · ") : "geen tarief";
 }
 
-function EditEditorButton({ editor, clients }: { editor: Editor; clients: ClientOption[] }) {
+export function EditEditorButton({ editor, clients }: { editor: Editor; clients: ClientOption[] }) {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     name: editor.name,

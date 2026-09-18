@@ -5,7 +5,7 @@ import { getEditors } from "@/lib/editors";
 import { getWorkspaceData } from "@/lib/data";
 import { fmtEur, editorPayout, LATE_DEDUCTION } from "../_data";
 import { AddEditorDialog } from "./AddEditorDialog";
-import { EditorPool } from "./EditorPool";
+import { EditorPool, EditEditorButton } from "./EditorPool";
 import { NoData } from "../_states";
 import { ExportButton } from "../ExportButton";
 
@@ -126,12 +126,7 @@ export default async function EditorsPage({ searchParams }: { searchParams: Prom
                   <Row label="Uit te betalen" value={fmtEur(pay.net)} strong />
                 </div>
 
-                <Link
-                  href={`/platform/contracts?nda=${encodeURIComponent(e.name)}`}
-                  className="mt-4 block text-center rounded-lg border border-accent/25 bg-accent/10 hover:bg-accent/20 text-accent font-bold text-[12px] py-2 transition-colors"
-                >
-                  📄 NDA sturen
-                </Link>
+                <EditEditorButton editor={e} clients={clientOptions} />
               </Card>
             );
           })}
