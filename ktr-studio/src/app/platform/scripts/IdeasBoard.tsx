@@ -159,7 +159,7 @@ export function IdeasBoard({
                 )}
 
                 <div className="mt-auto flex flex-wrap gap-1.5 pt-3 border-t border-white/[0.05]">
-                  {idea.status !== "gemaakt" && (
+                  {idea.status !== "gemaakt" && idea.status !== "gedaan" && (
                     <button
                       onClick={() =>
                         run(async () => {
@@ -181,6 +181,24 @@ export function IdeasBoard({
                       className="rounded-lg border border-white/[0.08] hover:border-accent/30 hover:text-accent text-[11.5px] px-2.5 py-1.5 text-muted transition-all"
                     >
                       Bewaren
+                    </button>
+                  )}
+                  {idea.status !== "gedaan" ? (
+                    <button
+                      onClick={() => run(() => setIdeaStatusAction(idea.id, "gedaan"))}
+                      disabled={busy}
+                      title="Deze heb ik al gemaakt"
+                      className="rounded-lg border border-white/[0.08] hover:border-emerald-400/40 hover:text-emerald-400 text-[11.5px] px-2.5 py-1.5 text-muted transition-all"
+                    >
+                      ✓ Al gedaan
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => run(() => setIdeaStatusAction(idea.id, "nieuw"))}
+                      disabled={busy}
+                      className="rounded-lg border border-emerald-400/30 text-emerald-400 text-[11.5px] px-2.5 py-1.5 transition-all"
+                    >
+                      ✓ Gedaan — terugzetten
                     </button>
                   )}
                   {idea.status !== "afgewezen" ? (

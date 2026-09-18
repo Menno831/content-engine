@@ -17,6 +17,7 @@ export const IDEA_STATUS = [
   { id: "nieuw", label: "Nieuw" },
   { id: "gekozen", label: "Deze ga ik maken" },
   { id: "gemaakt", label: "Script gemaakt" },
+  { id: "gedaan", label: "Al gemaakt" },
   { id: "afgewezen", label: "Niks voor mij" },
 ];
 
