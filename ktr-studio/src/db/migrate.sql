@@ -960,3 +960,13 @@ drop policy if exists "team all channel_insights" on channel_insights;
 create policy "team all channel_insights" on channel_insights
   for all using (agency_id = current_agency_id() and current_client_id() is null)
   with check (agency_id = current_agency_id() and current_client_id() is null);
+
+-- ── 045 · Google Agenda importeren ─────────────────────────────
+alter table meetings add column if not exists external_id text;
+alter table meetings add column if not exists source      text not null default 'handmatig';  -- handmatig | google
+alter table meetings add column if not exists ends_at     timestamptz;
+create unique index if not exists idx_meetings_external
+  on meetings (agency_id, external_id) where external_id is not null;
+
+alter table agencies add column if not exists calendar_ics_url text;
+alter table agencies add column if not exists calendar_synced_at timestamptz;

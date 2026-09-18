@@ -20,7 +20,7 @@ export default async function Dashboard() {
     getTodos(),
     getSessionContext(),
     getOutreachTodoCount(),
-    getMeetings({ fromToday: true, limit: 20 }).catch(() => []),
+    getMeetings({ fromToday: true, limit: 40 }).catch(() => []),
     getEodReports(20).catch(() => []),
   ]);
 
@@ -81,7 +81,7 @@ export default async function Dashboard() {
       <GreetingHeader name={ctx.profile?.full_name ?? null} />
 
       <TodayStrip
-        meetings={meetings.filter((m) => m.startsAt.slice(0, 10) === today)}
+        meetings={meetings.filter((m) => localDay(m.startsAt) === today)}
         eodDone={eods.some((e) => e.date === today && e.userId === ctx.user?.id)}
         eodCount={eods.filter((e) => e.date === today).length}
       />
@@ -425,37 +425,58 @@ function GreetingHeader({ name }: { name: string | null }) {
 }
 
 // Wat er vandaag speelt: calls van vandaag + of de dag al afgesloten is.
+// Datum in Amsterdam, niet UTC — anders schuift een avondcall naar morgen.
+function localDay(iso: string): string {
+  return new Date(iso).toLocaleDateString("sv-SE", { timeZone: "Europe/Amsterdam" });
+}
+
 function TodayStrip({
   meetings,
   eodDone,
   eodCount,
 }: {
-  meetings: { id: string; title: string; startsAt: string; clientName: string | null }[];
+  meetings: { id: string; title: string; startsAt: string; clientName: string | null; outcome?: string | null }[];
   eodDone: boolean;
   eodCount: number;
 }) {
+  const now = Date.now();
+  const done = meetings.filter((m) => new Date(m.startsAt).getTime() < now);
+  const todo = meetings.filter((m) => new Date(m.startsAt).getTime() >= now);
+  const time = (iso: string) => new Date(iso).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Amsterdam" });
   return (
     <div className="grid md:grid-cols-2 gap-4 mb-6">
       <Card className="p-5">
         <div className="flex items-center justify-between mb-3">
-          <div className="font-display font-bold">Calls vandaag</div>
+          <div className="font-display font-bold">Vandaag</div>
           <Link href="/platform/agenda" className="text-[12px] text-accent hover:text-accent-hover transition-colors">
             Agenda →
           </Link>
         </div>
         {meetings.length === 0 ? (
-          <p className="text-[13px] text-muted">Geen calls gepland vandaag.</p>
+          <p className="text-[13px] text-muted">Niets in je agenda vandaag.</p>
         ) : (
           <div className="space-y-1.5">
-            {meetings.map((m) => (
+            {todo.map((m) => (
               <div key={m.id} className="flex items-center gap-3 text-[13px]">
-                <span className="font-mono text-accent shrink-0">
-                  {new Date(m.startsAt).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })}
-                </span>
+                <span className="font-mono text-accent shrink-0">{time(m.startsAt)}</span>
                 <span className="truncate">{m.title}</span>
                 {m.clientName && <span className="text-muted text-[12px] shrink-0">{m.clientName}</span>}
               </div>
             ))}
+            {done.length > 0 && (
+              <>
+                {todo.length > 0 && <div className="text-[10px] font-mono uppercase tracking-wider text-muted pt-2">Gedaan</div>}
+                {done.map((m) => (
+                  <div key={m.id} className="flex items-center gap-3 text-[13px] opacity-60">
+                    <span className="font-mono text-muted shrink-0">{time(m.startsAt)}</span>
+                    <span className="truncate line-through decoration-white/30">{m.title}</span>
+                    <span className="text-[11px] shrink-0 text-emerald-400">
+                      {m.outcome === "no_show" ? "no-show" : m.outcome === "verzet" ? "verzet" : "✓"}
+                    </span>
+                  </div>
+                ))}
+              </>
+            )}
           </div>
         )}
       </Card>

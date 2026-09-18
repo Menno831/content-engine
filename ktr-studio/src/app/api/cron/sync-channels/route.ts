@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { syncOwnChannelsCore } from "@/lib/sync/channels";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { analyzeChannels } from "@/lib/channel-analysis";
+import { importCalendar } from "@/lib/sync/calendar";
 
 // Dagelijkse snapshot van de eigen kanalen (Vercel Cron, 07:00).
 export async function GET(request: NextRequest) {
@@ -19,6 +20,21 @@ export async function GET(request: NextRequest) {
   }
   const results = await syncOwnChannelsCore();
 
+  // Google Agenda: elke ochtend de komende weken verversen en wat voorbij
+  // is op 'gehouden' zetten.
+  const calendar: { agency: string; ok: boolean; imported?: number; error?: string }[] = [];
+  {
+    const admin = createAdminClient();
+    if (admin) {
+      const { data: agencies } = await admin.from("agencies").select("id, calendar_ics_url");
+      for (const a of agencies ?? []) {
+        if (!a.calendar_ics_url) continue;
+        const r = await importCalendar(admin, a.id as string).catch((e) => ({ ok: false, error: e instanceof Error ? e.message : "fout" }));
+        calendar.push({ agency: a.id as string, ok: r.ok, imported: "imported" in r ? r.imported : undefined, error: r.error });
+      }
+    }
+  }
+
   // Elke maandag na de sync: verse analyse per agency, zodat de week
   // begint met "dit moeten we fixen" in plaats van een tabel cijfers.
   let analyzed = 0;
@@ -32,5 +48,5 @@ export async function GET(request: NextRequest) {
       }
     }
   }
-  return NextResponse.json({ ok: true, results, analyzed });
+  return NextResponse.json({ ok: true, results, calendar, analyzed });
 }

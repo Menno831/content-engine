@@ -34,6 +34,8 @@ create table if not exists agencies (
   accent      text default '#F97316',
   monthly_target numeric default 0,  -- maand-omzetdoel
   own_website text,                  -- eigen site voor de site-check
+  calendar_ics_url text,             -- geheim iCal-adres van Google Agenda
+  calendar_synced_at timestamptz,
   created_at  timestamptz not null default now()
 );
 
@@ -765,9 +767,13 @@ create table if not exists meetings (
   attendees  text,
   notes      text,
   outcome    text,                          -- gepland | gehouden | no_show | verzet
+  external_id text,                         -- uid uit de agenda (idempotente import)
+  source     text not null default 'handmatig', -- handmatig | google
+  ends_at    timestamptz,
   created_at timestamptz not null default now()
 );
 create index if not exists idx_meetings_agency on meetings (agency_id, starts_at);
+create unique index if not exists idx_meetings_external on meetings (agency_id, external_id) where external_id is not null;
 alter table meetings enable row level security;
 drop policy if exists "team all meetings" on meetings;
 create policy "team all meetings" on meetings
