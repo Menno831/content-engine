@@ -20,6 +20,8 @@ import { FinanceTodo, type TodoItem } from "./FinanceTodo";
 import { findRecurring } from "@/lib/recurring";
 import { getEditors } from "@/lib/editors";
 import { usdToEurRate, toEur, fmtMoney } from "@/lib/fx";
+import { getDeals, pipelineFor } from "@/lib/deals";
+import { PipelineCard } from "./PipelineCard";
 import type { CostLine } from "./actions";
 import { createClient as supabaseServer } from "@/lib/supabase/server";
 import Link from "next/link";
@@ -58,13 +60,14 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
   // maandvergelijking: gaan we er elke maand op vooruit?
   // Bankmutaties 120 dagen terug: genoeg om terugkerende afschrijvingen
   // (vaste lasten) in minstens twee maanden te herkennen.
-  const [{ clients, demo }, { agency }, drafts, bank, editors, usdRate, ...allMonths] = await Promise.all([
+  const [{ clients, demo }, { agency }, drafts, bank, editors, usdRate, deals, ...allMonths] = await Promise.all([
     getWorkspaceData(),
     getSessionContext(),
     getMoneybirdDrafts(),
     getMoneybirdMutations(120),
     getEditors(),
     usdToEurRate(),
+    getDeals(),
     ...months.map((m) => getMoneybirdMonth(m === thisMonth ? undefined : m)),
   ]);
   const byMonth = new Map(months.map((m, i) => [m, allMonths[i]]));
@@ -213,10 +216,12 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
     const isCurrent = key === thisMonth;
     const g = goalByMonth.get(key);
+    const pipe = pipelineFor(deals, key, usdRate);
     return {
       month: key,
       label: d.toLocaleDateString("nl-NL", { month: "short" }),
-      projected: isCurrent ? profitOf(thisMonth).omzet + drafts.total : mrrForecast + avgExtra,
+      projected: (isCurrent ? profitOf(thisMonth).omzet + drafts.total : mrrForecast + avgExtra) + pipe,
+      pipeline: pipe,
       goal: g?.goal ?? null,
       note: g?.note ?? null,
       isCurrent,
@@ -334,6 +339,14 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
         });
       }
     }
+    const noAmount = deals.filter((d) => ["gesprek", "voorstel", "mondeling_ja"].includes(d.stage) && d.monthlyValue <= 0);
+    if (noAmount.length) {
+      todos.push({
+        key: "dealbedrag",
+        text: `${noAmount.map((d) => d.name).join(", ")}: nog geen maandbedrag — zonder bedrag telt de deal voor niets mee in de vooruitblik.`,
+        href: "#pijplijn",
+      });
+    }
     const noRate = editors.filter((e) => e.active && !(e.payShortform ?? e.payPerVideo) && !e.payLongform);
     if (noRate.length) {
       todos.push({
@@ -392,6 +405,14 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
       {/* Vooruitblik: projectie + klikbare maanddoelen */}
       {!demo && moneybird.configured && (
         <OutlookCard months={outlookMonths} basis={{ mrr: mrrForecast, avgExtra, drafts: drafts.total }} />
+      )}
+
+      {!demo && (
+        <PipelineCard
+          deals={deals}
+          weighted={pipelineFor(deals, `${now.getFullYear()}-${String(now.getMonth() + 2).padStart(2, "0")}`, usdRate)}
+          usdRate={usdRate}
+        />
       )}
 
       {/* Maanddoel: hoeveel nog te gaan (doel instellen via Instellingen) */}

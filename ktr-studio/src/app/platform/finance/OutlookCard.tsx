@@ -16,6 +16,8 @@ export interface OutlookMonth {
   month: string;      // YYYY-MM
   label: string;      // "sep"
   projected: number;
+  /** Gewogen pijplijn die in `projected` zit. */
+  pipeline?: number;
   goal: number | null;
   note: string | null;
   isCurrent: boolean;
@@ -59,7 +61,8 @@ export function OutlookCard({
         </div>
         <p className="text-[11.5px] text-muted max-w-sm">
           Projectie = retainers ({fmtEur(basis.mrr)}) + gemiddeld los werk van de laatste 3 maanden
-          ({fmtEur(Math.round(basis.avgExtra))}){basis.drafts > 0 ? ` · lopende maand + concepten (${fmtEur(basis.drafts)})` : ""}.
+          ({fmtEur(Math.round(basis.avgExtra))}){basis.drafts > 0 ? ` · lopende maand + concepten (${fmtEur(basis.drafts)})` : ""}
+          {months.some((m) => (m.pipeline ?? 0) > 0) ? " + je pijplijn, gewogen op de fase van de deal" : ""}.
           Klik een maand om je eigen doel te zetten.
         </p>
       </div>
@@ -78,6 +81,9 @@ export function OutlookCard({
             >
               <div className="font-mono text-[10px] uppercase text-muted mb-1">{m.label}</div>
               <div className="font-mono text-sm">{fmtEur(Math.round(m.projected))}</div>
+              {(m.pipeline ?? 0) > 0 && (
+                <div className="text-[10.5px] text-accent mt-0.5">waarvan {fmtEur(Math.round(m.pipeline!))} pijplijn</div>
+              )}
               {target ? (
                 <>
                   <div className="text-[10.5px] text-muted mt-1">doel {fmtEur(target)}</div>

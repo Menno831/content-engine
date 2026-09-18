@@ -251,3 +251,67 @@ export async function dismissFinanceTodoAction(key: string): Promise<{ ok: boole
   revalidatePath("/platform/finance");
   return { ok: true };
 }
+
+// ── Deals in de pijplijn ────────────────────────────────────────
+export interface DealInput {
+  id?: string;
+  name: string;
+  monthlyValue: number;
+  currency: string;
+  stage: string;
+  startsMonth: string | null; // YYYY-MM
+  note: string | null;
+}
+
+export async function saveDealAction(input: DealInput): Promise<{ ok: boolean; error?: string }> {
+  const auth = await requireTeam();
+  if ("error" in auth) return { ok: false, error: auth.error };
+  if (!input.name.trim()) return { ok: false, error: "Geef de deal een naam." };
+
+  const row = {
+    agency_id: auth.agency.id,
+    name: input.name.trim().slice(0, 120),
+    monthly_value: Math.max(0, Number(input.monthlyValue) || 0),
+    currency: input.currency === "USD" ? "USD" : "EUR",
+    stage: ["gesprek", "voorstel", "mondeling_ja", "gewonnen", "verloren"].includes(input.stage) ? input.stage : "gesprek",
+    starts_month: input.startsMonth && /^\d{4}-\d{2}$/.test(input.startsMonth) ? `${input.startsMonth}-01` : null,
+    note: input.note?.trim() || null,
+  };
+
+  const { error } = input.id
+    ? await auth.supabase.from("deals").update(row).eq("id", input.id)
+    : await auth.supabase.from("deals").insert(row);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/platform/finance");
+  return { ok: true };
+}
+
+export async function deleteDealAction(id: string): Promise<{ ok: boolean; error?: string }> {
+  const auth = await requireTeam();
+  if ("error" in auth) return { ok: false, error: auth.error };
+  const { error } = await auth.supabase.from("deals").delete().eq("id", id);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/platform/finance");
+  return { ok: true };
+}
+
+// Gewonnen? Dan hoort het bij de klanten, niet meer in de pijplijn.
+export async function dealToClientAction(id: string): Promise<{ ok: boolean; error?: string }> {
+  const auth = await requireTeam();
+  if ("error" in auth) return { ok: false, error: auth.error };
+  const { data: deal } = await auth.supabase.from("deals").select("name,monthly_value,currency").eq("id", id).maybeSingle();
+  if (!deal) return { ok: false, error: "Deal niet gevonden." };
+
+  const { error } = await auth.supabase.from("clients").insert({
+    agency_id: auth.agency.id,
+    name: String(deal.name).slice(0, 120),
+    monthly_value: Number(deal.monthly_value ?? 0),
+    currency: (deal.currency as string) === "USD" ? "USD" : "EUR",
+    status: "onboarding",
+  });
+  if (error) return { ok: false, error: error.message };
+  await auth.supabase.from("deals").update({ stage: "gewonnen" }).eq("id", id);
+  revalidatePath("/platform/finance");
+  revalidatePath("/platform/clients");
+  return { ok: true };
+}

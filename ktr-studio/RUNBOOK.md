@@ -357,3 +357,19 @@ sessie niet dubbel werk doet.
   ($700/mnd, omgerekend) tellen wél mee in de maandkosten en de winst.
 - Elke taak op Finance heeft nu een ✕: weg tot het einde van de maand,
   daarna weer zichtbaar als het nog steeds speelt.
+
+## Ronde 18 sep 2026 (6) — pijplijn in de vooruitblik
+
+- Migratie 050: tabel `deals` (naam, maandbedrag, valuta, fase, startmaand,
+  notitie) met RLS. Fase bepaalt de kans: gesprek 25%, voorstel 50%,
+  mondeling ja 80%. Gewonnen/verloren tellen niet mee.
+- `lib/deals-shared.ts` (types + `pipelineFor`) en `lib/deals.ts`
+  (`getDeals`, server) — gesplitst zodat de client-component geen
+  next/headers meesleept.
+- `PipelineCard` op Finance: toevoegen, bewerken, verwijderen en
+  "Gewonnen" → maakt de klant aan met dat bedrag.
+- Vooruitblik telt de gewogen pijplijn mee vanaf de startmaand van de deal
+  en zet eronder hoeveel daarvan pijplijn is.
+- Vier deals geseed uit zijn calls/agenda (Ivar/Simon Solutions op
+  'voorstel'; Nick, Jisk & Jamy en Sarah op 'gesprek') met bedrag 0 —
+  bewust geen verzonnen bedragen; een taak vraagt hem die in te vullen.
