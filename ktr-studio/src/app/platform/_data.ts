@@ -33,6 +33,8 @@ export interface Client {
   invoiceDay?: number;
   /** EUR of USD — waarin deze klant betaalt. */
   currency?: string;
+  /** Jouw eigen merk: staat in de lijst, maar telt niet als klantomzet. */
+  isOwnBrand?: boolean;
   /** Soorten video's in de retainer, bv. "4× Talking, 2× Lifestyle" of "Alleen YouTube". */
   contentMix?: string | null;
   /** Asana-project-id als deze klant z'n eigen Asana-bord heeft (twee-weg-sync). */

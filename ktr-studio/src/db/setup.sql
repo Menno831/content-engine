@@ -1119,6 +1119,30 @@ alter table agencies add column if not exists frameio_project_id text;
 alter table prospects add column if not exists fit_reason     text;
 alter table prospects add column if not exists fit_checked_at timestamptz;
 alter table clients add column if not exists currency text not null default 'EUR';
+alter table clients add column if not exists is_own_brand boolean not null default false;
+
+create table if not exists finance_dismissals (
+  agency_id  uuid not null references agencies (id) on delete cascade,
+  item_key   text not null,
+  until      date not null,
+  created_at timestamptz not null default now(),
+  primary key (agency_id, item_key)
+);
+
+alter table finance_dismissals enable row level security;
+drop policy if exists "team leest weggeklikte taken" on finance_dismissals;
+create policy "team leest weggeklikte taken" on finance_dismissals
+  for select using (agency_id = current_agency_id() and current_client_id() is null);
+drop policy if exists "team klikt taken weg" on finance_dismissals;
+create policy "team klikt taken weg" on finance_dismissals
+  for insert with check (agency_id = current_agency_id() and current_client_id() is null);
+drop policy if exists "team werkt weggeklikte taken bij" on finance_dismissals;
+create policy "team werkt weggeklikte taken bij" on finance_dismissals
+  for update using (agency_id = current_agency_id() and current_client_id() is null);
+drop policy if exists "team haalt taken terug" on finance_dismissals;
+create policy "team haalt taken terug" on finance_dismissals
+  for delete using (agency_id = current_agency_id() and current_client_id() is null);
+
 alter table prospects add column if not exists icp_score int;
 create index if not exists idx_prospects_icp on prospects (agency_id, stage, icp_score desc);
 -- ════════════════════════════════════════════════════════════════

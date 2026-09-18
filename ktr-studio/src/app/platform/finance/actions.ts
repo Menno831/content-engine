@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient as supabaseServer } from "@/lib/supabase/server";
 import { getSessionContext } from "@/lib/auth";
+import { requireTeam } from "@/lib/guard";
 
 const STATUSES = ["betaald", "open", "te_laat"] as const;
 
@@ -89,7 +90,7 @@ export async function deleteOtherIncomeAction(id: string): Promise<{ ok: boolean
 // ── Retainer/pakket per klant bijwerken (vanaf Finance) ─────────
 export async function updateClientFinanceAction(
   clientId: string,
-  patch: { monthly_value?: number; package?: string; videos_per_month?: number; editor_cost?: number; video_price?: number | null; invoice_day?: number; currency?: string }
+  patch: { monthly_value?: number; package?: string; videos_per_month?: number; editor_cost?: number; video_price?: number | null; invoice_day?: number; currency?: string; is_own_brand?: boolean }
 ): Promise<{ ok: boolean; error?: string }> {
   const supabase = await supabaseServer();
   if (!supabase) return { ok: false, error: "Supabase niet geconfigureerd." };
@@ -102,6 +103,7 @@ export async function updateClientFinanceAction(
   if (patch.video_price !== undefined) update.video_price = patch.video_price === null ? null : Number(patch.video_price) || 0;
   if (patch.invoice_day !== undefined) update.invoice_day = Math.min(28, Math.max(1, Number(patch.invoice_day) || 1));
   if (patch.currency !== undefined) update.currency = patch.currency === "USD" ? "USD" : "EUR";
+  if (patch.is_own_brand !== undefined) update.is_own_brand = Boolean(patch.is_own_brand);
 
   const { error } = await supabase.from("clients").update(update).eq("id", clientId);
   if (error) return { ok: false, error: error.message };
@@ -229,6 +231,23 @@ export async function adoptFixedCostAction(input: {
     }));
     await supabase.from("expense_links").upsert(rows);
   }
+  revalidatePath("/platform/finance");
+  return { ok: true };
+}
+
+// ── Taken op Finance wegklikken ─────────────────────────────────
+// Weg tot het einde van de maand: volgende maand is het weer relevant
+// (een factuur die eruit moet, kosten die ontbreken). Terughalen kan
+// met dezelfde knop.
+export async function dismissFinanceTodoAction(key: string): Promise<{ ok: boolean; error?: string }> {
+  const auth = await requireTeam();
+  if ("error" in auth) return { ok: false, error: auth.error };
+  const now = new Date();
+  const until = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().slice(0, 10);
+  const { error } = await auth.supabase
+    .from("finance_dismissals")
+    .upsert({ agency_id: auth.agency.id, item_key: key.slice(0, 120), until }, { onConflict: "agency_id,item_key" });
+  if (error) return { ok: false, error: error.message };
   revalidatePath("/platform/finance");
   return { ok: true };
 }

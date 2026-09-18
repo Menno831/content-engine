@@ -17,6 +17,7 @@ export function ClientFinanceDialog({
   videoPrice,
   invoiceDay = 1,
   currency: initialCurrency = "EUR",
+  isOwnBrand: initialOwnBrand = false,
   children,
 }: {
   clientId: string;
@@ -28,6 +29,7 @@ export function ClientFinanceDialog({
   videoPrice?: number | null;
   invoiceDay?: number;
   currency?: string;
+  isOwnBrand?: boolean;
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -35,6 +37,8 @@ export function ClientFinanceDialog({
   // videoprijs in USD; Finance rekent alleen de totalen om naar euro.
   const [currency, setCurrency] = useState(initialCurrency === "USD" ? "USD" : "EUR");
   const sym = currency === "USD" ? "$" : "€";
+  // Je eigen merk: geen retainer, wel echte edit-kosten per maand.
+  const [ownBrand, setOwnBrand] = useState(initialOwnBrand);
   const [form, setForm] = useState({
     retainer: String(monthlyValue || ""),
     pakket: packageName ?? "",
@@ -56,6 +60,7 @@ export function ClientFinanceDialog({
         video_price: form.videoPrice.trim() ? Number(form.videoPrice.replace(",", ".")) : null,
         invoice_day: Math.min(28, Math.max(1, Number(form.invoiceDay) || 1)),
         currency,
+        is_own_brand: ownBrand,
       });
       if (r.error) setError(r.error);
       else setOpen(false);
@@ -130,6 +135,16 @@ export function ClientFinanceDialog({
                   <input value={form.videos} onChange={(e) => setForm({ ...form, videos: e.target.value })} type="number" className={field} />
                 </label>
               </div>
+
+              <label className="flex items-start gap-2.5 rounded-xl border border-white/[0.08] bg-white/[0.02] px-3.5 py-3 cursor-pointer">
+                <input type="checkbox" checked={ownBrand} onChange={(e) => setOwnBrand(e.target.checked)} className="mt-0.5 accent-[var(--accent)]" />
+                <span>
+                  <span className="block text-sm">Dit ben ik zelf</span>
+                  <span className="block text-[11.5px] text-muted mt-0.5">
+                    Geen retainer verwacht en geen factuur-herinnering. De edit-kosten tellen wel mee als maandkosten.
+                  </span>
+                </span>
+              </label>
 
               {error && <p className="text-[13px] text-red-400">{error}</p>}
 

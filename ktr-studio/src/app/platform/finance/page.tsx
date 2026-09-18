@@ -152,6 +152,13 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
     reserveConfig = (agRes.data?.reserve_config as ReserveConfig | null) ?? null;
   }
 
+  // Weggeklikte taken (tot het einde van de maand) niet meer tonen.
+  let dismissed = new Set<string>();
+  if (supabase && !demo) {
+    const { data } = await supabase.from("finance_dismissals").select("item_key,until").gte("until", `${thisMonth}-01`);
+    dismissed = new Set((data ?? []).filter((d) => String(d.until) >= now.toISOString().slice(0, 10)).map((d) => String(d.item_key)));
+  }
+
   const fixedTotal = fixedCosts.reduce((s, r) => s + r.amount, 0);
 
   // Winst per maand: gefactureerd + overig − editkosten (per factuur) −
@@ -161,12 +168,12 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
   const profitOf = (m: string) => {
     const mo = byMonth.get(m);
     const ex = expenseByMonth.get(m) ?? { klant: 0, vast: 0, prive: 0, overig: 0 };
-    if (!mo) return { omzet: 0, kosten: 0, winst: 0, edit: 0, vast: fixedTotal, overigUit: ex.overig, klantBank: ex.klant };
+    if (!mo) return { omzet: 0, kosten: 0, winst: 0, edit: 0, vast: fixedTotal + ownContentCost, overigUit: ex.overig, klantBank: ex.klant };
     const edit = mo.invoices.reduce((s, i) => s + (invoiceCostById.get(i.id) ?? 0), 0);
-    const kosten = edit + fixedTotal + ex.overig;
+    const kosten = edit + fixedTotal + ex.overig + ownContentCost;
     const overig = (incomeByMonth.get(m) ?? []).reduce((s, r) => s + r.amount, 0);
     const omzet = mo.invoiced + overig + stripeExtra(m);
-    return { omzet, kosten, winst: omzet - kosten, edit, vast: fixedTotal, overigUit: ex.overig, klantBank: ex.klant };
+    return { omzet, kosten, winst: omzet - kosten, edit, vast: fixedTotal + ownContentCost, overigUit: ex.overig, klantBank: ex.klant };
   };
 
   // Omzet van de gekozen maand (gefactureerd + overig) — naast MRR in de
@@ -191,7 +198,12 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
   // kloppen MRR, marge en prognose als één bedrag.
   const eurRetainer = (c: (typeof clients)[number]) => toEur(c.monthlyValue, c.currency, usdRate);
   const eurEditor = (c: (typeof clients)[number]) => toEur(c.editorCost, c.currency, usdRate);
-  const mrrForecast = clients.filter((c) => c.status !== "gepauzeerd").reduce((s, c) => s + eurRetainer(c), 0);
+  // Je eigen merk is geen klant: geen omzet, maar de edit-kosten zijn
+  // wel echte maandlasten en tellen dus mee in de winst.
+  const ownContentCost = clients
+    .filter((c) => c.isOwnBrand && c.status !== "gepauzeerd")
+    .reduce((s, c) => s + eurEditor(c), 0);
+  const mrrForecast = clients.filter((c) => c.status !== "gepauzeerd" && !c.isOwnBrand).reduce((s, c) => s + eurRetainer(c), 0);
   const last3 = months.slice(-4, -1); // laatste 3 volledige maanden
   const avgExtra = last3.length
     ? Math.max(0, last3.reduce((s, m) => s + Math.max(0, profitOf(m).omzet - mrrForecast), 0) / last3.length)
@@ -225,10 +237,12 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
   const maandOverig = (incomeByMonth.get(maand) ?? []).reduce((s, r) => s + r.amount, 0);
   const monthProfit = profitOf(maand).winst;
   const billable = clients.filter((c) => c.status !== "gepauzeerd");
+  // Alles wat als klantdeal telt — je eigen merk hoort daar niet bij.
+  const paying = billable.filter((c) => !c.isOwnBrand);
   const target = Number(agency?.monthly_target ?? 0);
 
-  const mrr = billable.reduce((s, c) => s + eurRetainer(c), 0);
-  const editorCosts = billable.reduce((s, c) => s + eurEditor(c), 0);
+  const mrr = paying.reduce((s, c) => s + eurRetainer(c), 0);
+  const editorCosts = paying.reduce((s, c) => s + eurEditor(c), 0);
   const inUsd = billable.filter((c) => (c.currency ?? "EUR").toUpperCase() === "USD");
   const margin = mrr - editorCosts;
   const marginPct = mrr ? Math.round((margin / mrr) * 100) : 0;
@@ -236,7 +250,7 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
 
   // Per pakket samenvatten.
   const byPackage = new Map<string, { count: number; mrr: number; margin: number }>();
-  for (const c of billable) {
+  for (const c of paying) {
     const key = c.packageName || "Geen pakket";
     const cur = byPackage.get(key) ?? { count: 0, mrr: 0, margin: 0 };
     cur.count += 1;
@@ -264,9 +278,10 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
     };
     // Klanten in onboarding zonder retainer: de deal wordt nog gevormd,
     // daar hoeft geen taak voor te staan. Actieve klanten zonder bedrag wel.
-    for (const c of billable) {
+    for (const c of paying) {
       if (c.monthlyValue > 0 || c.status === "onboarding") continue;
       todos.push({
+        key: `retainer:${c.id}`,
         text: `${c.name} heeft nog geen retainer — de MRR klopt pas als dit is ingevuld.`,
         action: (
           <ClientFinanceDialog
@@ -279,6 +294,7 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
             videoPrice={c.videoPrice}
             invoiceDay={c.invoiceDay}
             currency={c.currency}
+            isOwnBrand={c.isOwnBrand}
           >
             <span className="shrink-0 rounded-lg border border-white/[0.08] hover:border-accent/30 hover:text-accent px-2.5 py-1 text-[12px] text-muted transition-all cursor-pointer">Instellen →</span>
           </ClientFinanceDialog>
@@ -287,12 +303,13 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
     }
     if (moneybird.configured) {
       const dayNow = now.getDate();
-      for (const c of billable) {
+      for (const c of paying) {
         if (c.monthlyValue <= 0) continue;
         const day = c.invoiceDay ?? 1;
         if (dayNow < day) continue;
         if (hasInvoiceFor(c.name)) continue;
         todos.push({
+          key: `factuur:${c.id}`,
           text: `Factuur voor ${c.name} moet eruit (${fmtMoney(c.monthlyValue, c.currency)}, dag ${day} is geweest) — nog niets in Moneybird.`,
           href: "https://moneybird.com",
           external: true,
@@ -301,15 +318,17 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
       const noCost = (thisMo?.invoices ?? []).filter((i) => !invoiceCostById.has(i.id));
       if (noCost.length) {
         todos.push({
+          key: "editkosten",
           text: `${noCost.length} factu${noCost.length === 1 ? "ur" : "ren"} deze maand zonder editkosten — zonder kosten klopt je winst niet.`,
           href: "#facturen",
         });
       }
       if (unlabeled.length) {
-        todos.push({ text: `${unlabeled.length} bankafschrijvingen nog zonder label (klant / vast / privé / overig).`, href: "#triage" });
+        todos.push({ key: "triage", text: `${unlabeled.length} bankafschrijvingen nog zonder label (klant / vast / privé / overig).`, href: "#triage" });
       }
       if (recurring.length) {
         todos.push({
+          key: "vast",
           text: `${recurring.length} terugkerende afschrijving${recurring.length === 1 ? "" : "en"} die nog niet als vaste last staan.`,
           href: "#vast",
         });
@@ -318,6 +337,7 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
     const noRate = editors.filter((e) => e.active && !(e.payShortform ?? e.payPerVideo) && !e.payLongform);
     if (noRate.length) {
       todos.push({
+        key: "editors",
         text: `${noRate.map((e) => e.name).join(", ")}: geen tarief ingevuld — kostprijs per video blijft leeg.`,
         href: "/platform/editors",
       });
@@ -367,7 +387,7 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
         <Stat label="Nieuw deze maand" value={String(newThisMonth)} icon={icons.clients} />
       </div>
 
-      <FinanceTodo items={todos} />
+      <FinanceTodo items={todos.filter((t) => !dismissed.has(t.key))} />
 
       {/* Vooruitblik: projectie + klikbare maanddoelen */}
       {!demo && moneybird.configured && (
@@ -757,14 +777,14 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
                         <Avatar initials={c.initials} size={30} />
                         <div className="min-w-0">
                           <div className="text-sm font-medium truncate">{c.name} <span className="text-muted">✎</span></div>
-                          <div className="text-[11px] text-muted">{c.packageName ?? "— klik om in te stellen"}</div>
+                          <div className="text-[11px] text-muted">{c.isOwnBrand ? "eigen merk · geen retainer" : (c.packageName ?? "— klik om in te stellen")}</div>
                         </div>
                       </div>
                     </ClientFinanceDialog>
                   </div>
-                  <span className="col-span-4 md:col-span-2 text-right font-mono text-sm">{fmtMoney(c.monthlyValue, c.currency)}</span>
+                  <span className="col-span-4 md:col-span-2 text-right font-mono text-sm">{c.isOwnBrand ? <span className="text-muted">—</span> : fmtMoney(c.monthlyValue, c.currency)}</span>
                   <span className="col-span-4 md:col-span-2 text-right font-mono text-sm text-muted">{fmtMoney(c.editorCost, c.currency)}</span>
-                  <span className="col-span-4 md:col-span-2 text-right font-mono text-sm text-emerald-400">{fmtMoney(m, c.currency)}</span>
+                  <span className="col-span-4 md:col-span-2 text-right font-mono text-sm text-emerald-400">{c.isOwnBrand ? <span className="text-muted">—</span> : fmtMoney(m, c.currency)}</span>
                   <div className="col-span-12 md:col-span-2 flex md:justify-end">
                     {demo ? (
                       <Badge color={c.paymentStatus === "betaald" ? "#34D399" : c.paymentStatus === "te_laat" ? "#F87171" : "#FBBF24"}>

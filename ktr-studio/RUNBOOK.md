@@ -347,3 +347,13 @@ sessie niet dubbel werk doet.
   gebruikte koers onder de kop "Per klant".
 - Bijgevangen bug: `updateClientFinanceAction` schreef `video_price` en
   `invoice_day` nooit weg — die velden werkten dus niet. Nu wel.
+
+## Ronde 18 sep 2026 (5) — eigen merk + taken wegklikken
+
+- Migratie 049: `clients.is_own_brand` en tabel `finance_dismissals`
+  (agency_id, item_key, until) met RLS.
+- Menno Kater staat als eigen merk: geen retainer-taak, geen factuur-
+  herinnering, telt niet mee in MRR/marge/pakketten. De edit-kosten
+  ($700/mnd, omgerekend) tellen wél mee in de maandkosten en de winst.
+- Elke taak op Finance heeft nu een ✕: weg tot het einde van de maand,
+  daarna weer zichtbaar als het nog steeds speelt.
