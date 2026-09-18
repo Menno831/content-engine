@@ -35,3 +35,11 @@ export function pipelineFor(deals: Deal[], month: string, usdRate: number): numb
       return s + eur * DEAL_META[d.stage].kans;
     }, 0);
 }
+
+/** Als álles doorgaat: alle open deals voor 100%, in euro. */
+export function pipelineMax(deals: Deal[], month: string, usdRate: number): number {
+  return deals
+    .filter((d) => d.stage !== "gewonnen" && d.stage !== "verloren")
+    .filter((d) => !d.startsMonth || d.startsMonth <= month)
+    .reduce((s, d) => s + (d.currency.toUpperCase() === "USD" ? d.monthlyValue * usdRate : d.monthlyValue), 0);
+}

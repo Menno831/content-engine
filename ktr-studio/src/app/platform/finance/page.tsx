@@ -20,7 +20,7 @@ import { FinanceTodo, type TodoItem } from "./FinanceTodo";
 import { findRecurring } from "@/lib/recurring";
 import { getEditors } from "@/lib/editors";
 import { usdToEurRate, toEur, fmtMoney } from "@/lib/fx";
-import { getDeals, pipelineFor } from "@/lib/deals";
+import { getDeals, pipelineFor, pipelineMax } from "@/lib/deals";
 import { PipelineCard } from "./PipelineCard";
 import type { CostLine } from "./actions";
 import { createClient as supabaseServer } from "@/lib/supabase/server";
@@ -215,16 +215,20 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
   // Eén formule voor de vooruitblik én de jaargrafiek, zodat beide
   // hetzelfde zeggen over een maand die nog moet komen.
   const projectionFor = (key: string) => mrrForecast + avgExtra + pipelineFor(deals, key, usdRate);
+  // Als álles doorgaat: dezelfde basis, maar met de hele pijplijn erin.
+  const bestCaseFor = (key: string) => mrrForecast + avgExtra + pipelineMax(deals, key, usdRate);
   const outlookMonths: OutlookMonth[] = Array.from({ length: 6 }, (_, i) => {
     const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
     const isCurrent = key === thisMonth;
     const g = goalByMonth.get(key);
     const pipe = pipelineFor(deals, key, usdRate);
+    const maxPipe = pipelineMax(deals, key, usdRate);
     return {
       month: key,
       label: d.toLocaleDateString("nl-NL", { month: "short" }),
       projected: isCurrent ? profitOf(thisMonth).omzet + drafts.total + pipe : projectionFor(key),
+      best: isCurrent ? profitOf(thisMonth).omzet + drafts.total + maxPipe : bestCaseFor(key),
       pipeline: pipe,
       goal: g?.goal ?? null,
       note: g?.note ?? null,
@@ -478,7 +482,7 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
             const expectedNow = (actual.get(thisMonth) ?? 0) + drafts.total;
             const goalOf = (m: string) => goalByMonth.get(m)?.goal ?? 0;
             const max = Math.max(
-              ...yearMonths.map((m) => Math.max(actual.get(m) ?? 0, m > thisMonth ? projectionFor(m) : 0, goalOf(m))),
+              ...yearMonths.map((m) => Math.max(actual.get(m) ?? 0, m > thisMonth ? bestCaseFor(m) : 0, goalOf(m))),
               expectedNow,
               1
             );
@@ -502,7 +506,7 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
                             ? `${label}: ${fmtEur(omzet)} gefactureerd${drafts.total ? ` + ${fmtEur(drafts.total)} in concepten` : ""}`
                             : isPast
                               ? `${label}: ${fmtEur(omzet)}`
-                              : `${label}: prognose ${fmtEur(Math.round(prognose))}${pipe > 0 ? ` (waarvan ${fmtEur(Math.round(pipe))} pijplijn)` : ""}`,
+                              : `${label}: verwacht ${fmtEur(Math.round(prognose))}${pipe > 0 ? ` · als alles doorgaat ${fmtEur(Math.round(bestCaseFor(m)))}` : ""}`,
                           doel > 0 ? `doel ${fmtEur(doel)} — ${haalbaar >= doel ? "gehaald" : `nog ${fmtEur(Math.round(doel - haalbaar))}`}` : null,
                         ].filter(Boolean).join(" · ")
                       }>
@@ -514,6 +518,12 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
                         )}
                         {isNow && drafts.total > 0 && (
                           <div className="rounded-t-md border border-dashed border-amber-300/60 bg-amber-300/10" style={{ height: h(drafts.total) }} />
+                        )}
+                        {!isPast && !isNow && bestCaseFor(m) > prognose + 1 && (
+                          <div
+                            className="absolute inset-x-0 border-t border-dashed border-accent/45 z-10"
+                            style={{ bottom: h(bestCaseFor(m)) }}
+                          />
                         )}
                         {(isPast || isNow) ? (
                           <div className={`${isNow && drafts.total > 0 ? "" : "rounded-t-md"} bg-accent/80`} style={{ height: h(omzet) }} />
@@ -542,6 +552,9 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
                   <span><span className="inline-block w-2.5 h-2.5 rounded-sm border border-dashed border-white/[0.18] align-middle mr-1.5" />prognose (retainers + los werk)</span>
                   {yearMonths.some((m) => m > thisMonth && pipelineFor(deals, m, usdRate) > 0) && (
                     <span><span className="inline-block w-2.5 h-2.5 rounded-sm border border-dashed border-accent/50 bg-accent/[0.12] align-middle mr-1.5" />pijplijn (gewogen)</span>
+                  )}
+                  {yearMonths.some((m) => m > thisMonth && pipelineMax(deals, m, usdRate) > pipelineFor(deals, m, usdRate) + 1) && (
+                    <span><span className="inline-block w-2.5 h-[2px] border-t border-dashed border-accent/45 align-middle mr-1.5" />als alles doorgaat</span>
                   )}
                   {yearMonths.some((m) => (goalByMonth.get(m)?.goal ?? 0) > 0) && (
                     <span><span className="inline-block w-2.5 h-[2px] border-t border-dashed border-white/35 align-middle mr-1.5" />maanddoel</span>

@@ -18,6 +18,8 @@ export interface OutlookMonth {
   projected: number;
   /** Gewogen pijplijn die in `projected` zit. */
   pipeline?: number;
+  /** Als álles in de pijplijn doorgaat. */
+  best?: number;
   goal: number | null;
   note: string | null;
   isCurrent: boolean;
@@ -67,7 +69,8 @@ export function OutlookCard({
           Projectie = retainers ({fmtEur(basis.mrr)}) + gemiddeld los werk van de laatste 3 maanden
           ({fmtEur(Math.round(basis.avgExtra))}){basis.drafts > 0 ? ` · lopende maand + concepten (${fmtEur(basis.drafts)})` : ""}
           {months.some((m) => (m.pipeline ?? 0) > 0) ? " + je pijplijn, gewogen op de fase van de deal" : ""}.
-          Klik een maand om je eigen doel te zetten.
+          {months.some((m) => (m.best ?? 0) > m.projected + 1) ? " “Max” is wat het wordt als elke deal doorgaat." : ""}
+          {" "}Klik een maand om je eigen doel te zetten.
         </p>
       </div>
 
@@ -85,8 +88,8 @@ export function OutlookCard({
             >
               <div className="font-mono text-[10px] uppercase text-muted mb-1">{m.label}</div>
               <div className="font-mono text-sm">{fmtEur(Math.round(m.projected))}</div>
-              {(m.pipeline ?? 0) > 0 && (
-                <div className="text-[10.5px] text-accent mt-0.5">waarvan {fmtEur(Math.round(m.pipeline!))} pijplijn</div>
+              {(m.best ?? 0) > m.projected + 1 && (
+                <div className="text-[10.5px] text-accent mt-0.5">max {fmtEur(Math.round(m.best!))} als alles doorgaat</div>
               )}
               {target ? (
                 <>
@@ -115,7 +118,8 @@ export function OutlookCard({
             </h3>
             <p className="text-[12px] text-muted mb-3">
               Verwachte omzet: {fmtEur(Math.round(edit.projected))}
-              {(edit.pipeline ?? 0) > 0 ? ` (waarvan ${fmtEur(Math.round(edit.pipeline!))} pijplijn)` : ""} — zet je doel daarboven zodat er iets te mikken valt.
+              {(edit.pipeline ?? 0) > 0 ? ` (waarvan ${fmtEur(Math.round(edit.pipeline!))} pijplijn)` : ""}
+              {(edit.best ?? 0) > edit.projected + 1 ? ` · ${fmtEur(Math.round(edit.best!))} als elke deal doorgaat` : ""} — zet je doel daartussenin.
             </p>
             <label className="block mb-3">
               <span className="block text-[11px] font-mono uppercase tracking-wider text-muted mb-1">Omzetdoel (€)</span>
