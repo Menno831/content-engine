@@ -37,6 +37,10 @@ export interface CompetitorPost {
   postedAt: string | null;
   outlier: boolean; // >= 2x mediaan van dit account
   multiplier: number; // views / mediaan
+  /** AI-oordeel: past bij Menno's strategie. null = nog niet beoordeeld. */
+  fit: boolean | null;
+  fitReason: string | null;
+  fitAngle: string | null;
 }
 
 export async function getCompetitorFeed(): Promise<{ competitors: Competitor[]; posts: CompetitorPost[] }> {
@@ -48,7 +52,7 @@ export async function getCompetitorFeed(): Promise<{ competitors: Competitor[]; 
     supabase.from("competitors").select("id,handle,name,niche,followers,last_synced_at").order("created_at"),
     supabase
       .from("competitor_posts")
-      .select("id,competitor_id,caption,format,permalink,views,likes,comments,posted_at")
+      .select("id,competitor_id,caption,format,permalink,views,likes,comments,posted_at,fit,fit_reason,fit_angle")
       .order("views", { ascending: false })
       .limit(400),
   ]);
@@ -86,6 +90,9 @@ export async function getCompetitorFeed(): Promise<{ competitors: Competitor[]; 
       postedAt: p.posted_at ?? null,
       outlier: median > 0 && multiplier >= 2,
       multiplier: Math.round(multiplier * 10) / 10,
+      fit: p.fit === null || p.fit === undefined ? null : Boolean(p.fit),
+      fitReason: p.fit_reason ?? null,
+      fitAngle: p.fit_angle ?? null,
     };
   });
 

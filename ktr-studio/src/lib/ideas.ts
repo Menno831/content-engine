@@ -25,7 +25,7 @@ export async function getIdeas(): Promise<IdeasData> {
   const [ideasRes, sourcesRes] = await Promise.all([
     supabase
       .from("content_ideas")
-      .select("id,title,hook,angle,pillar,format,status,source_id,source_note,script_id,client_id,created_at")
+      .select("id,title,hook,angle,pillar,format,status,source_id,source_note,source_url,script_id,client_id,created_at")
       .order("created_at", { ascending: false }),
     supabase
       .from("idea_sources")
@@ -47,6 +47,7 @@ export async function getIdeas(): Promise<IdeasData> {
       status: r.status ?? "nieuw",
       sourceId: r.source_id ?? null,
       sourceNote: r.source_note ?? null,
+      sourceUrl: r.source_url ?? null,
       scriptId: r.script_id ?? null,
       clientId: r.client_id ?? null,
       createdAt: r.created_at,

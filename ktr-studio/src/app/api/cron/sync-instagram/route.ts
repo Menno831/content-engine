@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { syncClientAll } from "@/lib/sync/client";
 import { syncCompetitorCore } from "@/lib/sync/competitors";
+import { scoreUncheckedPosts } from "@/lib/fit";
 import { getMoneybirdMonth, moneybirdConfigured } from "@/lib/integrations/moneybird";
 import { fmtEur } from "@/app/platform/_data";
 
@@ -33,6 +34,9 @@ export async function GET(request: NextRequest) {
     const r = await syncCompetitorCore(c.id);
     if (r.ok) competitorsSynced++;
   }
+  // Nieuwe competitor-posts meteen beoordelen op de strategie, zodat
+  // Discover 's ochtends alleen laat zien wat past.
+  const fit = await scoreUncheckedPosts(admin, 60).catch(() => ({ scored: 0 }));
 
   // ── Dagelijkse outreach-herinnering (alleen de ochtendrun, 10:00 NL) ──
   // De cron draait 3x per dag; alleen de eerste run van de dag meldt
@@ -96,6 +100,7 @@ export async function GET(request: NextRequest) {
     ranAt: new Date().toISOString(),
     synced: results.length,
     competitors: competitorsSynced,
+    fitScored: fit.scored,
     outreachReminder,
     newInvoices,
     results,

@@ -901,3 +901,13 @@ alter table editors add column if not exists welcomed_at   timestamptz;  -- wann
 -- Bestaande editors: het oude bedrag geldt als shortform-tarief.
 update editors set pay_shortform = pay_per_video
 where pay_shortform is null and pay_per_video is not null and pay_per_video > 0;
+
+-- ── 043 · Discover: strategie-fit per post ─────────────────────
+alter table competitor_posts add column if not exists fit            boolean;
+alter table competitor_posts add column if not exists fit_reason     text;
+alter table competitor_posts add column if not exists fit_angle      text;        -- hoe Menno dit zou maken
+alter table competitor_posts add column if not exists fit_checked_at timestamptz;
+create index if not exists idx_comp_posts_fit on competitor_posts (agency_id, fit, views desc);
+
+-- Ideeën uit Discover dragen een directe link naar de post.
+alter table content_ideas add column if not exists source_url text;

@@ -148,9 +148,9 @@ export function IdeasBoard({
                 {(src || idea.sourceNote) && (
                   <p className="text-[11px] text-muted/80 mb-3">
                     ↩︎{" "}
-                    {src?.url ? (
-                      <a href={src.url} target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors underline decoration-white/20">
-                        {idea.sourceNote ?? src.title}
+                    {idea.sourceUrl || src?.url ? (
+                      <a href={idea.sourceUrl ?? src?.url ?? "#"} target="_blank" rel="noopener noreferrer" className="hover:text-accent transition-colors underline decoration-white/20">
+                        {idea.sourceNote ?? src?.title}
                       </a>
                     ) : (
                       idea.sourceNote ?? src?.title

@@ -6,10 +6,11 @@
 // winnaars met één klik op je swipe-board.
 // ════════════════════════════════════════════════════════════════
 import { useActionState, useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Card, Badge, icons } from "../_components";
 import { fmtNum } from "../_data";
 import { saveToBoardAction } from "../boards/actions";
-import { addCompetitorAction, deleteCompetitorAction, syncCompetitorAction, type ActionResult } from "./actions";
+import { addCompetitorAction, deleteCompetitorAction, syncCompetitorAction, scoreFitAction, postToIdeaAction, type ActionResult } from "./actions";
 import type { Competitor, CompetitorPost } from "@/lib/competitors";
 
 const initial: ActionResult = {};
@@ -43,6 +44,32 @@ function SaveButton({ post }: { post: CompetitorPost }) {
   );
 }
 
+// Past-bij-mij → met één klik als idee naar Scripts, met de link erbij,
+// zodat Menno 'm daar naar zijn eigen verhaal ombouwt.
+function IdeaButton({ post }: { post: CompetitorPost }) {
+  const router = useRouter();
+  const [pending, start] = useTransition();
+  const [done, setDone] = useState(false);
+  return (
+    <button
+      onClick={() =>
+        start(async () => {
+          const r = await postToIdeaAction(post.id);
+          if (r.ideaId) {
+            setDone(true);
+            router.push("/platform/scripts?tab=ideeen");
+          } else if (r.error) alert(r.error);
+        })
+      }
+      disabled={pending || done}
+      className="flex items-center gap-1.5 rounded-lg bg-accent/15 border border-accent/25 hover:bg-accent/25 text-accent font-bold disabled:opacity-60 px-2.5 py-1.5 text-[12px] transition-colors"
+      title="Als idee naar Scripts — daar pas je 'm aan naar jouw verhaal"
+    >
+      {done ? "Staat bij Ideeën ✓" : pending ? "…" : "→ Idee"}
+    </button>
+  );
+}
+
 export function CompetitorBoard({ competitors, posts }: { competitors: Competitor[]; posts: CompetitorPost[] }) {
   const [state, action, pending] = useActionState(addCompetitorAction, initial);
   const [syncing, startSync] = useTransition();
@@ -51,17 +78,36 @@ export function CompetitorBoard({ competitors, posts }: { competitors: Competito
   const [activeComp, setActiveComp] = useState<string>("");
   const [onlyOutliers, setOnlyOutliers] = useState(false);
   const [platform, setPlatform] = useState<"" | "instagram" | "youtube">("");
+  // Standaard alleen wat bij de strategie past; alles tonen is een bewuste keuze.
+  const [onlyFit, setOnlyFit] = useState(true);
+  const [scoring, startScore] = useTransition();
+  const [scoreMsg, setScoreMsg] = useState<ActionResult>({});
+
+  const unchecked = posts.filter((p) => p.fit === null).length;
+  const fitCount = posts.filter((p) => p.fit === true).length;
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return posts.filter((p) => {
+      if (onlyFit && p.fit !== true) return false;
       if (platform && p.platform !== platform) return false;
       if (activeComp && p.competitorId !== activeComp) return false;
       if (onlyOutliers && !p.outlier) return false;
       if (q && !p.caption.toLowerCase().includes(q) && !p.handle.toLowerCase().includes(q)) return false;
       return true;
     });
-  }, [posts, query, activeComp, onlyOutliers, platform]);
+  }, [posts, query, activeComp, onlyOutliers, platform, onlyFit]);
+
+  // Zonder platformfilter: twee secties, YouTube en Instagram apart.
+  const sections: { key: "youtube" | "instagram"; label: string; items: CompetitorPost[] }[] = (
+    platform ? [platform] : (["youtube", "instagram"] as const)
+  )
+    .map((pf) => ({
+      key: pf,
+      label: pf === "youtube" ? "▶️ YouTube" : "📸 Instagram",
+      items: filtered.filter((p) => p.platform === pf),
+    }))
+    .filter((s) => platform || s.items.length > 0);
 
   return (
     <>
@@ -173,15 +219,41 @@ export function CompetitorBoard({ competitors, posts }: { competitors: Competito
             />
           </div>
           <button
+            onClick={() => setOnlyFit((v) => !v)}
+            className={`rounded-xl px-4 py-2.5 text-[13px] transition-all ${
+              onlyFit ? "bg-accent text-background font-bold" : "border border-white/[0.08] text-muted hover:border-accent/30 hover:text-accent"
+            }`}
+            title="Alleen posts die bij jouw strategie passen (AI-oordeel)"
+          >
+            ✓ Past bij mij ({fitCount})
+          </button>
+          <button
             onClick={() => setOnlyOutliers((v) => !v)}
             className={`rounded-xl px-4 py-2.5 text-[13px] transition-all ${
               onlyOutliers ? "bg-accent text-background font-bold" : "border border-white/[0.08] text-muted hover:border-accent/30 hover:text-accent"
             }`}
           >
-            🔥 Alleen outliers ({posts.filter((p) => p.outlier).length})
+            🔥 Outliers ({posts.filter((p) => p.outlier).length})
           </button>
+          {unchecked > 0 && (
+            <button
+              onClick={() =>
+                startScore(async () => {
+                  setScoreMsg({});
+                  setScoreMsg(await scoreFitAction());
+                })
+              }
+              disabled={scoring}
+              className="rounded-xl border border-accent/40 text-accent hover:bg-accent/[0.08] disabled:opacity-60 px-4 py-2.5 text-[13px] font-bold transition-all"
+              title="De cron doet dit elke ochtend; hiermee doe je het nu"
+            >
+              {scoring ? "Beoordelen…" : `✦ Check strategie (${unchecked} nieuw)`}
+            </button>
+          )}
         </div>
       )}
+      {scoreMsg.ok && <p className="-mt-3 mb-4 text-[13px] text-emerald-400">{scoreMsg.ok}</p>}
+      {scoreMsg.error && <p className="-mt-3 mb-4 text-[13px] text-red-400">{scoreMsg.error}</p>}
 
       {/* Feed */}
       {filtered.length === 0 ? (
@@ -191,12 +263,22 @@ export function CompetitorBoard({ competitors, posts }: { competitors: Competito
               ? "Volg je eerste account hierboven — wij syncen hun posts en markeren automatisch de outliers (posts die ≥2x beter doen dan hun mediaan)."
               : posts.length === 0
                 ? "Nog geen posts — klik op ↻ bij een account om te syncen."
-                : "Niets gevonden met dit filter."}
+                : onlyFit && fitCount === 0
+                  ? unchecked > 0
+                    ? "Nog niks beoordeeld — klik op ✦ Check strategie."
+                    : "Niets past bij je strategie in deze selectie. Zet 'Past bij mij' uit om alles te zien."
+                  : "Niets gevonden met dit filter."}
           </p>
         </Card>
       ) : (
+        sections.map((sec) => (
+        <section key={sec.key} className="mb-8">
+          <div className="flex items-center gap-2 mb-3 px-1">
+            <span className="font-display font-extrabold">{sec.label}</span>
+            <span className="font-mono text-[11px] text-muted bg-white/[0.05] rounded-full px-2 py-0.5">{sec.items.length}</span>
+          </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((p) => (
+          {sec.items.map((p) => (
             <Card key={p.id} hover className="p-4">
               <div className="flex items-center justify-between mb-2.5">
                 <div className="flex items-center gap-2">
@@ -206,7 +288,16 @@ export function CompetitorBoard({ competitors, posts }: { competitors: Competito
                 </div>
                 <span className="font-mono text-[11px] text-muted">{fmtNum(p.views)} views</span>
               </div>
-              <p className="text-sm leading-snug mb-3 line-clamp-3">{p.caption || "(zonder bijschrift)"}</p>
+              <p className="text-sm leading-snug mb-2 line-clamp-3">{p.caption || "(zonder bijschrift)"}</p>
+              {/* Waarom dit past, en hoe jij het zou maken */}
+              {p.fit === true && (p.fitAngle || p.fitReason) && (
+                <p className="text-[12px] text-accent/90 leading-snug mb-3 border-l-2 border-accent/40 pl-2.5">
+                  {p.fitAngle ?? p.fitReason}
+                </p>
+              )}
+              {p.fit === false && p.fitReason && (
+                <p className="text-[11.5px] text-muted leading-snug mb-3">✗ {p.fitReason}</p>
+              )}
               <div className="flex items-center justify-between pt-3 border-t border-white/[0.05]">
                 <div className="flex items-center gap-3 text-[11px] text-muted">
                   {p.permalink ? (
@@ -218,11 +309,16 @@ export function CompetitorBoard({ competitors, posts }: { competitors: Competito
                   )}
                   <span>♥ {fmtNum(p.likes)}</span>
                 </div>
-                <SaveButton post={p} />
+                <div className="flex items-center gap-1.5">
+                  {p.fit === true && <IdeaButton post={p} />}
+                  <SaveButton post={p} />
+                </div>
               </div>
             </Card>
           ))}
         </div>
+        </section>
+        ))
       )}
     </>
   );

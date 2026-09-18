@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { createClient as supabaseServer } from "@/lib/supabase/server";
 import { getSessionContext } from "@/lib/auth";
 import { syncCompetitorCore } from "@/lib/sync/competitors";
+import { scoreUncheckedPosts } from "@/lib/fit";
+import { requireTeam } from "@/lib/guard";
 
 export interface ActionResult {
   error?: string;
@@ -122,4 +124,55 @@ export async function runFeedScanAction(): Promise<ActionResult> {
   if (r.error) return { error: r.error };
   revalidatePath("/platform/discover");
   return { ok: r.added ? `${r.added} nieuwe video's gevonden.` : "Niks nieuws gevonden — alles al gezien." };
+}
+
+
+// ── Strategie-check: beoordeel alles wat nog geen oordeel heeft ──
+export async function scoreFitAction(): Promise<ActionResult> {
+  const auth = await requireTeam();
+  if ("error" in auth) return { error: auth.error };
+  const r = await scoreUncheckedPosts(auth.supabase, 60);
+  revalidatePath("/platform/discover");
+  if (r.error) return { error: `Beoordelen mislukt: ${r.error}` };
+  return { ok: r.scored ? `${r.scored} posts beoordeeld op je strategie.` : "Alles was al beoordeeld." };
+}
+
+// ── Een passende post als idee naar Scripts ─────────────────────
+export async function postToIdeaAction(postId: string): Promise<ActionResult & { ideaId?: string }> {
+  const auth = await requireTeam();
+  if ("error" in auth) return { error: auth.error };
+
+  const { data: p, error } = await auth.supabase
+    .from("competitor_posts")
+    .select("id,caption,format,permalink,views,fit_angle,competitor_id")
+    .eq("id", postId)
+    .maybeSingle();
+  if (error) return { error: error.message };
+  if (!p) return { error: "Post niet gevonden." };
+
+  const { data: comp } = await auth.supabase.from("competitors").select("handle").eq("id", p.competitor_id).maybeSingle();
+  const handle = (comp?.handle as string) ?? "competitor";
+  const caption = String(p.caption ?? "").trim();
+  const title = (caption.split(/\n/)[0] || "Idee uit Discover").slice(0, 120);
+  const fmt = /short|youtube/i.test(String(p.format)) && /longform/i.test(String(p.format)) ? "Longform" : String(p.format) === "Carrousel" ? "Carrousel" : "Reel";
+
+  const { data: idea, error: insErr } = await auth.supabase
+    .from("content_ideas")
+    .insert({
+      agency_id: auth.agency.id,
+      title,
+      hook: caption.slice(0, 300) || null,
+      angle: p.fit_angle ?? null,
+      pillar: null,
+      format: fmt,
+      source_note: `Discover: ${handle} · ${Number(p.views ?? 0).toLocaleString("nl-NL")} views`,
+      source_url: p.permalink ?? null,
+      status: "gekozen",
+    })
+    .select("id")
+    .single();
+  if (insErr) return { error: insErr.message };
+
+  revalidatePath("/platform/scripts");
+  return { ok: "Staat bij Ideeën — pas 'm daar aan naar jouw verhaal.", ideaId: idea.id as string };
 }

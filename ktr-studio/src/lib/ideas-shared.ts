@@ -39,6 +39,7 @@ export interface ContentIdea {
   status: string;
   sourceId: string | null;
   sourceNote: string | null;
+  sourceUrl: string | null;
   scriptId: string | null;
   clientId: string | null;
   createdAt: string;
