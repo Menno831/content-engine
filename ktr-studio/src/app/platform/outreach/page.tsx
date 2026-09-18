@@ -16,12 +16,16 @@ export default async function OutreachPage({ searchParams }: { searchParams: Pro
   await redirectEditorToBoard();
   const sp = await searchParams;
   const topOnly = sp.laag === "top";
+  const rejectedOnly = sp.laag === "afgekeurd";
   const all = await getProspects();
   const topCount = all.filter((p) => p.tier === "top").length;
-  // Toplaag-filter; binnen elke kolom staan toplaag-prospects bovenaan.
-  const prospects = (topOnly ? all.filter((p) => p.tier === "top") : all).sort(
-    (a, b) => Number(b.tier === "top") - Number(a.tier === "top")
+  const rejectedCount = all.filter((p) => p.stage === "afgekeurd").length;
+  // Standaard zie je alleen wat past: afgekeurd staat achter een eigen
+  // knop. Toplaag bovenaan, daarna op ICP-score (hoogste eerst).
+  const prospects = (topOnly ? all.filter((p) => p.tier === "top") : rejectedOnly ? all.filter((p) => p.stage === "afgekeurd") : all.filter((p) => p.stage !== "afgekeurd")).sort(
+    (a, b) => Number(b.tier === "top") - Number(a.tier === "top") || (b.icpScore ?? -1) - (a.icpScore ?? -1)
   );
+  const visibleStages = rejectedOnly ? (["afgekeurd"] as ProspectStage[]) : stageOrder.filter((s) => s !== "afgekeurd");
   const demo = DEMO_MODE || !isSupabaseConfigured;
 
   const pipelineValue = prospects
@@ -69,7 +73,7 @@ export default async function OutreachPage({ searchParams }: { searchParams: Pro
               !topOnly ? "bg-accent text-background font-bold" : "border border-white/[0.08] text-muted hover:border-accent/30 hover:text-accent"
             }`}
           >
-            Alle ({all.length})
+            Past ({all.length - rejectedCount})
           </Link>
           <Link
             href="/platform/outreach?laag=top"
@@ -79,9 +83,17 @@ export default async function OutreachPage({ searchParams }: { searchParams: Pro
           >
             ★ Toplaag ({topCount})
           </Link>
+          <Link
+            href="/platform/outreach?laag=afgekeurd"
+            className={`rounded-full px-3 py-1.5 text-[12px] transition-all ${
+              rejectedOnly ? "bg-red-400 text-background font-bold" : "border border-white/[0.08] text-muted hover:border-red-400/40 hover:text-red-300"
+            }`}
+          >
+            Afgekeurd ({rejectedCount})
+          </Link>
           <SprintMode items={sprintItems} />
         </div>
-        <p className="text-[11.5px] text-muted">★ op een kaart = persoonlijke aanpak in plaats van de standaard-opener</p>
+        <p className="text-[11.5px] text-muted">★ = persoonlijke aanpak · 🧭 score = hoe goed iemand bij je doelgroep past (≥65 blijft staan)</p>
       </div>
 
       {topOnly && (
@@ -98,12 +110,12 @@ export default async function OutreachPage({ searchParams }: { searchParams: Pro
       )}
 
       <div className="flex gap-4 overflow-x-auto pb-4 -mx-1 px-1">
-        {stageOrder.map((stage) => {
+        {visibleStages.map((stage) => {
           const items = prospects.filter((p) => p.stage === stage);
           const meta = prospectStageMeta[stage];
           const value = items.reduce((s, p) => s + p.potentialValue, 0);
           return (
-            <div key={stage} className="w-[290px] shrink-0">
+            <div key={stage} className={`${rejectedOnly ? "w-full" : "w-[290px]"} shrink-0`}>
               <div className="flex items-center justify-between mb-3 px-1">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full" style={{ background: meta.color }} />
@@ -113,7 +125,7 @@ export default async function OutreachPage({ searchParams }: { searchParams: Pro
                 <span className="font-mono text-[11px] text-muted">{fmtEur(value)}</span>
               </div>
 
-              <div className="space-y-3 min-h-[100px] rounded-2xl bg-white/[0.015] border border-white/[0.04] p-2.5">
+              <div className={`${rejectedOnly ? "grid md:grid-cols-2 xl:grid-cols-3 gap-3" : "space-y-3"} min-h-[100px] rounded-2xl bg-white/[0.015] border border-white/[0.04] p-2.5`}>
                 {items.map((p) => (
                   <ProspectCard key={p.id} prospect={p} demo={demo} />
                 ))}

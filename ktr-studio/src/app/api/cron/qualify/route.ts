@@ -1,6 +1,6 @@
 // ════════════════════════════════════════════════════════════════
 // Kwalificatie-run: beoordeelt te-contacteren-prospects in batches.
-// Afvallers (geen high-ticket aanbod, of YouTube draait al top) gaan
+// Afvallers (ICP-score onder de 65, of YouTube draait al top) gaan
 // naar stage 'afgekeurd' met de reden erbij; de rest krijgt een
 // fit-label. Toplaag-prospects (handmatig gekozen) slaan we over.
 // Aanroepen tot remaining 0 is (max ~20 per call i.v.m. tijd).
@@ -43,8 +43,9 @@ export async function GET(request: NextRequest) {
       const patch: Record<string, unknown> = {
         fit_reason: fit.reason,
         fit_checked_at: new Date().toISOString(),
+        icp_score: fit.score,
       };
-      // Alleen een zeker high-ticket aanbod blijft; twijfel gaat er ook uit.
+      // Alleen een echte match (score ≥ 65) blijft; twijfel gaat er ook uit.
       if (fit.verdict !== "goed") {
         patch.stage = "afgekeurd";
         patch.tier = null; // afgekeurd hoort nergens een ster te hebben

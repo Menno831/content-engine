@@ -301,6 +301,8 @@ export interface Prospect {
   stage: ProspectStage;
   potentialValue: number;
   fitReason?: string | null;
+  /** ICP-score 0-100 uit de kwalificatie (≥65 = past). */
+  icpScore?: number | null;
   note: string | null;
   /** Kant-en-klaar DM-bericht — kopieer & verstuur vanaf de outreach-pagina. */
   message?: string | null;

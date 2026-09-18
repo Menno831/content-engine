@@ -317,7 +317,7 @@ export async function runWatchdog(): Promise<WatchdogResult> {
     }
 
     // ── 2b. Nieuwe prospects kwalificeren (max 10 per run) ──────────
-    // Zelfde check als /api/cron/qualify: geen high-ticket aanbod of
+    // Zelfde check als /api/cron/qualify: ICP-score onder de 65 of
     // YouTube draait al top → afgekeurd. Toplaag slaan we over.
     try {
       const { data: unchecked } = await admin
@@ -331,8 +331,8 @@ export async function runWatchdog(): Promise<WatchdogResult> {
       for (const p of unchecked ?? []) {
         const fit = await qualifyProspect(p);
         if (fit.verdict === "onbekend") continue; // storing → volgende run opnieuw
-        const patch: Record<string, unknown> = { fit_reason: fit.reason, fit_checked_at: new Date().toISOString() };
-        // Alleen zeker high-ticket blijft staan; twijfel = eruit (regel van Menno).
+        const patch: Record<string, unknown> = { fit_reason: fit.reason, fit_checked_at: new Date().toISOString(), icp_score: fit.score };
+        // Alleen een echte match blijft staan; twijfel = eruit (regel van Menno).
         if (fit.verdict !== "goed") { patch.stage = "afgekeurd"; patch.tier = null; }
         await admin.from("prospects").update(patch).eq("id", p.id);
       }

@@ -3,9 +3,8 @@
 // kunnen betekenen — én die ons kan betalen?
 //
 // Twee poorten:
-// 1. HIGH-TICKET — verkoopt deze persoon iets van minstens €1000
-//    (coaching, agency, done-for-you, B2B, mastermind)? Zonder
-//    zo'n aanbod is een content-retainer nooit rendabel voor ze.
+// 1. DOELGROEP — past deze persoon bij Menno's ICP (zie MENNO_ICP):
+//    bewezen bedrijf, maakt al content, YouTube ligt nog. Score 0-100.
 // 2. NIET AL TE GOED — draait hun YouTube al top (hoge gemiddelde
 //    views), dan valt er weinig te fixen en is de pitch zwak.
 // ════════════════════════════════════════════════════════════════
@@ -65,23 +64,55 @@ export async function getChannelSnapshot(youtube: string): Promise<ChannelSnapsh
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
-const OFFER_TEMPLATE = `Je beoordeelt of een creator/ondernemer een interessante prospect is voor een premium content-agency (retainer vanaf €1000 per maand). Enige criterium: heeft deze persoon zeer waarschijnlijk een HIGH-TICKET aanbod — iets van minstens €1000 dat ze zelf verkopen? Denk aan: coaching of mentorship, een eigen agency of bureau, done-for-you diensten, B2B-dienstverlening, mastermind, high-ticket cursus, vastgoed- of financiële dienstverlening.
+// ── Menno's doelgroep, in zijn eigen woorden (intakecall met Seth, juli 2026) ──
+// "Founders die meer dan 20K winst per maand draaien, al content maken
+// (van nul naar vier YouTube-video's per maand is een te grote stap) en
+// het liefst een high-ticket aanbod hebben. 80% van mijn klanten zijn
+// coaches, vooral e-com coaches; daarnaast founders in het algemeen."
+// Het aanbod: YouTube als extra leadkanaal naast Instagram, €4K/mnd.
+export const MENNO_ICP = `WIE WEL
+- Founder of coach in NL/BE met een bewezen bedrijf: aannemelijk >€20.000 winst per maand
+  (cursussen/coaching van €3K-€10K, team, jaren actief, awards, grote community, bekend merk).
+- Maakt al content: actief Instagram-account (reels, ≥ ~2.000 volgers), podcast of YouTube.
+- YouTube ligt nog (bijna) leeg, loopt inconsistent of ziet er amateuristisch uit — daar zit de winst.
+- Kern: e-commerce-coaches en -educators, businesscoaches/mentoren met bewezen omzet, vastgoed- en
+  beleggingseducators met echte programma's, founders van bekende merken (founder-led documentaire).
 
-GEEN fit: iemand die vooral leeft van AdSense, sponsors, affiliate, merchandise of goedkope cursussen, zonder eigen duur aanbod.
+WIE NIET
+- Kleine accounts (< ~1.500 volgers) of mensen die nog geen content maken: de stap is te groot.
+- Concurrenten of aangrenzend vak: video-/content-/personal-branding-/zichtbaarheidsbureaus en -coaches.
+- Trading-signalen, forex, crypto-communities zonder gezicht: reputatierisico en YouTube vaak al vol.
+- Dating/relaties, fitness/PT en gezondheidscoaches als hoofdaanbod: niet onze wereld, geen cases.
+- YouTube draait al sterk (>20K gemiddelde views): weinig te fixen.
+- Merk-/communityaccounts zonder herkenbare founder, of namen zonder werkende handle.`;
 
-Antwoord ALLEEN met JSON, niets eromheen:
-{"high_ticket":"ja"|"nee"|"onzeker","reden":"<max 12 woorden, Nederlands>"}
+const ICP_TEMPLATE = `Je beoordeelt of een prospect past bij de doelgroep van KTR Studio (YouTube-groei voor founders, €4.000 per maand).
+
+DOELGROEP
+{{onderwerp}}
+
+Geef een score 0-100:
+- 80-100: klassieke match (bewezen bedrijf, maakt al content, YouTube ligt nog)
+- 65-79: past, met één kanttekening
+- 50-64: twijfel (te klein, aanbod onduidelijk, niche aan de rand)
+- 0-49: past niet
+Wees streng: twijfel is geen 65+. Antwoord ALLEEN met JSON, niets eromheen:
+{"score":<0-100>,"reden":"<max 15 woorden, Nederlands, concreet>"}
 
 PROSPECT:
-{{onderwerp}}`;
+`;
 
 export interface FitVerdict {
-  // Menno's regel: alleen een ZEKER high-ticket aanbod telt. Twijfel = eruit.
-  // "onbekend" = technische storing (AI niet bereikbaar) — later opnieuw proberen,
-  // nooit op basis daarvan afkeuren.
-  verdict: "goed" | "twijfel" | "geen_high_ticket" | "al_sterk" | "onbekend";
+  // ≥65 = goed, 50-64 = twijfel, <50 = geen_fit. Twijfel gaat er ook uit
+  // (regel van Menno), maar de score blijft staan om later te herzien.
+  // "onbekend" = technische storing (AI niet bereikbaar) — later opnieuw
+  // proberen, nooit op basis daarvan afkeuren.
+  verdict: "goed" | "twijfel" | "geen_fit" | "al_sterk" | "onbekend";
+  score: number | null;
   reason: string;
 }
+
+export const ICP_KEEP_SCORE = 65;
 
 export async function qualifyProspect(p: {
   name: string;
@@ -96,11 +127,12 @@ export async function qualifyProspect(p: {
   if (snapshot && snapshot.avgViews >= STRONG_AVG_VIEWS) {
     return {
       verdict: "al_sterk",
+      score: 20,
       reason: `YouTube loopt al sterk (~${Math.round(snapshot.avgViews / 1000)}K gem. views) — weinig te fixen`,
     };
   }
 
-  // Poort 1: high-ticket aanbod (AI-oordeel op alle beschikbare context).
+  // Poort 1: past de persoon bij de doelgroep (AI-score op alle context).
   const input = [
     `Naam: ${p.name}`,
     p.instagram ? `Instagram: ${p.instagram}` : null,
@@ -113,16 +145,18 @@ export async function qualifyProspect(p: {
     .filter(Boolean)
     .join("\n");
 
-  const { text, mock } = await generateText({ template: OFFER_TEMPLATE, input, model: "fast" });
-  if (mock) return { verdict: "onbekend", reason: "AI niet beschikbaar" };
+  const { text, mock } = await generateText({ template: ICP_TEMPLATE.replace("{{onderwerp}}", MENNO_ICP), input, model: "fast" });
+  if (mock) return { verdict: "onbekend", score: null, reason: "AI niet beschikbaar" };
 
   try {
     const json = JSON.parse(text.match(/\{[\s\S]*\}/)?.[0] ?? "{}");
+    const score = Math.max(0, Math.min(100, Math.round(Number(json.score))));
+    if (!Number.isFinite(score)) return { verdict: "onbekend", score: null, reason: "AI-antwoord onleesbaar" };
     const reden = String(json.reden ?? "").slice(0, 120);
-    if (json.high_ticket === "nee") return { verdict: "geen_high_ticket", reason: `geen high-ticket aanbod — ${reden}` };
-    if (json.high_ticket === "ja") return { verdict: "goed", reason: `high-ticket: ${reden}` };
-    return { verdict: "twijfel", reason: `aanbod onduidelijk — ${reden}` };
+    if (score >= ICP_KEEP_SCORE) return { verdict: "goed", score, reason: `past: ${reden}` };
+    if (score >= 50) return { verdict: "twijfel", score, reason: `twijfel: ${reden}` };
+    return { verdict: "geen_fit", score, reason: `past niet: ${reden}` };
   } catch {
-    return { verdict: "onbekend", reason: "AI-antwoord onleesbaar" };
+    return { verdict: "onbekend", score: null, reason: "AI-antwoord onleesbaar" };
   }
 }

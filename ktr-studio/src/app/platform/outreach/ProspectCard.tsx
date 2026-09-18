@@ -263,8 +263,8 @@ export function ProspectCard({ prospect: p, demo }: { prospect: Prospect; demo: 
 
       {p.note && <div className="text-[11px] text-muted">{p.note}</div>}
       {p.fitReason && (
-        <div className={`text-[11px] ${p.stage === "afgekeurd" ? "text-red-400/90" : p.fitReason.startsWith("high-ticket") ? "text-emerald-400/90" : "text-amber-300/90"}`}>
-          🧭 {p.fitReason}
+        <div className={`text-[11px] ${p.fitReason.startsWith("past:") || p.fitReason.startsWith("high-ticket") ? "text-emerald-400/90" : p.fitReason.startsWith("twijfel") ? "text-amber-300/90" : "text-red-400/90"}`}>
+          🧭 {p.icpScore != null && <span className="font-mono font-bold mr-1">{p.icpScore}</span>}{p.fitReason}
         </div>
       )}
       {!demo && <ProspectStageControl prospectId={p.id} stage={p.stage} />}

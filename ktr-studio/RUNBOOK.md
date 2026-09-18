@@ -295,3 +295,20 @@ sessie niet dubbel werk doet.
 - Nieuw: `src/lib/integrations/stripe.ts` (betalingen per maand via balance_transactions, abonnementen actief + betaling mislukt → MRR, uitbetalingen) en `finance/StripeCard.tsx`.
 - Finance: netto Stripe-betalingen tellen mee in maandomzet en winst, ontdubbeld op bedrag tegen betaalde Moneybird-facturen van dezelfde maand (label "ook in Moneybird", telt dan niet dubbel). Kaart staat boven het Moneybird-blok.
 - Settings → Koppelingen: Stripe-rij. Openstaand: `STRIPE_SECRET_KEY` in Vercel zetten (restricted key, alleen lezen op Balance, Charges, Customers, Subscriptions, Payouts).
+
+## Ronde 18 sep 2026 — outreach op de echte doelgroep
+
+- Menno: "outreach is voor 90% troep". De doelgroep staat nu letterlijk in
+  `lib/qualify.ts` (`MENNO_ICP`), uit zijn eigen woorden in de intakecall
+  met Seth: founders/coaches in NL/BE die aannemelijk >€20k/mnd winst
+  draaien, al content maken en YouTube laten liggen. Niet: kleine accounts,
+  concurrenten/aangrenzend vak, trading/crypto zonder gezicht, dating/
+  fitness/gezondheid, YouTube al sterk, merkaccounts zonder founder.
+- Migratie 047: `prospects.icp_score` (0-100). ≥65 blijft staan, 50-64
+  "twijfel" en <50 "past niet" gaan naar afgekeurd — score en reden blijven
+  op de kaart, dus terughalen kan altijd.
+- Alle 172 open prospects opnieuw beoordeeld en weggeschreven: 57 blijven
+  (toplaag altijd), 115 afgekeurd (incl. 6 dubbelen). Nieuwe imports lopen
+  via dezelfde rubriek (cron qualify + watchdog 2b).
+- Outreach-board: standaard alleen wat past; "Afgekeurd (n)" is een eigen
+  weergave; te-contacteren gesorteerd op toplaag → ICP-score.

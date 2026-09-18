@@ -973,3 +973,7 @@ alter table agencies add column if not exists calendar_synced_at timestamptz;
 
 -- ── 046 · Factuurdag per klant ─────────────────────────────────
 alter table clients add column if not exists invoice_day int not null default 1;
+
+-- 047: ICP-score op prospects
+alter table prospects add column if not exists icp_score int;
+create index if not exists idx_prospects_icp on prospects (agency_id, stage, icp_score desc);

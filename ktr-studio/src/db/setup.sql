@@ -1118,6 +1118,8 @@ alter table agencies add column if not exists frameio_project_id text;
 
 alter table prospects add column if not exists fit_reason     text;
 alter table prospects add column if not exists fit_checked_at timestamptz;
+alter table prospects add column if not exists icp_score int;
+create index if not exists idx_prospects_icp on prospects (agency_id, stage, icp_score desc);
 -- ════════════════════════════════════════════════════════════════
 -- Migratie 036: Finance-uitbouw.
 -- 1. month_goals: klikbare omzetdoelen per komende maand.

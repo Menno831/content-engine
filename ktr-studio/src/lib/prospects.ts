@@ -30,7 +30,7 @@ export async function getProspects(): Promise<Prospect[]> {
   let data: any[] | null = null;
   const first = await supabase
     .from("prospects")
-    .select(`${base},message,dm_sent_at,tier,last_reply,last_reply_at,reply_draft,fit_reason`)
+    .select(`${base},message,dm_sent_at,tier,last_reply,last_reply_at,reply_draft,fit_reason,icp_score`)
     .order("created_at", { ascending: false });
   if (first.error) {
     // Oudere database zonder de nieuwste migraties? Trapsgewijs terug.
@@ -58,6 +58,7 @@ export async function getProspects(): Promise<Prospect[]> {
     message: p.message ?? null,
     tier: p.tier ?? null,
     fitReason: p.fit_reason ?? null,
+    icpScore: p.icp_score != null ? Number(p.icp_score) : null,
     lastReply: p.last_reply ?? null,
     lastReplyAt: p.last_reply_at ?? null,
     replyDraft: p.reply_draft ?? null,
