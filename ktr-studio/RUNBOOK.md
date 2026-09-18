@@ -428,3 +428,15 @@ sessie niet dubbel werk doet.
   een IG-DM, Mexico/Marbella, 5k pond coaching bij Seth).
 - Model "smart", met de instructie om alleen uit die feiten te putten.
   Geen AI-sleutel of storing? Dan de structuur zoals eerst.
+
+## Ronde 18 sep 2026 (11) — scripts bijschaven met opdrachten
+
+- Migratie 052: `script_revisions` (script_id, instruction, content). Elke
+  bijschaafronde bewaart de vorige tekst én wat er gevraagd werd.
+- `refineScriptAction(scriptId, opdracht)`: stuurt MENNO_FEITEN (nu
+  geëxporteerd uit ideaActions), het idee waar het script uit komt
+  (titel, angle, bron), de huidige tekst en alle eerdere opdrachten voor
+  dat script naar het smart-model. Antwoord vervangt de tekst.
+- `undoRefineAction`: laatste ronde terugdraaien.
+- In de editor een balk "Laat het aanpassen": invoer + Enter, lijst van
+  wat je al vroeg, en een terugdraaiknop.

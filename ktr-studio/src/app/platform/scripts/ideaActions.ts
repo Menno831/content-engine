@@ -33,7 +33,7 @@ export async function deleteIdeaAction(ideaId: string): Promise<IdeaResult> {
 // ── Wat er écht van Menno bekend is ─────────────────────────────
 // Alleen dingen die hij zelf heeft gezegd in zijn calls. Het model mag
 // hier uit putten, maar niets verzinnen wat hier niet staat.
-const MENNO_FEITEN = `ACHTERGROND (uit zijn eigen calls, allemaal waar)
+export const MENNO_FEITEN = `ACHTERGROND (uit zijn eigen calls, allemaal waar)
 - Had vier jaar geleden een schoonmaakbedrijf, ongeveer 1000 euro per week.
 - Wilde het vak leren en betaalde een lokaal marketingbureau om er te mogen zijn.
   Een uur rijden, elke week, een half jaar lang.

@@ -8,7 +8,7 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Card, Badge } from "../_components";
-import { createScriptAction, updateScriptAction, deleteScriptAction } from "./actions";
+import { createScriptAction, updateScriptAction, deleteScriptAction, refineScriptAction, undoRefineAction } from "./actions";
 
 export interface ScriptRow {
   id: string;
@@ -49,6 +49,12 @@ export function ScriptsBoard({
   const [locFilter, setLocFilter] = useState<string>("");
   const [saved, setSaved] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [pendingNew, startNew] = useTransition();
+  // Bijschaven met een opdracht: het model kent je achtergrond, het idee
+  // waar dit script uit komt en wat je eerder voor dit script vroeg.
+  const [prompt, setPrompt] = useState("");
+  const [refining, setRefining] = useState(false);
+  const [refineMsg, setRefineMsg] = useState<string | null>(null);
+  const [asked, setAsked] = useState<string[]>([]);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const active = scripts.find((s) => s.id === activeId) ?? null;
@@ -84,6 +90,37 @@ export function ScriptsBoard({
   }
 
   useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+  // Van script wisselen? Dan het opdracht-vak leegmaken.
+  useEffect(() => { setPrompt(""); setRefineMsg(null); setAsked([]); }, [activeId]);
+
+  async function refine() {
+    if (!active || !prompt.trim()) return;
+    const vraag = prompt.trim();
+    setRefining(true);
+    setRefineMsg(null);
+    const r = await refineScriptAction(active.id, vraag);
+    setRefining(false);
+    if (r.error) setRefineMsg(r.error);
+    else if (r.content) {
+      setScripts((cur) => cur.map((s) => (s.id === active.id ? { ...s, content: r.content! } : s)));
+      setAsked((a) => [...a, vraag]);
+      setPrompt("");
+      setRefineMsg("Aangepast.");
+    }
+  }
+
+  async function undoRefine() {
+    if (!active) return;
+    setRefining(true);
+    const r = await undoRefineAction(active.id);
+    setRefining(false);
+    if (r.error) setRefineMsg(r.error);
+    else if (r.content) {
+      setScripts((cur) => cur.map((s) => (s.id === active.id ? { ...s, content: r.content! } : s)));
+      setAsked((a) => a.slice(0, -1));
+      setRefineMsg("Teruggedraaid.");
+    }
+  }
 
   function addScript() {
     startNew(async () => {
@@ -249,6 +286,55 @@ export function ScriptsBoard({
             rows={22}
             className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3.5 text-[14px] leading-relaxed outline-none focus:border-accent/40 transition-colors resize-y font-[inherit]"
           />
+          {/* Bijschaven met een opdracht — het model kent je achtergrond,
+              het idee erachter en wat je eerder voor dit script vroeg. */}
+          <div className="mt-3 rounded-xl border border-accent/20 bg-accent/[0.03] p-3.5">
+            <div className="flex items-baseline justify-between gap-3 mb-2">
+              <span className="text-[12px] font-mono uppercase tracking-wider text-accent">Laat het aanpassen</span>
+              {asked.length > 0 && (
+                <button
+                  onClick={undoRefine}
+                  disabled={refining}
+                  className="text-[11.5px] text-muted hover:text-foreground transition-colors disabled:opacity-50"
+                >
+                  ↶ laatste aanpassing terug
+                </button>
+              )}
+            </div>
+            {asked.length > 0 && (
+              <ul className="mb-2 space-y-0.5">
+                {asked.map((a, i) => (
+                  <li key={i} className="text-[11.5px] text-muted truncate">· {a}</li>
+                ))}
+              </ul>
+            )}
+            <div className="flex gap-2">
+              <input
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); refine(); } }}
+                placeholder="bv. hook harder, meer cijfers, korter, meer over mijn familie"
+                disabled={refining}
+                className="flex-1 rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-[13px] outline-none focus:border-accent/40 disabled:opacity-60"
+              />
+              <button
+                onClick={refine}
+                disabled={refining || !prompt.trim()}
+                className="rounded-lg bg-accent hover:bg-accent-hover disabled:opacity-50 text-background font-bold text-[13px] px-4 transition-colors"
+              >
+                {refining ? "Bezig…" : "Aanpassen"}
+              </button>
+            </div>
+            {refineMsg && (
+              <p className={`mt-2 text-[12px] ${refineMsg === "Aangepast." || refineMsg === "Teruggedraaid." ? "text-emerald-400" : "text-red-400"}`}>
+                {refineMsg}
+              </p>
+            )}
+            <p className="mt-2 text-[11.5px] text-muted">
+              Hij weet wie je bent, waar dit idee vandaan komt en wat je hiervoor al vroeg. Elke ronde bouwt op de vorige.
+            </p>
+          </div>
+
           {active.status === "recorded" && (
             <p className="mt-2 text-[12px] text-muted">
               Opgenomen ✓ — zet &lsquo;m op het productieboard via <Badge color="#F97316">Add card</Badge> zodra de edit kan starten.
