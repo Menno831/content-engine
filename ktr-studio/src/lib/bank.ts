@@ -17,8 +17,16 @@ export interface BankImportResult {
   fetched: number;
   labeled: number;
   byAi: number;
+  /** Nog te sorteren na deze ronde — klik nog een keer. */
+  remaining: number;
   error?: string;
 }
+
+// Eén ronde blijft binnen de tijd die een serverfunctie krijgt: de regels
+// kosten niets, maar elke AI-batch is een API-call. Zes batches (±360
+// afschrijvingen) is ruim binnen de limiet; de rest pak je met nog een klik.
+const MAX_AI_BATCHES = 6;
+const BATCH = 60;
 
 const RULES: { kind: string; match: RegExp }[] = [
   {
@@ -79,9 +87,9 @@ export async function importBankHistory(
   toDate: string
 ): Promise<BankImportResult> {
   const res = await getMoneybirdMutationRange(fromDate, toDate);
-  if (!res.configured) return { ok: false, fetched: 0, labeled: 0, byAi: 0, error: "Moneybird is niet gekoppeld." };
+  if (!res.configured) return { ok: false, fetched: 0, labeled: 0, byAi: 0, remaining: 0, error: "Moneybird is niet gekoppeld." };
   const spend = res.mutations.filter((m) => m.amount < 0);
-  if (!spend.length) return { ok: true, fetched: 0, labeled: 0, byAi: 0, error: res.error };
+  if (!spend.length) return { ok: true, fetched: 0, labeled: 0, byAi: 0, remaining: 0, error: res.error };
 
   // Wat al een label heeft laten we met rust — jouw keuze wint.
   const { data: known } = await db.from("expense_links").select("id").in("id", spend.map((m) => m.id));
@@ -96,10 +104,12 @@ export async function importBankHistory(
     else unknown.push(m);
   }
 
-  // De rest in batches van 60 aan de AI voorleggen.
+  // De rest aan de AI voorleggen, maar niet meer dan één ronde aankan.
   let byAi = 0;
-  for (let i = 0; i < unknown.length; i += 60) {
-    const chunk = unknown.slice(i, i + 60);
+  const aiTodo = unknown.slice(0, MAX_AI_BATCHES * BATCH);
+  const remaining = unknown.length - aiTodo.length;
+  for (let i = 0; i < aiTodo.length; i += BATCH) {
+    const chunk = aiTodo.slice(i, i + BATCH);
     const verdict = await byAiBatch(chunk).catch(() => new Map<string, string>());
     for (const m of chunk) {
       const kind = verdict.get(m.id);
@@ -111,9 +121,9 @@ export async function importBankHistory(
 
   for (let i = 0; i < rows.length; i += 200) {
     const { error } = await db.from("expense_links").upsert(rows.slice(i, i + 200));
-    if (error) return { ok: false, fetched: spend.length, labeled: i, byAi, error: error.message };
+    if (error) return { ok: false, fetched: spend.length, labeled: i, byAi, remaining, error: error.message };
   }
 
-  return { ok: true, fetched: spend.length, labeled: rows.length, byAi, error: res.error };
+  return { ok: true, fetched: spend.length, labeled: rows.length, byAi, remaining, error: res.error };
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */

@@ -43,6 +43,10 @@ const invoiceStateLabel: Record<string, string> = {
   uncollectible: "oninbaar",
 };
 
+// De bank-import haalt een heel jaar op en laat de AI sorteren; dat mag
+// wat langer duren dan een gewone paginarender.
+export const maxDuration = 60;
+
 export default async function FinancePage({ searchParams }: { searchParams: Promise<{ maand?: string }> }) {
   await redirectEditorToBoard();
   const sp = await searchParams;

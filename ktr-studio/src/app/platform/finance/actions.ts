@@ -361,12 +361,12 @@ export async function deleteMonthCostAction(id: string): Promise<{ ok: boolean; 
 export async function importBankHistoryAction(
   fromDate: string,
   toDate: string
-): Promise<{ ok: boolean; fetched?: number; labeled?: number; byAi?: number; error?: string }> {
+): Promise<{ ok: boolean; fetched?: number; labeled?: number; byAi?: number; remaining?: number; error?: string }> {
   const auth = await requireTeam();
   if ("error" in auth) return { ok: false, error: auth.error };
   const admin = createAdminClient() ?? auth.supabase;
   const r = await importBankHistory(admin, auth.agency.id, fromDate, toDate);
   if (!r.ok) return { ok: false, error: r.error ?? "Ophalen mislukt." };
   revalidatePath("/platform/finance");
-  return { ok: true, fetched: r.fetched, labeled: r.labeled, byAi: r.byAi, error: r.error };
+  return { ok: true, fetched: r.fetched, labeled: r.labeled, byAi: r.byAi, remaining: r.remaining, error: r.error };
 }

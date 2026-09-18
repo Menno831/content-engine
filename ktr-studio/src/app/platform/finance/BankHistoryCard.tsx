@@ -6,7 +6,6 @@
 
 import { useState, useTransition } from "react";
 import { Card, Eyebrow } from "../_components";
-import { fmtEur } from "../_data";
 import { importBankHistoryAction } from "./actions";
 
 export function BankHistoryCard({ labeled, oldest }: { labeled: number; oldest: string | null }) {
@@ -22,7 +21,9 @@ export function BankHistoryCard({ labeled, oldest }: { labeled: number; oldest: 
       else
         setMsg({
           ok: true,
-          text: `${what}: ${r.fetched} afschrijvingen gelezen, ${r.labeled} nieuw gesorteerd${r.byAi ? ` (${r.byAi} door de AI)` : ""}.${r.error ? ` Let op: ${r.error}` : ""}`,
+          text: `${what}: ${r.fetched} afschrijvingen gelezen, ${r.labeled} nieuw gesorteerd${r.byAi ? ` (${r.byAi} door de AI)` : ""}.${
+            r.remaining ? ` Nog ${r.remaining} te gaan — klik nog een keer.` : ""
+          }${r.error ? ` Let op: ${r.error}` : ""}`,
         });
     });
   }
