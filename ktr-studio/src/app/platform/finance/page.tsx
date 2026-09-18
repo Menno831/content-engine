@@ -105,7 +105,7 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
   let fixedCosts: FixedCostRow[] = [];
   let incomeByMonth = new Map<string, IncomeRow[]>();
   if (supabase && !demo) {
-    const allIds = allMonths.flatMap((mo) => mo.invoices.map((i) => i.id));
+    const allIds = [...allMonths.flatMap((mo) => mo.invoices.map((i) => i.id)), ...drafts.drafts.map((d) => d.id)];
     const [costsRes, fixedRes, incomeRes] = await Promise.all([
       allIds.length
         ? supabase.from("invoice_costs").select("id,cost,breakdown").in("id", allIds)
@@ -185,7 +185,8 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
 
   // Jaaroverzicht: alle maanden van dit jaar. Verleden = echte omzet,
   // huidige maand krijgt de concepten er gestippeld bovenop (= verwacht
-  // als alles verstuurd wordt), toekomstige maanden = prognose op MRR.
+  // als alles verstuurd wordt), toekomstige maanden dezelfde prognose als
+  // de vooruitblik — inclusief je pijplijn — met je maanddoel als lijn.
   const year = now.getFullYear();
   const yearMonths = Array.from({ length: 12 }, (_, i) => `${year}-${String(i + 1).padStart(2, "0")}`);
   const ytdOmzet = months.reduce((s, m) => s + profitOf(m).omzet, 0);
@@ -211,6 +212,9 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
   const avgExtra = last3.length
     ? Math.max(0, last3.reduce((s, m) => s + Math.max(0, profitOf(m).omzet - mrrForecast), 0) / last3.length)
     : 0;
+  // Eén formule voor de vooruitblik én de jaargrafiek, zodat beide
+  // hetzelfde zeggen over een maand die nog moet komen.
+  const projectionFor = (key: string) => mrrForecast + avgExtra + pipelineFor(deals, key, usdRate);
   const outlookMonths: OutlookMonth[] = Array.from({ length: 6 }, (_, i) => {
     const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
@@ -220,7 +224,7 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
     return {
       month: key,
       label: d.toLocaleDateString("nl-NL", { month: "short" }),
-      projected: (isCurrent ? profitOf(thisMonth).omzet + drafts.total : mrrForecast + avgExtra) + pipe,
+      projected: isCurrent ? profitOf(thisMonth).omzet + drafts.total + pipe : projectionFor(key),
       pipeline: pipe,
       goal: g?.goal ?? null,
       note: g?.note ?? null,
@@ -472,7 +476,12 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
           {(() => {
             const actual = new Map(months.map((m) => [m, profitOf(m).omzet]));
             const expectedNow = (actual.get(thisMonth) ?? 0) + drafts.total;
-            const max = Math.max(...yearMonths.map((m) => actual.get(m) ?? 0), expectedNow, mrr, 1);
+            const goalOf = (m: string) => goalByMonth.get(m)?.goal ?? 0;
+            const max = Math.max(
+              ...yearMonths.map((m) => Math.max(actual.get(m) ?? 0, m > thisMonth ? projectionFor(m) : 0, goalOf(m))),
+              expectedNow,
+              1
+            );
             const h = (v: number) => `${Math.max(2, Math.round((v / max) * 100))}%`;
             return (
               <>
@@ -482,21 +491,39 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
                     const isNow = m === thisMonth;
                     const isPast = m < thisMonth;
                     const omzet = actual.get(m) ?? 0;
+                    const doel = goalOf(m);
+                    const pipe = pipelineFor(deals, m, usdRate);
+                    const prognose = projectionFor(m);
+                    const haalbaar = isPast || isNow ? omzet + (isNow ? drafts.total : 0) : prognose;
                     return (
-                      <div key={m} className="flex-1 flex flex-col justify-end items-stretch h-full" title={
-                        isNow
-                          ? `${label}: ${fmtEur(omzet)} gefactureerd${drafts.total ? ` + ${fmtEur(drafts.total)} in concepten` : ""}`
-                          : isPast
-                            ? `${label}: ${fmtEur(omzet)}`
-                            : `${label}: prognose ${fmtEur(mrr)} (MRR)`
+                      <div key={m} className="flex-1 relative flex flex-col justify-end items-stretch h-full" title={
+                        [
+                          isNow
+                            ? `${label}: ${fmtEur(omzet)} gefactureerd${drafts.total ? ` + ${fmtEur(drafts.total)} in concepten` : ""}`
+                            : isPast
+                              ? `${label}: ${fmtEur(omzet)}`
+                              : `${label}: prognose ${fmtEur(Math.round(prognose))}${pipe > 0 ? ` (waarvan ${fmtEur(Math.round(pipe))} pijplijn)` : ""}`,
+                          doel > 0 ? `doel ${fmtEur(doel)} — ${haalbaar >= doel ? "gehaald" : `nog ${fmtEur(Math.round(doel - haalbaar))}`}` : null,
+                        ].filter(Boolean).join(" · ")
                       }>
+                        {doel > 0 && (
+                          <div
+                            className={`absolute inset-x-0 border-t border-dashed z-10 ${haalbaar >= doel ? "border-emerald-400/70" : "border-white/35"}`}
+                            style={{ bottom: h(doel) }}
+                          />
+                        )}
                         {isNow && drafts.total > 0 && (
                           <div className="rounded-t-md border border-dashed border-amber-300/60 bg-amber-300/10" style={{ height: h(drafts.total) }} />
                         )}
                         {(isPast || isNow) ? (
                           <div className={`${isNow && drafts.total > 0 ? "" : "rounded-t-md"} bg-accent/80`} style={{ height: h(omzet) }} />
                         ) : (
-                          <div className="rounded-t-md border border-dashed border-white/[0.18]" style={{ height: h(mrr) }} />
+                          <>
+                            {pipe > 0 && (
+                              <div className="rounded-t-md border border-dashed border-accent/50 bg-accent/[0.12]" style={{ height: h(pipe) }} />
+                            )}
+                            <div className={`${pipe > 0 ? "" : "rounded-t-md"} border border-dashed border-white/[0.18]`} style={{ height: h(Math.max(0, prognose - pipe)) }} />
+                          </>
                         )}
                       </div>
                     );
@@ -512,7 +539,13 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
                 <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-[11px] text-muted">
                   <span><span className="inline-block w-2.5 h-2.5 rounded-sm bg-accent/80 align-middle mr-1.5" />gefactureerd</span>
                   {drafts.total > 0 && <span><span className="inline-block w-2.5 h-2.5 rounded-sm border border-dashed border-amber-300/60 bg-amber-300/10 align-middle mr-1.5" />nog te versturen (concepten)</span>}
-                  <span><span className="inline-block w-2.5 h-2.5 rounded-sm border border-dashed border-white/[0.18] align-middle mr-1.5" />prognose op MRR</span>
+                  <span><span className="inline-block w-2.5 h-2.5 rounded-sm border border-dashed border-white/[0.18] align-middle mr-1.5" />prognose (retainers + los werk)</span>
+                  {yearMonths.some((m) => m > thisMonth && pipelineFor(deals, m, usdRate) > 0) && (
+                    <span><span className="inline-block w-2.5 h-2.5 rounded-sm border border-dashed border-accent/50 bg-accent/[0.12] align-middle mr-1.5" />pijplijn (gewogen)</span>
+                  )}
+                  {yearMonths.some((m) => (goalByMonth.get(m)?.goal ?? 0) > 0) && (
+                    <span><span className="inline-block w-2.5 h-[2px] border-t border-dashed border-white/35 align-middle mr-1.5" />maanddoel</span>
+                  )}
                 </div>
               </>
             );
@@ -621,8 +654,15 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
                       <div className="text-sm font-medium truncate">{d.contact}</div>
                       <div className="text-[11px] text-muted">{d.reference ?? "concept"}</div>
                     </div>
-                    <div className="flex items-center gap-3 shrink-0">
+                    <div className="flex flex-wrap items-center gap-3 shrink-0 justify-end">
                       <span className="font-mono text-sm">{fmtEur(d.totalExcl)}</span>
+                      <InvoiceCost
+                        invoiceId={d.id}
+                        invoiceLabel={d.contact}
+                        totalExcl={d.totalExcl}
+                        initialCost={invoiceCostById.get(d.id) ?? 0}
+                        initialBreakdown={breakdownById.get(d.id) ?? null}
+                      />
                       <Badge color="#FBBF24">concept</Badge>
                     </div>
                   </div>

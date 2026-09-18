@@ -36,9 +36,13 @@ export function OutlookCard({
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
+  // Geen doel? Dan staat de prognose alvast in het veld, afgerond op
+  // €500 naar boven — dat is een eerlijk startpunt om overheen te mikken.
+  const suggest = (v: number) => String(Math.max(500, Math.ceil(v / 500) * 500));
+
   function openEdit(m: OutlookMonth) {
     setEdit(m);
-    setGoal(m.goal ? String(m.goal) : "");
+    setGoal(m.goal ? String(m.goal) : suggest(m.projected));
     setNote(m.note ?? "");
     setError(null);
   }
@@ -86,9 +90,13 @@ export function OutlookCard({
               )}
               {target ? (
                 <>
-                  <div className="text-[10.5px] text-muted mt-1">doel {fmtEur(target)}</div>
                   <div className="mt-1 h-1 rounded-full bg-white/[0.06] overflow-hidden">
                     <div className={`h-full ${pct! >= 100 ? "bg-emerald-400" : "bg-accent"}`} style={{ width: `${pct}%` }} />
+                  </div>
+                  <div className={`text-[10.5px] mt-1 ${pct! >= 100 ? "text-emerald-400" : "text-muted"}`}>
+                    {pct! >= 100
+                      ? `doel ${fmtEur(target)} gehaald`
+                      : `nog ${fmtEur(Math.round(target - m.projected))} naar ${fmtEur(target)}`}
                   </div>
                 </>
               ) : (
@@ -105,7 +113,10 @@ export function OutlookCard({
             <h3 className="font-display font-extrabold text-lg mb-1">
               Doel voor {new Date(`${edit.month}-01`).toLocaleDateString("nl-NL", { month: "long", year: "numeric" })}
             </h3>
-            <p className="text-[12px] text-muted mb-3">Projectie: {fmtEur(Math.round(edit.projected))} — zet je doel iets daarboven zodat er iets te mikken valt.</p>
+            <p className="text-[12px] text-muted mb-3">
+              Verwachte omzet: {fmtEur(Math.round(edit.projected))}
+              {(edit.pipeline ?? 0) > 0 ? ` (waarvan ${fmtEur(Math.round(edit.pipeline!))} pijplijn)` : ""} — zet je doel daarboven zodat er iets te mikken valt.
+            </p>
             <label className="block mb-3">
               <span className="block text-[11px] font-mono uppercase tracking-wider text-muted mb-1">Omzetdoel (€)</span>
               <input

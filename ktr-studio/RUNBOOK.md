@@ -373,3 +373,16 @@ sessie niet dubbel werk doet.
 - Vier deals geseed uit zijn calls/agenda (Ivar/Simon Solutions op
   'voorstel'; Nick, Jisk & Jamy en Sarah op 'gesprek') met bedrag 0 —
   bewust geen verzonnen bedragen; een taak vraagt hem die in te vullen.
+
+## Ronde 18 sep 2026 (7) — prognose en doelen gelijkgetrokken
+
+- Eén formule `projectionFor(maand)` = retainers + gemiddeld los werk +
+  gewogen pijplijn. De vooruitblik én de jaargrafiek gebruiken 'm, dus
+  een toekomstige maand zegt overal hetzelfde (was: grafiek op kale MRR).
+- Jaargrafiek: toekomstige maanden tonen de prognose met het pijplijn-deel
+  apart gearceerd, en je maanddoel als stippellijn over de kolom (groen
+  als de prognose er al overheen komt). Legenda uitgebreid.
+- Vooruitblik-kaarten: voortgangsbalk + "nog €X naar €Y" of "doel gehaald".
+  Het doelveld staat voorgevuld op de prognose, afgerond op €500 omhoog.
+- Concepten in Moneybird hebben nu ook een kostenveld, zodat de winst al
+  klopt voordat de factuur de deur uit is.
