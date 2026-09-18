@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { createClient as supabaseServer } from "@/lib/supabase/server";
 import { getSessionContext } from "@/lib/auth";
 import { requireTeam } from "@/lib/guard";
+import { analyzeChannels } from "@/lib/channel-analysis";
+import { checkSite } from "@/lib/site-check";
 import { syncOwnChannelsCore, type ChannelSyncResult } from "@/lib/sync/channels";
 
 export interface ChannelResult {
@@ -68,7 +70,7 @@ export async function deleteChannelStatAction(id: string): Promise<ChannelResult
   return { ok: true };
 }
 
-export async function saveOwnChannelsAction(igHandle: string, ytChannel: string): Promise<ChannelResult> {
+export async function saveOwnChannelsAction(igHandle: string, ytChannel: string, website = ""): Promise<ChannelResult> {
   const ctx = await requireTeam();
   if ("error" in ctx) return { error: ctx.error };
 
@@ -77,6 +79,7 @@ export async function saveOwnChannelsAction(igHandle: string, ytChannel: string)
     .update({
       own_ig_handle: igHandle.trim().replace(/^@/, "") || null,
       own_yt_channel: ytChannel.trim() || null,
+      own_website: website.trim().replace(/\/$/, "") || null,
     })
     .eq("id", ctx.agency.id);
   if (error) return { error: error.message };
@@ -92,4 +95,31 @@ export async function syncOwnChannelsAction(): Promise<ChannelResult & { results
   const results = await syncOwnChannelsCore(ctx.agency.id);
   revalidatePath("/platform/channels");
   return { ok: true, results };
+}
+
+
+export async function analyzeChannelsAction(): Promise<ChannelResult> {
+  const ctx = await requireTeam();
+  if ("error" in ctx) return { error: ctx.error };
+  const r = await analyzeChannels(ctx.supabase, ctx.agency.id);
+  if (!r.ok) return { error: r.error ?? "Analyse mislukt." };
+  revalidatePath("/platform/channels");
+  return { ok: true };
+}
+
+export async function checkSiteAction(): Promise<ChannelResult> {
+  const ctx = await requireTeam();
+  if ("error" in ctx) return { error: ctx.error };
+  const { data: a } = await ctx.supabase.from("agencies").select("own_website").eq("id", ctx.agency.id).maybeSingle();
+  const url = (a?.own_website as string) ?? "";
+  if (!url) return { error: "Vul eerst je website in en sla op." };
+  const c = await checkSite(url);
+  const { error } = await ctx.supabase.from("site_checks").insert({
+    agency_id: ctx.agency.id, url: c.url, ok: c.ok, status: c.status, ms: c.ms, https: c.https,
+    title: c.title, description: c.description, has_viewport: c.hasViewport, has_canonical: c.hasCanonical,
+    has_og_image: c.hasOgImage, h1_count: c.h1Count, issues: c.issues,
+  });
+  if (error) return { error: error.message };
+  revalidatePath("/platform/channels");
+  return { ok: true };
 }

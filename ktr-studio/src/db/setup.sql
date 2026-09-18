@@ -9,7 +9,7 @@
 -- ════════════════════════════════════════════════════════════════
 
 drop table if exists
-  content_ideas, idea_sources, ad_insights, ad_entries, scripts, seen_invoices, account_metrics, brief_ideas, competitor_posts, competitors, transcripts, orders, captures, generations, prospects, content_metrics, leads, content,
+  channel_insights, site_checks, content_ideas, idea_sources, ad_insights, ad_entries, scripts, seen_invoices, account_metrics, brief_ideas, competitor_posts, competitors, transcripts, orders, captures, generations, prospects, content_metrics, leads, content,
   integrations, editors, todos, notifications, clients, profiles, agencies
   cascade;
 drop type if exists
@@ -33,6 +33,7 @@ create table if not exists agencies (
   brand_name  text,
   accent      text default '#F97316',
   monthly_target numeric default 0,  -- maand-omzetdoel
+  own_website text,                  -- eigen site voor de site-check
   created_at  timestamptz not null default now()
 );
 
@@ -937,6 +938,13 @@ create table if not exists channel_stats (
   visitors    bigint,
   views       bigint,
   impressions bigint,
+  videos    bigint,   -- totaal uploads op het kanaal
+  likes     bigint,
+  comments  bigint,
+  avg_views numeric,  -- gemiddelde views per recente upload
+  top_title text,
+  top_views bigint,
+  top_url   text,
   note        text,
   created_at  timestamptz not null default now(),
   unique (agency_id, channel, stat_date)
@@ -1291,5 +1299,44 @@ create index if not exists idx_content_ideas on content_ideas (agency_id, status
 alter table content_ideas enable row level security;
 drop policy if exists "team all content_ideas" on content_ideas;
 create policy "team all content_ideas" on content_ideas
+  for all using (agency_id = current_agency_id() and current_client_id() is null)
+  with check (agency_id = current_agency_id() and current_client_id() is null);
+
+-- ── Site-checks en kanaalanalyse ────────────────────────────────
+create table if not exists site_checks (
+  id          uuid primary key default gen_random_uuid(),
+  agency_id   uuid not null references agencies (id) on delete cascade,
+  url         text not null,
+  ok          boolean not null,
+  status      int,
+  ms          int,                 -- responstijd
+  https       boolean,
+  title       text,
+  description text,
+  has_viewport boolean,
+  has_canonical boolean,
+  has_og_image boolean,
+  h1_count    int,
+  issues      text[],              -- mensentaal, één per regel
+  checked_at  timestamptz not null default now()
+);
+create index if not exists idx_site_checks on site_checks (agency_id, checked_at desc);
+alter table site_checks enable row level security;
+drop policy if exists "team all site_checks" on site_checks;
+create policy "team all site_checks" on site_checks
+  for all using (agency_id = current_agency_id() and current_client_id() is null)
+  with check (agency_id = current_agency_id() and current_client_id() is null);
+
+create table if not exists channel_insights (
+  id         uuid primary key default gen_random_uuid(),
+  agency_id  uuid not null references agencies (id) on delete cascade,
+  body       text not null,
+  model      text,
+  created_at timestamptz not null default now()
+);
+create index if not exists idx_channel_insights on channel_insights (agency_id, created_at desc);
+alter table channel_insights enable row level security;
+drop policy if exists "team all channel_insights" on channel_insights;
+create policy "team all channel_insights" on channel_insights
   for all using (agency_id = current_agency_id() and current_client_id() is null)
   with check (agency_id = current_agency_id() and current_client_id() is null);

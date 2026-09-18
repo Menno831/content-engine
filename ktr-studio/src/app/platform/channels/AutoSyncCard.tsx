@@ -11,20 +11,23 @@ import { saveOwnChannelsAction, syncOwnChannelsAction } from "./actions";
 export function AutoSyncCard({
   igHandle,
   ytChannel,
+  website,
   keys,
 }: {
   igHandle: string;
   ytChannel: string;
+  website: string;
   keys: { instagram: boolean; youtube: boolean; clarity: boolean };
 }) {
   const [ig, setIg] = useState(igHandle);
   const [yt, setYt] = useState(ytChannel);
+  const [site, setSite] = useState(website);
   const [msg, setMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
   const [pending, start] = useTransition();
 
   function save() {
     start(async () => {
-      const r = await saveOwnChannelsAction(ig, yt);
+      const r = await saveOwnChannelsAction(ig, yt, site);
       setMsg(r.error ? { tone: "err", text: r.error } : { tone: "ok", text: "Bronnen opgeslagen." });
     });
   }
@@ -70,6 +73,10 @@ export function AutoSyncCard({
           <span className="block text-[10px] font-mono uppercase tracking-wider text-muted mb-1">YouTube-kanaal (URL of @handle)</span>
           <input value={yt} onChange={(e) => setYt(e.target.value)} placeholder="youtube.com/@mennokater" className={field} />
         </label>
+        <label className="block flex-1 min-w-[170px]">
+          <span className="block text-[10px] font-mono uppercase tracking-wider text-muted mb-1">Eigen website</span>
+          <input value={site} onChange={(e) => setSite(e.target.value)} placeholder="mennokater.nl" className={field} />
+        </label>
         <button
           onClick={save}
           disabled={pending}
@@ -89,7 +96,8 @@ export function AutoSyncCard({
       <div className="flex flex-wrap gap-x-5 gap-y-1 mt-3 text-[11.5px] text-muted">
         <span className="flex items-center gap-1.5">{dot(keys.instagram)} Instagram-scraper {keys.instagram ? "actief" : "— RAPIDAPI_KEY ontbreekt"}</span>
         <span className="flex items-center gap-1.5">{dot(keys.youtube)} YouTube {keys.youtube ? "actief" : "— wacht op YOUTUBE_API_KEY"}</span>
-        <span className="flex items-center gap-1.5">{dot(keys.clarity)} Website (Clarity) {keys.clarity ? "actief" : "— wacht op CLARITY_API_TOKEN"}</span>
+        <span className="flex items-center gap-1.5">{dot(Boolean(site))} Website-check {site ? "actief (elke ochtend)" : "— vul je site in"}</span>
+        <span className="flex items-center gap-1.5">{dot(keys.clarity)} Bezoekers (Clarity) {keys.clarity ? "actief" : "— optioneel, CLARITY_API_TOKEN"}</span>
       </div>
 
       {msg && <p className={`mt-2 text-[13px] ${msg.tone === "ok" ? "text-emerald-400" : "text-red-400"}`}>{msg.text}</p>}

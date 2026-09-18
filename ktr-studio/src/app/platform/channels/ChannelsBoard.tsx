@@ -21,6 +21,13 @@ export interface StatRow {
   visitors: number | null;
   views: number | null;
   impressions: number | null;
+  videos?: number | null;
+  likes?: number | null;
+  comments?: number | null;
+  avgViews?: number | null;
+  topTitle?: string | null;
+  topViews?: number | null;
+  topUrl?: string | null;
 }
 
 interface FieldDef {
@@ -58,7 +65,7 @@ const CHANNELS: {
       { key: "views", label: "Reels-views" },
       { key: "impressions", label: "Bereik" },
     ],
-    hint: "Volgers komen ook binnen via de sync zodra je eigen profiel als klant gekoppeld is.",
+    hint: "Automatisch elke ochtend via je IG-handle hierboven: volgers, reels-views, likes en je best lopende reel.",
   },
   {
     id: "linkedin",
@@ -80,7 +87,7 @@ const CHANNELS: {
       { key: "followers", label: "Abonnees" },
       { key: "views", label: "Views" },
     ],
-    hint: "Gaat automatisch zodra de YouTube-key er is — tot die tijd handmatig uit YouTube Studio.",
+    hint: "Automatisch elke ochtend: abonnees, views, uploads, gemiddelde per video en je best lopende video.",
   },
 ];
 
@@ -208,6 +215,24 @@ export function ChannelsBoard({ initial }: { initial: StatRow[] }) {
                       {latest.views != null && c.primary.key !== "views" && ` · ${fmt(latest.views)} views`}
                       {latest.impressions != null && ` · ${fmt(latest.impressions)} impressies`}
                       {latest.visitors != null && c.primary.key !== "visitors" && ` · ${fmt(latest.visitors)} bezoekers`}
+                    </div>
+                  )}
+                  {/* Wat de sync extra binnenbrengt: per upload, niet alleen totalen */}
+                  {latest && (latest.avgViews != null || latest.videos != null || latest.likes != null) && (
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2.5 text-[12px]">
+                      {latest.avgViews != null && <span><span className="font-mono">{fmt(latest.avgViews)}</span> <span className="text-muted">gem. views/upload</span></span>}
+                      {latest.videos != null && <span><span className="font-mono">{fmt(latest.videos)}</span> <span className="text-muted">uploads</span></span>}
+                      {latest.likes != null && <span><span className="font-mono">{fmt(latest.likes)}</span> <span className="text-muted">likes</span></span>}
+                      {latest.comments != null && <span><span className="font-mono">{fmt(latest.comments)}</span> <span className="text-muted">reacties</span></span>}
+                    </div>
+                  )}
+                  {latest?.topTitle && (
+                    <div className="mt-2 text-[12px] truncate">
+                      <span className="text-muted">Best lopend: </span>
+                      {latest.topUrl ? (
+                        <a href={latest.topUrl} target="_blank" rel="noopener noreferrer" className="text-accent hover:text-accent-hover">{latest.topTitle}</a>
+                      ) : latest.topTitle}
+                      {latest.topViews != null && <span className="text-muted"> · {fmt(latest.topViews)} views</span>}
                     </div>
                   )}
                 </div>
