@@ -336,3 +336,14 @@ sessie niet dubbel werk doet.
   iCal-adres is ingevuld, dus niets komt dubbel te staan.
 - Klantherkenning verbeterd: een naam die in meer dan 60% van de afspraken
   voorkomt (Menno zelf) telt alleen mee als er verder niemand past.
+
+## Ronde 18 sep 2026 (4) — valuta per klant
+
+- Migratie 048: `clients.currency` (EUR/USD). Schakelaar in de
+  klantdialoog op Finance; retainer, editor-kosten en videoprijs staan
+  in die valuta en worden zo ook getoond.
+- `lib/fx.ts`: koers USD→EUR van de ECB (frankfurter.app, 1x per dag,
+  terugval 0,92). MRR, marge, pakketten en prognose rekenen om, met de
+  gebruikte koers onder de kop "Per klant".
+- Bijgevangen bug: `updateClientFinanceAction` schreef `video_price` en
+  `invoice_day` nooit weg — die velden werkten dus niet. Nu wel.

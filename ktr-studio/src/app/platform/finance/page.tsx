@@ -19,6 +19,7 @@ import { RecurringCard } from "./RecurringCard";
 import { FinanceTodo, type TodoItem } from "./FinanceTodo";
 import { findRecurring } from "@/lib/recurring";
 import { getEditors } from "@/lib/editors";
+import { usdToEurRate, toEur, fmtMoney } from "@/lib/fx";
 import type { CostLine } from "./actions";
 import { createClient as supabaseServer } from "@/lib/supabase/server";
 import Link from "next/link";
@@ -57,12 +58,13 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
   // maandvergelijking: gaan we er elke maand op vooruit?
   // Bankmutaties 120 dagen terug: genoeg om terugkerende afschrijvingen
   // (vaste lasten) in minstens twee maanden te herkennen.
-  const [{ clients, demo }, { agency }, drafts, bank, editors, ...allMonths] = await Promise.all([
+  const [{ clients, demo }, { agency }, drafts, bank, editors, usdRate, ...allMonths] = await Promise.all([
     getWorkspaceData(),
     getSessionContext(),
     getMoneybirdDrafts(),
     getMoneybirdMutations(120),
     getEditors(),
+    usdToEurRate(),
     ...months.map((m) => getMoneybirdMonth(m === thisMonth ? undefined : m)),
   ]);
   const byMonth = new Map(months.map((m, i) => [m, allMonths[i]]));
@@ -185,7 +187,11 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
   const omzetDelta = maandOmzet - prevOmzet;
 
   // Projectie komende 6 maanden: retainers + gemiddeld los werk (3 mnd).
-  const mrrForecast = clients.filter((c) => c.status !== "gepauzeerd").reduce((s, c) => s + c.monthlyValue, 0);
+  // Klanten die in dollars betalen tellen we om naar euro; alleen zo
+  // kloppen MRR, marge en prognose als één bedrag.
+  const eurRetainer = (c: (typeof clients)[number]) => toEur(c.monthlyValue, c.currency, usdRate);
+  const eurEditor = (c: (typeof clients)[number]) => toEur(c.editorCost, c.currency, usdRate);
+  const mrrForecast = clients.filter((c) => c.status !== "gepauzeerd").reduce((s, c) => s + eurRetainer(c), 0);
   const last3 = months.slice(-4, -1); // laatste 3 volledige maanden
   const avgExtra = last3.length
     ? Math.max(0, last3.reduce((s, m) => s + Math.max(0, profitOf(m).omzet - mrrForecast), 0) / last3.length)
@@ -221,8 +227,9 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
   const billable = clients.filter((c) => c.status !== "gepauzeerd");
   const target = Number(agency?.monthly_target ?? 0);
 
-  const mrr = billable.reduce((s, c) => s + c.monthlyValue, 0);
-  const editorCosts = billable.reduce((s, c) => s + c.editorCost, 0);
+  const mrr = billable.reduce((s, c) => s + eurRetainer(c), 0);
+  const editorCosts = billable.reduce((s, c) => s + eurEditor(c), 0);
+  const inUsd = billable.filter((c) => (c.currency ?? "EUR").toUpperCase() === "USD");
   const margin = mrr - editorCosts;
   const marginPct = mrr ? Math.round((margin / mrr) * 100) : 0;
   const newThisMonth = clients.filter((c) => c.createdThisMonth).length;
@@ -233,12 +240,12 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
     const key = c.packageName || "Geen pakket";
     const cur = byPackage.get(key) ?? { count: 0, mrr: 0, margin: 0 };
     cur.count += 1;
-    cur.mrr += c.monthlyValue;
-    cur.margin += c.monthlyValue - c.editorCost;
+    cur.mrr += eurRetainer(c);
+    cur.margin += eurRetainer(c) - eurEditor(c);
     byPackage.set(key, cur);
   }
 
-  const sorted = [...billable].sort((a, b) => b.monthlyValue - b.editorCost - (a.monthlyValue - a.editorCost));
+  const sorted = [...billable].sort((a, b) => eurRetainer(b) - eurEditor(b) - (eurRetainer(a) - eurEditor(a)));
 
   // ── Vaste lasten herkennen in de bank ───────────────────────────
   const recurring = !demo && moneybird.configured ? findRecurring(bank.mutations, fixedCosts.map((f) => f.name), linkedIds) : [];
@@ -271,6 +278,7 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
             editorCost={c.editorCost}
             videoPrice={c.videoPrice}
             invoiceDay={c.invoiceDay}
+            currency={c.currency}
           >
             <span className="shrink-0 rounded-lg border border-white/[0.08] hover:border-accent/30 hover:text-accent px-2.5 py-1 text-[12px] text-muted transition-all cursor-pointer">Instellen →</span>
           </ClientFinanceDialog>
@@ -285,7 +293,7 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
         if (dayNow < day) continue;
         if (hasInvoiceFor(c.name)) continue;
         todos.push({
-          text: `Factuur voor ${c.name} moet eruit (${fmtEur(c.monthlyValue)}, dag ${day} is geweest) — nog niets in Moneybird.`,
+          text: `Factuur voor ${c.name} moet eruit (${fmtMoney(c.monthlyValue, c.currency)}, dag ${day} is geweest) — nog niets in Moneybird.`,
           href: "https://moneybird.com",
           external: true,
         });
@@ -331,6 +339,7 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
             rows={billable.map((c) => ({
               klant: c.name,
               pakket: c.packageName ?? "",
+              valuta: c.currency ?? "EUR",
               retainer: c.monthlyValue,
               editor_kosten: c.editorCost,
               marge: c.monthlyValue - c.editorCost,
@@ -712,7 +721,14 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Per klant */}
         <Card className="lg:col-span-2 p-6">
-          <h2 className="font-display font-extrabold text-xl mb-5">Per klant</h2>
+          <div className="flex flex-wrap items-baseline justify-between gap-2 mb-5">
+            <h2 className="font-display font-extrabold text-xl">Per klant</h2>
+            {inUsd.length > 0 && (
+              <span className="text-[11.5px] text-muted">
+                Bedragen in de valuta van de klant · totalen omgerekend met $1 = €{usdRate.toFixed(2)}
+              </span>
+            )}
+          </div>
           <div className="space-y-1">
             <div className="hidden md:grid grid-cols-12 gap-2 px-3 pb-2 text-[10px] font-mono uppercase tracking-wider text-muted">
               <span className="col-span-4">Klant</span>
@@ -735,6 +751,7 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
                       editorCost={c.editorCost}
                       videoPrice={c.videoPrice}
                       invoiceDay={c.invoiceDay}
+                      currency={c.currency}
                     >
                       <div className="flex items-center gap-2.5 cursor-pointer">
                         <Avatar initials={c.initials} size={30} />
@@ -745,9 +762,9 @@ export default async function FinancePage({ searchParams }: { searchParams: Prom
                       </div>
                     </ClientFinanceDialog>
                   </div>
-                  <span className="col-span-4 md:col-span-2 text-right font-mono text-sm">{fmtEur(c.monthlyValue)}</span>
-                  <span className="col-span-4 md:col-span-2 text-right font-mono text-sm text-muted">{fmtEur(c.editorCost)}</span>
-                  <span className="col-span-4 md:col-span-2 text-right font-mono text-sm text-emerald-400">{fmtEur(m)}</span>
+                  <span className="col-span-4 md:col-span-2 text-right font-mono text-sm">{fmtMoney(c.monthlyValue, c.currency)}</span>
+                  <span className="col-span-4 md:col-span-2 text-right font-mono text-sm text-muted">{fmtMoney(c.editorCost, c.currency)}</span>
+                  <span className="col-span-4 md:col-span-2 text-right font-mono text-sm text-emerald-400">{fmtMoney(m, c.currency)}</span>
                   <div className="col-span-12 md:col-span-2 flex md:justify-end">
                     {demo ? (
                       <Badge color={c.paymentStatus === "betaald" ? "#34D399" : c.paymentStatus === "te_laat" ? "#F87171" : "#FBBF24"}>

@@ -89,7 +89,7 @@ export async function deleteOtherIncomeAction(id: string): Promise<{ ok: boolean
 // ── Retainer/pakket per klant bijwerken (vanaf Finance) ─────────
 export async function updateClientFinanceAction(
   clientId: string,
-  patch: { monthly_value?: number; package?: string; videos_per_month?: number; editor_cost?: number; video_price?: number | null; invoice_day?: number }
+  patch: { monthly_value?: number; package?: string; videos_per_month?: number; editor_cost?: number; video_price?: number | null; invoice_day?: number; currency?: string }
 ): Promise<{ ok: boolean; error?: string }> {
   const supabase = await supabaseServer();
   if (!supabase) return { ok: false, error: "Supabase niet geconfigureerd." };
@@ -99,6 +99,9 @@ export async function updateClientFinanceAction(
   if (patch.package !== undefined) update.package = patch.package.trim() || null;
   if (patch.videos_per_month !== undefined) update.videos_per_month = Number(patch.videos_per_month) || 0;
   if (patch.editor_cost !== undefined) update.editor_cost = Number(patch.editor_cost) || 0;
+  if (patch.video_price !== undefined) update.video_price = patch.video_price === null ? null : Number(patch.video_price) || 0;
+  if (patch.invoice_day !== undefined) update.invoice_day = Math.min(28, Math.max(1, Number(patch.invoice_day) || 1));
+  if (patch.currency !== undefined) update.currency = patch.currency === "USD" ? "USD" : "EUR";
 
   const { error } = await supabase.from("clients").update(update).eq("id", clientId);
   if (error) return { ok: false, error: error.message };

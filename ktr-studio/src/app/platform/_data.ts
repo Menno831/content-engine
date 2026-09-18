@@ -31,6 +31,8 @@ export interface Client {
   videoPrice?: number | null;
   /** Dag van de maand waarop de retainer gefactureerd hoort te zijn. */
   invoiceDay?: number;
+  /** EUR of USD — waarin deze klant betaalt. */
+  currency?: string;
   /** Soorten video's in de retainer, bv. "4× Talking, 2× Lifestyle" of "Alleen YouTube". */
   contentMix?: string | null;
   /** Asana-project-id als deze klant z'n eigen Asana-bord heeft (twee-weg-sync). */

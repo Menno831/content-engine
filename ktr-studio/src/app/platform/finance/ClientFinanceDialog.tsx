@@ -16,6 +16,7 @@ export function ClientFinanceDialog({
   editorCost,
   videoPrice,
   invoiceDay = 1,
+  currency: initialCurrency = "EUR",
   children,
 }: {
   clientId: string;
@@ -26,9 +27,14 @@ export function ClientFinanceDialog({
   editorCost: number;
   videoPrice?: number | null;
   invoiceDay?: number;
+  currency?: string;
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  // Betaalt deze klant in dollars? Dan staan retainer, editor-kosten en
+  // videoprijs in USD; Finance rekent alleen de totalen om naar euro.
+  const [currency, setCurrency] = useState(initialCurrency === "USD" ? "USD" : "EUR");
+  const sym = currency === "USD" ? "$" : "€";
   const [form, setForm] = useState({
     retainer: String(monthlyValue || ""),
     pakket: packageName ?? "",
@@ -49,6 +55,7 @@ export function ClientFinanceDialog({
         editor_cost: Number(form.editorCost) || 0,
         video_price: form.videoPrice.trim() ? Number(form.videoPrice.replace(",", ".")) : null,
         invoice_day: Math.min(28, Math.max(1, Number(form.invoiceDay) || 1)),
+        currency,
       });
       if (r.error) setError(r.error);
       else setOpen(false);
@@ -67,20 +74,33 @@ export function ClientFinanceDialog({
       {open && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setOpen(false)}>
           <div className="w-full max-w-sm bg-card border border-white/[0.08] rounded-2xl p-6 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <h3 className="font-display font-extrabold text-xl mb-4">{name}</h3>
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <h3 className="font-display font-extrabold text-xl">{name}</h3>
+              <div className="flex rounded-lg border border-white/[0.1] overflow-hidden text-[12px] shrink-0">
+                {(["EUR", "USD"] as const).map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => setCurrency(c)}
+                    className={`px-3 py-1 transition-colors ${currency === c ? "bg-accent text-background font-bold" : "text-muted hover:text-foreground"}`}
+                  >
+                    {c === "EUR" ? "€ EUR" : "$ USD"}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="space-y-3.5">
               <div className="grid grid-cols-2 gap-3">
                 <label className="block">
-                  <span className={label}>Retainer €/mnd</span>
+                  <span className={label}>Retainer {sym}/mnd</span>
                   <input value={form.retainer} onChange={(e) => setForm({ ...form, retainer: e.target.value })} type="number" className={field} />
                 </label>
                 <label className="block">
-                  <span className={label}>Editor-kosten €</span>
+                  <span className={label}>Editor-kosten {sym}</span>
                   <input value={form.editorCost} onChange={(e) => setForm({ ...form, editorCost: e.target.value })} type="number" className={field} />
                 </label>
               </div>
               <label className="block">
-                <span className={label}>Prijs per video €</span>
+                <span className={label}>Prijs per video {sym}</span>
                 <input
                   value={form.videoPrice}
                   onChange={(e) => setForm({ ...form, videoPrice: e.target.value })}
@@ -90,6 +110,7 @@ export function ClientFinanceDialog({
                 />
                 <span className="block mt-1 text-[11.5px] text-muted">
                   Vult automatisch de verkoopprijs in als je voor deze klant een video toevoegt.
+                  {currency === "USD" && " Bedragen in dollars; de totalen op deze pagina rekenen we om naar euro."}
                 </span>
               </label>
               <label className="block">
