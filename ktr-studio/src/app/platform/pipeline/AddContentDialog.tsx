@@ -37,6 +37,7 @@ export function AddContentDialog({
   // Klant en editor bijhouden: daar hangen de standaardprijzen aan.
   const [clientId, setClientId] = useState(defaultClient ?? clients[0]?.id ?? "");
   const [editorId, setEditorId] = useState("");
+  const [format, setFormat] = useState(FORMATS[0]);
 
   useEffect(() => {
     if (state.ok) {
@@ -70,7 +71,7 @@ export function AddContentDialog({
                 </div>
                 <Field name="title" label="Title" placeholder="Client result reveal" required />
                 <div className="grid grid-cols-2 gap-3">
-                  <Select name="format" label="Format" options={FORMATS.map((f) => ({ id: f, label: f }))} />
+                  <Select name="format" label="Format" options={FORMATS.map((f) => ({ id: f, label: f }))} onChange={setFormat} />
                   <Field name="content_type" label="Type" placeholder="Talking head / B-roll" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
@@ -84,7 +85,7 @@ export function AddContentDialog({
                 <Field name="brief_url" label="Raw footage (Drive)" placeholder="https://drive.google.com/… — where the files are" />
                 <Field name="frame_url" label="Delivery (Frame)" placeholder="https://f.io/… — filled in by the editor" />
                 <Field name="vo_url" label="Voice-over file" placeholder="https://… — VO stories only" />
-                <PriceFields editors={editors} clients={clients} editorId={editorId} clientId={clientId} />
+                <PriceFields editors={editors} clients={clients} editorId={editorId} clientId={clientId} format={format} />
 
                 <label className="block">
                   <span className="block text-[12px] font-mono uppercase tracking-wider text-muted mb-1.5">Extra notes</span>

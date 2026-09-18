@@ -3,10 +3,19 @@
 import { revalidatePath } from "next/cache";
 import { createClient as supabaseServer } from "@/lib/supabase/server";
 import { getSessionContext } from "@/lib/auth";
+import { sendEmail } from "@/lib/email";
 
 export interface EditorActionResult {
   error?: string;
   ok?: string;
+}
+
+// "21,41" en "21.41" allebei goed; leeg blijft leeg (null), geen stille 0.
+function money(v: FormDataEntryValue | null): number | null {
+  const raw = String(v ?? "").trim();
+  if (!raw) return null;
+  const n = Number(raw.replace(/[^\d,.-]/g, "").replace(",", "."));
+  return Number.isFinite(n) ? n : null;
 }
 
 export async function createEditorAction(
@@ -22,11 +31,20 @@ export async function createEditorAction(
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return { error: "Naam is verplicht." };
 
+  const email = String(formData.get("email") ?? "").trim().toLowerCase() || null;
+  const currency = String(formData.get("currency") ?? "EUR") === "USD" ? "USD" : "EUR";
+  const shortform = money(formData.get("pay_shortform"));
+  const longform = money(formData.get("pay_longform"));
+
   const { error } = await supabase.from("editors").insert({
     agency_id: agency.id,
     name,
-    email: String(formData.get("email") ?? "").trim() || null,
-    pay_per_video: Number(formData.get("pay_per_video") ?? 0) || 0,
+    email,
+    // pay_per_video blijft gevuld als terugval voor oudere berekeningen.
+    pay_per_video: shortform ?? 0,
+    pay_shortform: shortform,
+    pay_longform: longform,
+    currency,
     specialty: String(formData.get("specialty") ?? "").trim() || null,
     pool_status: String(formData.get("pool_status") ?? "actief").trim() || "actief",
     contact: String(formData.get("contact") ?? "").trim() || null,
@@ -34,8 +52,38 @@ export async function createEditorAction(
   });
   if (error) return { error: error.message };
 
+  // Welkomstmail, persoonlijk en in het Engels — de editors zijn dat.
+  let mailed = false;
+  if (email) {
+    const sym = currency === "USD" ? "$" : "€";
+    const rates = [
+      shortform != null ? `${sym}${shortform} per short-form video (reels, clips, stories)` : null,
+      longform != null ? `${sym}${longform} per long-form video` : null,
+    ].filter(Boolean);
+    const sent = await sendEmail({
+      to: email,
+      subject: `Welcome to the KTR Studio editor team, ${name.split(" ")[0]}`,
+      html: `<p>Hi ${name.split(" ")[0]},</p>
+<p>Great to have you on board. Here's how we work, so you're never guessing.</p>
+${rates.length ? `<p><strong>Your rates</strong><br>${rates.join("<br>")}</p>` : ""}
+<p><strong>The production board</strong><br>Every video you edit is a card on our board. The card has the raw footage (Drive link), the deadline, the format and notes on what we want. When a video is ready for you, you get an email.</p>
+<p><strong>When you're done</strong><br>Drop the finished video in Frame.io, paste the link on the card and drag the card to <em>Quality Control</em>. We get notified automatically and review within a day.</p>
+<p><strong>Deadlines</strong><br>The date on the card is the date we need it. If something is going to be late, say so early — that's always fine. Silence isn't.</p>
+<p>You'll get a separate email with your login for the board.</p>
+<p>Welcome aboard,<br>Menno</p>`,
+    }).then(() => true).catch(() => false);
+    mailed = sent;
+    if (sent) await supabase.from("editors").update({ welcomed_at: new Date().toISOString() }).eq("email", email).eq("agency_id", agency.id);
+  }
+
   revalidatePath("/platform/editors");
-  return { ok: `Editor "${name}" toegevoegd.` };
+  return {
+    ok: mailed
+      ? `Editor "${name}" toegevoegd — welkomstmail is onderweg naar ${email}.`
+      : email
+        ? `Editor "${name}" toegevoegd. Mail niet verstuurd (staat RESEND_API_KEY er?).`
+        : `Editor "${name}" toegevoegd (geen e-mail, dus geen welkomstmail).`,
+  };
 }
 
 export async function updateEditorPoolAction(editorId: string, status: string): Promise<EditorActionResult> {
@@ -59,7 +107,7 @@ export async function updateEditorPoolAction(editorId: string, status: string): 
 // ── Editor bewerken en verwijderen ──────────────────────────────
 export async function updateEditorAction(
   editorId: string,
-  patch: { name?: string; email?: string; pay_per_video?: number; specialty?: string; contact?: string; portfolio_url?: string; notes?: string; client_ids?: string[] }
+  patch: { name?: string; email?: string; pay_per_video?: number; pay_shortform?: number | null; pay_longform?: number | null; currency?: string; specialty?: string; contact?: string; portfolio_url?: string; notes?: string; client_ids?: string[] }
 ): Promise<EditorActionResult> {
   const supabase = await supabaseServer();
   if (!supabase) return { error: "Supabase niet geconfigureerd." };
@@ -68,6 +116,13 @@ export async function updateEditorAction(
   if (patch.name !== undefined) update.name = patch.name.trim() || "Editor";
   if (patch.email !== undefined) update.email = patch.email.trim() || null;
   if (patch.pay_per_video !== undefined) update.pay_per_video = Number(patch.pay_per_video) || 0;
+  if (patch.pay_shortform !== undefined) {
+    update.pay_shortform = patch.pay_shortform;
+    // Terugval meebewegen zodat oude berekeningen het nieuwe tarief pakken.
+    if (patch.pay_shortform != null) update.pay_per_video = patch.pay_shortform;
+  }
+  if (patch.pay_longform !== undefined) update.pay_longform = patch.pay_longform;
+  if (patch.currency !== undefined) update.currency = patch.currency === "USD" ? "USD" : "EUR";
   if (patch.specialty !== undefined) update.specialty = patch.specialty.trim() || null;
   if (patch.contact !== undefined) update.contact = patch.contact.trim() || null;
   if (patch.portfolio_url !== undefined) update.portfolio_url = patch.portfolio_url.trim() || null;

@@ -92,7 +92,14 @@ export default async function EditorsPage({ searchParams }: { searchParams: Prom
                     <Avatar initials={e.name.slice(0, 2).toUpperCase()} size={40} />
                     <div>
                       <div className="font-medium">{e.name}</div>
-                      <div className="text-[12px] text-muted">{fmtEur(e.payPerVideo)} / video</div>
+                      <div className="text-[12px] text-muted">
+                        {(() => {
+                          const sym = e.currency === "USD" ? "$" : "€";
+                          const f = (n: number) => `${sym}${n.toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                          const parts = [e.payShortform ? `${f(e.payShortform)} shortform` : null, e.payLongform ? `${f(e.payLongform)} longform` : null].filter(Boolean);
+                          return parts.length ? parts.join(" · ") : "geen tarief ingesteld";
+                        })()}
+                      </div>
                     </div>
                   </div>
                   <Badge color={e.active ? "#34D399" : "#6B7280"}>{e.active ? "actief" : "inactief"}</Badge>

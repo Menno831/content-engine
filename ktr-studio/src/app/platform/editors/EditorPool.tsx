@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Card, Avatar, Badge } from "../_components";
-import { fmtEur, type Editor } from "../_data";
+import { type Editor } from "../_data";
 import { updateEditorPoolAction, updateEditorAction, deleteEditorAction } from "./actions";
 
 const POOL = ["actief", "pool", "gestopt"] as const;
@@ -62,7 +62,7 @@ export function EditorPool({ editors, clients }: { editors: Editor[]; clients: C
                         Portfolio bekijken →
                       </a>
                     )}
-                    <div className="text-muted">{fmtEur(e.payPerVideo)} / video · {e.videosThisMonth} deze maand</div>
+                    <div className="text-muted">{rateLabel(e)} · {e.videosThisMonth} deze maand</div>
                   </div>
                   <a
                     href={`/platform/contracts?nda=${encodeURIComponent(e.name)}`}
@@ -102,12 +102,25 @@ export function EditorPool({ editors, clients }: { editors: Editor[]; clients: C
 
 // Bewerken + verwijderen per editor: naam, e-mail (voor de mails vanaf
 // het board), tarief, specialiteit, contact en portfolio.
+// "€21,41 SF · €120 LF" — in de valuta van de editor; leeg als er niks staat.
+function rateLabel(e: Editor): string {
+  const sym = e.currency === "USD" ? "$" : "€";
+  const f = (n: number) => `${sym}${n.toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const parts = [
+    e.payShortform ? `${f(e.payShortform)} SF` : null,
+    e.payLongform ? `${f(e.payLongform)} LF` : null,
+  ].filter(Boolean);
+  return parts.length ? parts.join(" · ") : "geen tarief";
+}
+
 function EditEditorButton({ editor, clients }: { editor: Editor; clients: ClientOption[] }) {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     name: editor.name,
     email: editor.email ?? "",
-    pay: String(editor.payPerVideo ?? 0),
+    payShort: editor.payShortform != null ? String(editor.payShortform) : String(editor.payPerVideo ?? ""),
+    payLong: editor.payLongform != null ? String(editor.payLongform) : "",
+    currency: editor.currency ?? "EUR",
     specialty: editor.specialty ?? "",
     contact: editor.contact ?? "",
     portfolio: editor.portfolioUrl ?? "",
@@ -123,7 +136,9 @@ function EditEditorButton({ editor, clients }: { editor: Editor; clients: Client
       const r = await updateEditorAction(editor.id, {
         name: form.name,
         email: form.email,
-        pay_per_video: Number(form.pay) || 0,
+        pay_shortform: form.payShort.trim() ? Number(form.payShort.replace(",", ".")) || 0 : null,
+        pay_longform: form.payLong.trim() ? Number(form.payLong.replace(",", ".")) || 0 : null,
+        currency: form.currency,
         specialty: form.specialty,
         contact: form.contact,
         portfolio_url: form.portfolio,
@@ -166,12 +181,31 @@ function EditEditorButton({ editor, clients }: { editor: Editor; clients: Client
                 <input value={form.name} onChange={(ev) => setForm({ ...form, name: ev.target.value })} className={field} /></label>
               <label className="block"><span className={label}>E-mail (voor de video-mails)</span>
                 <input value={form.email} onChange={(ev) => setForm({ ...form, email: ev.target.value })} placeholder="editor@mail.com" className={field} /></label>
-              <div className="grid grid-cols-2 gap-3">
-                <label className="block"><span className={label}>Tarief / video (€)</span>
-                  <input value={form.pay} onChange={(ev) => setForm({ ...form, pay: ev.target.value })} type="number" className={field} /></label>
-                <label className="block"><span className={label}>Specialiteit</span>
-                  <input value={form.specialty} onChange={(ev) => setForm({ ...form, specialty: ev.target.value })} placeholder="Reels / longform" className={field} /></label>
+              <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-3.5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className={label}>Tarieven</span>
+                  <div className="flex rounded-lg border border-white/[0.1] overflow-hidden text-[12px]">
+                    {(["EUR", "USD"] as const).map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setForm({ ...form, currency: c })}
+                        className={`px-3 py-1 transition-colors ${form.currency === c ? "bg-accent text-background font-bold" : "text-muted hover:text-foreground"}`}
+                      >
+                        {c === "EUR" ? "€ EUR" : "$ USD"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="block"><span className={label}>Per shortform</span>
+                    <input value={form.payShort} onChange={(ev) => setForm({ ...form, payShort: ev.target.value })} inputMode="decimal" placeholder="21,41" className={field} /></label>
+                  <label className="block"><span className={label}>Per longform</span>
+                    <input value={form.payLong} onChange={(ev) => setForm({ ...form, payLong: ev.target.value })} inputMode="decimal" placeholder="120" className={field} /></label>
+                </div>
               </div>
+              <label className="block"><span className={label}>Specialiteit</span>
+                <input value={form.specialty} onChange={(ev) => setForm({ ...form, specialty: ev.target.value })} placeholder="Reels / longform" className={field} /></label>
               <label className="block"><span className={label}>Contact (WhatsApp/IG)</span>
                 <input value={form.contact} onChange={(ev) => setForm({ ...form, contact: ev.target.value })} className={field} /></label>
               <label className="block"><span className={label}>Portfolio-link</span>

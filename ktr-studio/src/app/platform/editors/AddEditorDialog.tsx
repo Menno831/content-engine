@@ -30,14 +30,36 @@ export function AddEditorDialog() {
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setOpen(false)}>
           <div className="w-full max-w-md bg-card border border-white/[0.08] rounded-2xl p-6" onClick={(e) => e.stopPropagation()}>
             <h3 className="font-display font-extrabold text-xl mb-1">Nieuwe editor</h3>
-            <p className="text-muted text-sm mb-5">Stel het bedrag per video in voor automatische uitbetalingsberekening.</p>
+            <p className="text-muted text-sm mb-5">Met een e-mailadres krijgt de editor meteen een persoonlijke welkomstmail met de tarieven en hoe we werken.</p>
 
             <form action={action} className="space-y-3.5">
               <Field name="name" label="Naam" placeholder="Eva" required />
+              <Field name="email" label="E-mail (voor de welkomstmail en meldingen)" type="email" placeholder="eva@editor.com" />
               <Field name="specialty" label="Specialiteit" placeholder="Talking head, motion design…" />
-              <Field name="contact" label="Contact (WhatsApp / e-mail / Discord)" placeholder="wa: +31 6… of eva@editor.nl" />
+              <Field name="contact" label="Contact (WhatsApp / Discord)" placeholder="wa: +31 6…" />
               <Field name="portfolio_url" label="Portfolio (optioneel)" placeholder="https://…" />
-              <Field name="pay_per_video" label="Bedrag per video (€)" type="number" placeholder="60" />
+
+              {/* Tarieven: per format, in de valuta waarin je uitbetaalt */}
+              <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-3.5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[12px] font-mono uppercase tracking-wider text-muted">Tarieven</span>
+                  <div className="flex rounded-lg border border-white/[0.1] overflow-hidden text-[12px]">
+                    {(["EUR", "USD"] as const).map((c) => (
+                      <label key={c} className="cursor-pointer">
+                        <input type="radio" name="currency" value={c} defaultChecked={c === "EUR"} className="peer sr-only" />
+                        <span className="block px-3 py-1 text-muted peer-checked:bg-accent peer-checked:text-background peer-checked:font-bold transition-colors">
+                          {c === "EUR" ? "€ EUR" : "$ USD"}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <Field name="pay_shortform" label="Per shortform" placeholder="21,41" />
+                  <Field name="pay_longform" label="Per longform" placeholder="120" />
+                </div>
+                <p className="text-[11.5px] text-muted">Shortform = reels, clips, stories. Longform = YouTube-video's. Vult de kostprijs op het bord automatisch in.</p>
+              </div>
               <label className="block">
                 <span className="block text-[12px] font-mono uppercase tracking-wider text-muted mb-1.5">Status</span>
                 <select name="pool_status" defaultValue="actief" className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-3.5 py-2.5 text-sm outline-none focus:border-accent/40">

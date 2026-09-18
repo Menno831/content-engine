@@ -87,7 +87,11 @@ create table if not exists editors (
   agency_id     uuid not null references agencies (id) on delete cascade,
   name          text not null,
   email         text,
-  pay_per_video numeric default 0,
+  pay_per_video numeric default 0,     -- terugval; zie pay_shortform/pay_longform
+  pay_longform  numeric,
+  pay_shortform numeric,
+  currency      text not null default 'EUR',
+  welcomed_at   timestamptz,
   active        boolean not null default true,
   created_at    timestamptz not null default now()
 );

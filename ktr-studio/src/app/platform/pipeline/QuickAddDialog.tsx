@@ -26,6 +26,7 @@ export function QuickAddDialog({
   const [state, action, pending] = useActionState(bulkCreateContentAction, initial);
   const [clientId, setClientId] = useState(defaultClient ?? clients[0]?.id ?? "");
   const [editorId, setEditorId] = useState("");
+  const [format, setFormat] = useState(FORMATS[0]);
   // Aantal regels tellen zodat de rekensom over de hele batch klopt.
   const [count, setCount] = useState(0);
 
@@ -74,7 +75,7 @@ export function QuickAddDialog({
                   <Select name="editor_id" label="Editor" options={editors} placeholder={editors.length ? "— none —" : "No editors yet"} onChange={setEditorId} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <Select name="format" label="Format" options={FORMATS.map((f) => ({ id: f, label: f }))} />
+                  <Select name="format" label="Format" options={FORMATS.map((f) => ({ id: f, label: f }))} onChange={setFormat} />
                   <Select
                     name="stage"
                     label="Stage"
@@ -94,6 +95,7 @@ export function QuickAddDialog({
                   clients={clients}
                   editorId={editorId}
                   clientId={clientId}
+                  format={format}
                   count={count}
                   labels={{
                     cost: "Cost per video (editor)",

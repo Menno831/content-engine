@@ -11,7 +11,7 @@ export async function getEditors(): Promise<Editor[]> {
   if (!supabase) return [];
 
   const [{ data: editorRows }, { data: contentRows }] = await Promise.all([
-    supabase.from("editors").select("id,name,email,pay_per_video,active,specialty,pool_status,contact,portfolio_url,notes,client_ids").order("active", { ascending: false }),
+    supabase.from("editors").select("id,name,email,pay_per_video,pay_longform,pay_shortform,currency,active,specialty,pool_status,contact,portfolio_url,notes,client_ids").order("active", { ascending: false }),
     supabase.from("content").select("editor_id,stage,deadline,posting_date,published_at,delivered_at"),
   ]);
 
@@ -37,6 +37,10 @@ export async function getEditors(): Promise<Editor[]> {
       name: e.name,
       email: e.email ?? null,
       payPerVideo: Number(e.pay_per_video ?? 0),
+      // Per format; valt terug op het oude bedrag zodat niets op 0 springt.
+      payShortform: e.pay_shortform != null ? Number(e.pay_shortform) : Number(e.pay_per_video ?? 0),
+      payLongform: e.pay_longform != null ? Number(e.pay_longform) : null,
+      currency: (e.currency as string) || "EUR",
       active: Boolean(e.active),
       videosThisMonth,
       lateVideos,

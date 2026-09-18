@@ -13,12 +13,15 @@ import { useEffect, useState } from "react";
 export interface PriceOption {
   id: string;
   label: string;
-  /** Tarief van de editor of standaardprijs van de klant. */
+  /** Standaardprijs van de klant, of (editor) het shortform-tarief. */
   amount?: number;
+  /** Editor: apart tarief voor longform. */
+  amountLongform?: number | null;
+  currency?: string;
 }
 
-const eur = (n: number) =>
-  `€${n.toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const fmt = (n: number, sym = "€") =>
+  `${sym}${n.toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 const parse = (v: string) => {
   const n = Number(v.replace(/[^\d,.-]/g, "").replace(",", "."));
@@ -30,6 +33,8 @@ export function PriceFields({
   clients,
   editorId,
   clientId,
+  /** Longform pakt het longform-tarief van de editor, al het andere shortform. */
+  format = "",
   /** Aantal video's — bij Quick add rekent de som over de hele batch. */
   count = 1,
   labels,
@@ -38,6 +43,7 @@ export function PriceFields({
   clients: PriceOption[];
   editorId: string;
   clientId: string;
+  format?: string;
   count?: number;
   labels?: { cost: string; sell: string; perVideo: string; total: string; margin: string; noPrices: string };
 }) {
@@ -57,8 +63,11 @@ export function PriceFields({
   const [costTouched, setCostTouched] = useState(false);
   const [sellTouched, setSellTouched] = useState(false);
 
-  const editorRate = editors.find((e) => e.id === editorId)?.amount;
+  const editor = editors.find((e) => e.id === editorId);
+  const isLong = /longform/i.test(format);
+  const editorRate = isLong && editor?.amountLongform ? editor.amountLongform : editor?.amount;
   const clientPrice = clients.find((c) => c.id === clientId)?.amount;
+  const sym = editor?.currency === "USD" ? "$" : "€";
 
   useEffect(() => {
     if (!costTouched) setCost(editorRate && editorRate > 0 ? String(editorRate) : "");
@@ -119,16 +128,16 @@ export function PriceFields({
           <>
             <div className="flex items-baseline justify-between gap-3">
               <span className="text-[12.5px] text-muted">
-                {n > 1 ? `${n} × ${eur(c)}` : t.perVideo}
+                {n > 1 ? `${n} × ${fmt(c, sym)}` : t.perVideo}
               </span>
               <span className="font-mono text-sm tabular-nums">
-                −{eur(c * n)} <span className="text-muted">kosten</span>
+                −{fmt(c * n, sym)} <span className="text-muted">kosten</span>
               </span>
             </div>
             <div className="flex items-baseline justify-between gap-3 mt-1">
-              <span className="text-[12.5px] text-muted">{n > 1 ? `${n} × ${eur(s)}` : ""}</span>
+              <span className="text-[12.5px] text-muted">{n > 1 ? `${n} × ${fmt(s, sym)}` : ""}</span>
               <span className="font-mono text-sm tabular-nums text-foreground/80">
-                +{eur(s * n)} <span className="text-muted">omzet</span>
+                +{fmt(s * n, sym)} <span className="text-muted">omzet</span>
               </span>
             </div>
             <div className="flex items-baseline justify-between gap-3 mt-2 pt-2 border-t border-white/[0.06]">
@@ -138,7 +147,7 @@ export function PriceFields({
                   marginOne < 0 ? "text-red-400" : "text-emerald-400"
                 }`}
               >
-                {eur(marginOne * n)}
+                {fmt(marginOne * n, sym)}
                 {pct !== null && (
                   <span className="text-muted font-normal"> · {pct.toFixed(0)}% {t.margin}</span>
                 )}

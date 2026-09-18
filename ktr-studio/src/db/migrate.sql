@@ -891,3 +891,13 @@ drop policy if exists "team all content_ideas" on content_ideas;
 create policy "team all content_ideas" on content_ideas
   for all using (agency_id = current_agency_id() and current_client_id() is null)
   with check (agency_id = current_agency_id() and current_client_id() is null);
+
+-- ── 042 · Editor-tarieven per format + valuta ──────────────────
+alter table editors add column if not exists pay_longform  numeric;
+alter table editors add column if not exists pay_shortform numeric;
+alter table editors add column if not exists currency      text not null default 'EUR';
+alter table editors add column if not exists welcomed_at   timestamptz;  -- wanneer de welkomstmail is gegaan
+
+-- Bestaande editors: het oude bedrag geldt als shortform-tarief.
+update editors set pay_shortform = pay_per_video
+where pay_shortform is null and pay_per_video is not null and pay_per_video > 0;

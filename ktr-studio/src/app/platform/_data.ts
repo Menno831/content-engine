@@ -231,6 +231,10 @@ export interface Editor {
   name: string;
   email?: string | null;
   payPerVideo: number;
+  /** Tarief per shortform (reel/clip) en per longform, in `currency`. */
+  payShortform?: number;
+  payLongform?: number | null;
+  currency?: string; // EUR | USD
   active: boolean;
   videosThisMonth: number;
   lateVideos: number; // te laat aangeleverd t.o.v. deadline

@@ -68,7 +68,13 @@ export default async function Pipeline({
   const editors = await getEditors();
   // De dialogen vullen prijzen voor: editor-tarief en klantprijs gaan mee.
   const clientOptions = clients.map((c) => ({ id: c.id, label: c.name, amount: c.videoPrice ?? undefined }));
-  const editorOptions = editors.map((e) => ({ id: e.id, label: e.name, amount: e.payPerVideo || undefined }));
+  const editorOptions = editors.map((e) => ({
+    id: e.id,
+    label: e.name,
+    amount: e.payShortform || e.payPerVideo || undefined,
+    amountLongform: e.payLongform ?? null,
+    currency: e.currency ?? "EUR",
+  }));
 
   // Kaarten dragen de editor-naam (voor het board en de editor-weergave).
   const editorNameById = new Map(editors.map((e) => [e.id, e.name]));
