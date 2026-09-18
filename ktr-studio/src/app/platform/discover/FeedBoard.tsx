@@ -10,7 +10,7 @@
 import { useState, useTransition } from "react";
 import { Card, Eyebrow } from "../_components";
 import { fmtNum } from "../_data";
-import { saveFeedNoteAction, dismissFeedItemAction, saveFeedSourcesAction, runFeedScanAction } from "./actions";
+import { saveFeedNoteAction, dismissFeedItemAction, saveFeedSourcesAction, runFeedScanAction, feedToScriptAction } from "./actions";
 
 export interface FeedItem {
   id: string;
@@ -32,6 +32,8 @@ const CATS: { key: string; title: string; hint: string; color: string }[] = [
 
 export function FeedBoard({ items, channels, topics }: { items: FeedItem[]; channels: string; topics: string }) {
   const [list, setList] = useState(items);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [scriptMsg, setScriptMsg] = useState<{ ok: boolean; text: string; href?: string } | null>(null);
   const [showSettings, setShowSettings] = useState(items.length === 0);
   const [ch, setCh] = useState(channels);
   const [tp, setTp] = useState(topics);
@@ -55,6 +57,19 @@ export function FeedBoard({ items, channels, topics }: { items: FeedItem[]; chan
 
   function saveNote(id: string, note: string) {
     saveFeedNoteAction(id, note).catch(() => undefined);
+  }
+
+  // Iets goeds gezien? Dan meteen een script ervan, met jouw take erbij.
+  async function toScript(id: string) {
+    setBusy(id);
+    setScriptMsg(null);
+    const r = await feedToScriptAction(id);
+    setBusy(null);
+    if (r.error) setScriptMsg({ ok: false, text: r.error });
+    else {
+      setList((cur) => cur.filter((x) => x.id !== id));
+      setScriptMsg({ ok: true, text: r.ok ?? "Script gemaakt.", href: r.scriptId ? `/platform/scripts?script=${r.scriptId}` : undefined });
+    }
   }
 
   function dismiss(id: string) {
@@ -104,6 +119,15 @@ export function FeedBoard({ items, channels, topics }: { items: FeedItem[]; chan
           dit elke ochtend automatisch en krijg je een melding als er nieuwe video&rsquo;s klaarstaan.
         </p>
       ) : (
+        <>
+        {scriptMsg && (
+          <p className={`mb-3 text-[13px] ${scriptMsg.ok ? "text-emerald-400" : "text-red-400"}`}>
+            {scriptMsg.text}{" "}
+            {scriptMsg.href && (
+              <a href={scriptMsg.href} className="underline hover:text-accent">Openen →</a>
+            )}
+          </p>
+        )}
         <div className="grid lg:grid-cols-3 gap-4">
           {CATS.map((cat) => {
             const inCat = list.filter((i) => i.category === cat.key);
@@ -134,6 +158,13 @@ export function FeedBoard({ items, channels, topics }: { items: FeedItem[]; chan
                         rows={2}
                         className="mt-2 w-full rounded-lg border border-white/[0.07] bg-white/[0.02] px-2.5 py-2 text-[12px] outline-none focus:border-accent/40 resize-y"
                       />
+                      <button
+                        onClick={() => toScript(i.id)}
+                        disabled={busy === i.id}
+                        className="mt-2 w-full rounded-lg bg-accent/15 border border-accent/25 hover:bg-accent/25 text-accent font-bold text-[11.5px] px-2.5 py-1.5 transition-colors disabled:opacity-50"
+                      >
+                        {busy === i.id ? "Schrijven…" : "→ Maak hier een script van"}
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -141,6 +172,7 @@ export function FeedBoard({ items, channels, topics }: { items: FeedItem[]; chan
             );
           })}
         </div>
+        </>
       )}
     </Card>
   );

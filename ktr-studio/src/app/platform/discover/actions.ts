@@ -82,6 +82,7 @@ export async function syncCompetitorAction(competitorId: string): Promise<Action
 // ── Ochtendscan ─────────────────────────────────────────────────
 import { createAdminClient } from "@/lib/supabase/admin";
 import { runFeedScan } from "@/lib/feedscan";
+import { ideaToScriptAction } from "../scripts/ideaActions";
 
 export async function saveFeedNoteAction(id: string, note: string): Promise<ActionResult> {
   const supabase = await supabaseServer();
@@ -175,4 +176,58 @@ export async function postToIdeaAction(postId: string): Promise<ActionResult & {
 
   revalidatePath("/platform/scripts");
   return { ok: "Staat bij Ideeën — pas 'm daar aan naar jouw verhaal.", ideaId: idea.id as string };
+}
+
+// ── Ochtendscan → eigen script ──────────────────────────────────
+// Iets goeds gezien? Eén klik maakt er een idee én een uitgeschreven
+// script van, met jouw take erbij als die er staat.
+export async function feedToScriptAction(itemId: string): Promise<ActionResult & { scriptId?: string }> {
+  const auth = await requireTeam();
+  if ("error" in auth) return { error: auth.error };
+
+  const { data: item, error } = await auth.supabase
+    .from("feed_items")
+    .select("id,title,channel,url,views,summary,note,category")
+    .eq("id", itemId)
+    .maybeSingle();
+  if (error) return { error: error.message };
+  if (!item) return { error: "Item niet gevonden." };
+
+  const summary = String(item.summary ?? "").trim();
+  const take = String(item.note ?? "").trim();
+  const angle = [
+    summary ? `Wat de bron laat zien: ${summary}` : null,
+    take ? `Jouw take: ${take}` : null,
+    "Pak het format, niet het onderwerp — vertaal het naar Menno's eigen verhaal.",
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .slice(0, 800);
+
+  const { data: idea, error: insErr } = await auth.supabase
+    .from("content_ideas")
+    .insert({
+      agency_id: auth.agency.id,
+      title: String(item.title ?? "Idee uit de ochtendscan").slice(0, 120),
+      hook: null,
+      angle,
+      pillar: null,
+      format: "Reel",
+      source_note: `Ochtendscan: ${item.channel ?? "onbekend kanaal"}${item.views ? ` · ${Number(item.views).toLocaleString("nl-NL")} views` : ""}`,
+      source_url: item.url ?? null,
+      status: "gekozen",
+    })
+    .select("id")
+    .single();
+  if (insErr) return { error: insErr.message };
+
+  const r = await ideaToScriptAction(idea.id as string);
+  if (r.error) return { error: r.error };
+
+  // Uit de scan halen: hij staat nu bij je scripts.
+  await auth.supabase.from("feed_items").delete().eq("id", itemId);
+
+  revalidatePath("/platform/discover");
+  revalidatePath("/platform/scripts");
+  return { ok: "Script gemaakt — met een uitgeschreven voorbeeld.", scriptId: r.scriptId };
 }

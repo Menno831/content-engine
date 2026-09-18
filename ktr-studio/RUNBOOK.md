@@ -440,3 +440,12 @@ sessie niet dubbel werk doet.
 - `undoRefineAction`: laatste ronde terugdraaien.
 - In de editor een balk "Laat het aanpassen": invoer + Enter, lijst van
   wat je al vroeg, en een terugdraaiknop.
+
+## Ronde 18 sep 2026 (12) — ochtendscan → eigen script
+
+- `feedToScriptAction` in discover/actions: maakt van een scan-item een
+  idee (angle = samenvatting + jouw take + "pak het format, niet het
+  onderwerp") en roept meteen `ideaToScriptAction` aan, dus het script
+  komt er met uitgeschreven voorbeeld uit. Het item verdwijnt uit de scan.
+- Knop "→ Maak hier een script van" op elke kaart, met een melding en een
+  directe link naar het nieuwe script.
