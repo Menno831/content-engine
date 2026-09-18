@@ -8,6 +8,9 @@ import { getIdeas } from "@/lib/ideas";
 
 // Scripts-bibliotheek: alles wat eerst los op mennokater.nl stond.
 // Nog schrijven → klaar om op te nemen → opgenomen, met inline autosave.
+// Een script laten schrijven duurt wat langer dan een gewone render.
+export const maxDuration = 60;
+
 export default async function ScriptsPage() {
   await redirectEditorToBoard();
   const demo = DEMO_MODE || !isSupabaseConfigured;

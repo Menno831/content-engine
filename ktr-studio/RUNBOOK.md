@@ -417,3 +417,14 @@ sessie niet dubbel werk doet.
 - `BankHistoryCard` op Finance met knoppen voor dit en vorig jaar.
 - Kostenhistorie: staat er voor een maand echte bankdata onder 'vast', dan
   zijn dát de vaste lasten van die maand in plaats van het vaste bedrag.
+
+## Ronde 18 sep 2026 (10) — scripts met een uitgewerkt voorbeeld
+
+- "Maak script" geeft nu eerst een kant-en-klaar voorbeeld en daaronder de
+  structuur. Het voorbeeld wordt geschreven met `MENNO_FEITEN` in
+  `ideaActions.ts`: alleen dingen die hij zelf in zijn calls heeft gezegd
+  (schoonmaakbedrijf, €750/dag videografie, tien editors, 12,5k→80k in
+  zeven maanden, 8-25k schommeling, drie uur per dag, nooit een klant uit
+  een IG-DM, Mexico/Marbella, 5k pond coaching bij Seth).
+- Model "smart", met de instructie om alleen uit die feiten te putten.
+  Geen AI-sleutel of storing? Dan de structuur zoals eerst.
