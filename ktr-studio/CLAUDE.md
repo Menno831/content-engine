@@ -51,6 +51,7 @@ npm run lint
 | `TRANSKRIPTOR_API_KEY` | audio/video → transcript |
 | `MANYCHAT_WEBHOOK_SECRET`, `CRON_SECRET`, `YOUTUBE_API_KEY`, `RESEND_API_KEY` | webhook/cron/yt/mail |
 | `MONEYBIRD_API_TOKEN` + `MONEYBIRD_ADMINISTRATION_ID` | facturen op Finance (alleen-lezen) |
+| `META_ADS_TOKEN` + `META_AD_ACCOUNT_ID` | Meta-advertenties automatisch in Advertenties (cron 05:00 UTC + knop Sync nu) |
 | `ASANA_TOKEN` | twee-weg-sync met Asana-borden (asana_project_id per klant) |
 | `FRAMEIO_CLIENT_ID` + `FRAMEIO_CLIENT_SECRET` | Frame.io-uploadmeldingen + auto-koppeling aan kaarten (Adobe S2S) |
 

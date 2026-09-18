@@ -8,6 +8,9 @@ import { AdImport } from "./AdImport";
 import { AdQuickAdd } from "./AdQuickAdd";
 import { AdInsightPanel } from "./AdInsightPanel";
 import { DeleteEntry } from "./DeleteEntry";
+import { MetaCard, type MetaState } from "./MetaCard";
+import { isMetaAdsConfigured } from "@/lib/metaAds";
+import { createClient as supabaseServer } from "@/lib/supabase/server";
 
 const PERIODS = [7, 30, 90];
 
@@ -29,6 +32,18 @@ export default async function AdvertisingPage({
   const clientId = sp.client || null;
 
   const [{ clients, demo }, data] = await Promise.all([getWorkspaceData(), getAdData(days, clientId)]);
+
+  // Stand van de Meta-koppeling: sleutels aanwezig, en hoeveel er al binnen is.
+  const metaState: MetaState = { configured: isMetaAdsConfigured, entries: 0, lastDate: null };
+  if (!demo && isMetaAdsConfigured) {
+    const sb = await supabaseServer();
+    if (sb) {
+      const { count } = await sb.from("ad_entries").select("id", { count: "exact", head: true }).eq("source", "meta");
+      const { data: last } = await sb.from("ad_entries").select("date").eq("source", "meta").order("date", { ascending: false }).limit(1).maybeSingle();
+      metaState.entries = count ?? 0;
+      metaState.lastDate = last?.date ?? null;
+    }
+  }
 
   const now = totalsOf(data.entries);
   const before = totalsOf(data.previous);
@@ -88,6 +103,8 @@ export default async function AdvertisingPage({
         </div>
       ) : (
         <>
+          <MetaCard state={metaState} />
+
           {/* Periode + klantfilter */}
           <div className="flex flex-wrap items-center gap-2 mb-5">
             {PERIODS.map((p) => (

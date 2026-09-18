@@ -312,3 +312,16 @@ sessie niet dubbel werk doet.
   via dezelfde rubriek (cron qualify + watchdog 2b).
 - Outreach-board: standaard alleen wat past; "Afgekeurd (n)" is een eigen
   weergave; te-contacteren gesorteerd op toplaag → ICP-score.
+
+## Ronde 18 sep 2026 (2) — Meta Ads klaargezet
+
+- `lib/metaAds.ts`: `testMetaConnection()` (één call naar het account:
+  naam, valuta, status, foutuitleg per Meta-foutcode) en `importMetaAds()`
+  (gedeeld door cron 05:00 UTC en de knop "Sync nu").
+- Advertenties-pagina: `MetaCard` — zonder sleutels de exacte stappen
+  (systeemgebruiker-token met ads_read, act_-nummer uit Ads Manager, twee
+  env-namen in Vercel, redeploy); met sleutels "Test koppeling" en
+  "Sync nu (30 dagen)" + hoeveel regels er al binnen zijn.
+- Watchdog-zelftest meldt ontbrekende of falende Meta-sleutels.
+- Menno hoeft alleen nog `META_ADS_TOKEN` en `META_AD_ACCOUNT_ID` in Vercel
+  te zetten en te redeployen; daarna Sync nu klikken.

@@ -310,3 +310,80 @@ export async function getMetaAdEntries(days = 30): Promise<MetaEntry[]> {
     source: "meta",
   })).filter((e) => e.date && (e.impressions > 0 || e.spend > 0));
 }
+
+// ── Koppeling testen ────────────────────────────────────────────
+// Eén lichte call naar het advertentieaccount zelf: klopt de token, klopt
+// het account-id, en hoe heet het account? Zo zie je binnen een seconde of
+// de twee waarden in Vercel goed staan.
+export interface MetaTest {
+  ok: boolean;
+  configured: boolean;
+  accountName?: string;
+  currency?: string;
+  status?: string;
+  error?: string;
+}
+
+const ACCOUNT_STATUS: Record<number, string> = {
+  1: "actief", 2: "uitgeschakeld", 3: "onbetaald", 7: "in beoordeling", 9: "betalingsperiode verlopen", 101: "gesloten",
+};
+
+export async function testMetaConnection(): Promise<MetaTest> {
+  const token = process.env.META_ADS_TOKEN;
+  const raw = process.env.META_AD_ACCOUNT_ID;
+  if (!token || !raw) return { ok: false, configured: false, error: "META_ADS_TOKEN en/of META_AD_ACCOUNT_ID ontbreken in Vercel." };
+  const account = raw.startsWith("act_") ? raw : `act_${raw}`;
+  try {
+    const q = new URLSearchParams({ access_token: token, fields: "name,currency,account_status" });
+    const res = await fetch(`https://graph.facebook.com/${VERSION}/${account}?${q}`, { cache: "no-store" });
+    const json = (await res.json()) as Record<string, unknown>;
+    if (!res.ok) {
+      const err = (json.error as Record<string, unknown>) ?? {};
+      const code = Number(err.code ?? 0);
+      let why = String(err.message ?? `Meta gaf ${res.status}`);
+      if (code === 190) why = "Token ongeldig of verlopen — maak een nieuwe systeemgebruiker-token aan (zonder vervaldatum).";
+      else if (code === 100 || code === 803) why = "Account-id niet gevonden — check het nummer achter act_ in de URL van Ads Manager.";
+      else if (code === 200 || code === 10) why = "Token mist rechten — geef de systeemgebruiker toegang tot dit advertentieaccount met ads_read.";
+      return { ok: false, configured: true, error: why };
+    }
+    return {
+      ok: true,
+      configured: true,
+      accountName: String(json.name ?? account),
+      currency: String(json.currency ?? "EUR"),
+      status: ACCOUNT_STATUS[Number(json.account_status)] ?? String(json.account_status ?? ""),
+    };
+  } catch (e) {
+    return { ok: false, configured: true, error: e instanceof Error ? e.message : "Meta niet bereikbaar" };
+  }
+}
+
+// ── Importeren naar ad_entries ──────────────────────────────────
+// Gebruikt door de cron (05:00) én door de "Sync nu"-knop. Meta corrigeert
+// zijn cijfers nog dagen na, dus we halen de hele periode opnieuw op en
+// vervangen onze eerdere Meta-regels; handmatige regels blijven staan.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export async function importMetaAds(admin: any, days = 30): Promise<{ ok: boolean; entries: number; from?: string; to?: string; error?: string }> {
+  if (!isMetaAdsConfigured) return { ok: false, entries: 0, error: "geen_meta_sleutels" };
+  let entries: MetaEntry[];
+  try {
+    entries = await getMetaAdEntries(Math.min(90, Math.max(1, days)));
+  } catch (e) {
+    return { ok: false, entries: 0, error: e instanceof Error ? e.message : "onbekend" };
+  }
+  if (!entries.length) return { ok: true, entries: 0 };
+
+  const { data: agency } = await admin.from("agencies").select("id").limit(1).single();
+  const agencyId = agency?.id ?? null;
+  const from = entries.reduce((a, e) => (e.date < a ? e.date : a), entries[0].date);
+  const to = entries.reduce((a, e) => (e.date > a ? e.date : a), entries[0].date);
+
+  const del = await admin.from("ad_entries").delete().eq("source", "meta").gte("date", from).lte("date", to);
+  if (del.error) return { ok: false, entries: 0, error: del.error.message };
+
+  const rows = entries.map((e) => ({ ...e, agency_id: agencyId, content_id: null, revenue: 0, client_id: null }));
+  const ins = await admin.from("ad_entries").insert(rows);
+  if (ins.error) return { ok: false, entries: 0, error: ins.error.message };
+  return { ok: true, entries: rows.length, from, to };
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */

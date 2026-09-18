@@ -5,6 +5,8 @@ import { requireTeam } from "@/lib/guard";
 import { generateText, isClaudeConfigured } from "@/lib/ai";
 import { parseAdCsv } from "@/lib/ads-csv";
 import { getAdData, totalsOf, groupBy, periodBounds } from "@/lib/ads";
+import { testMetaConnection, importMetaAds, type MetaTest } from "@/lib/metaAds";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export interface AdResult {
   ok?: boolean;
@@ -212,4 +214,23 @@ export async function generateAdInsightAction(days: number, clientId: string | n
 
   revalidatePath("/platform/advertising");
   return { ok: true, message: "Analyse klaar." };
+}
+
+// ── Meta-koppeling: testen en direct synchroniseren ─────────────
+export async function testMetaAction(): Promise<MetaTest> {
+  const auth = await requireTeam();
+  if ("error" in auth) return { ok: false, configured: false, error: auth.error };
+  return testMetaConnection();
+}
+
+export async function syncMetaAction(days = 30): Promise<AdResult & { entries?: number }> {
+  const auth = await requireTeam();
+  if ("error" in auth) return { error: auth.error };
+  const admin = createAdminClient();
+  if (!admin) return { error: "Serverkey ontbreekt (SUPABASE_SERVICE_ROLE_KEY)." };
+  const r = await importMetaAds(admin, days);
+  if (!r.ok) return { error: r.error === "geen_meta_sleutels" ? "META_ADS_TOKEN en META_AD_ACCOUNT_ID staan nog niet in Vercel." : `Meta-sync mislukt: ${r.error}` };
+  revalidatePath("/platform/advertising");
+  revalidatePath("/platform");
+  return { ok: true, entries: r.entries, message: r.entries ? `${r.entries} regels opgehaald (${r.from} t/m ${r.to}).` : "Meta gaf geen advertentiedata voor deze periode." };
 }

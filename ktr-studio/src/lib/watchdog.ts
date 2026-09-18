@@ -21,6 +21,7 @@ import { qualifyProspect } from "@/lib/qualify";
 import { runFeedScan } from "@/lib/feedscan";
 import { getOrCreateBriefing } from "@/lib/briefing";
 import { moneybirdConfigured, getMoneybirdMonth, getMoneybirdDrafts } from "@/lib/integrations/moneybird";
+import { isMetaAdsConfigured, testMetaConnection } from "@/lib/metaAds";
 
 export interface WatchdogResult {
   notifications: number;
@@ -551,6 +552,12 @@ export async function runWatchdog(): Promise<WatchdogResult> {
       if (!process.env.YOUTUBE_API_KEY) defects.push("YOUTUBE_API_KEY ontbreekt — YouTube-stats en eigen-kanaal-sync wachten");
       if (!process.env.RESEND_API_KEY) defects.push("RESEND_API_KEY ontbreekt — editor- en rapportmails staan uit");
       if (!frameioConfigured()) defects.push("FRAMEIO_CLIENT_ID/SECRET ontbreken — Frame.io-uploadmeldingen staan uit");
+      if (!isMetaAdsConfigured) {
+        defects.push("META_ADS_TOKEN/META_AD_ACCOUNT_ID ontbreken — advertenties vullen zichzelf niet (stappen staan op Advertenties)");
+      } else {
+        const mt = await testMetaConnection();
+        if (!mt.ok) defects.push(`Meta Ads-koppeling faalt — ${mt.error ?? "onbekend"}`);
+      }
 
       result.selftest = defects;
       for (const d of defects) {
